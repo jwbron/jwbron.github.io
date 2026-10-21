@@ -4,7 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>James Wiesebron</title>
-  <meta name="description" content="James Wiesebron builds the systems that let engineering teams trust AI agents with real work: code review, sandboxed agent harnesses and evaluations, on top of ten years of platform and data engineering. South Lake Tahoe.">
+  <meta name="description" content="James Wiesebron helps engineering teams trust AI agents with real work: guardrails, code review and evaluations, plus faster and cheaper CI and cloud platforms. South Lake Tahoe.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
@@ -27,6 +29,12 @@
 
   <main id="main">
     <section class="hero" aria-labelledby="name">
+      <div class="hero-art" aria-hidden="true">
+        <span class="arc"></span>
+        <span class="dots"></span>
+        <span class="half"></span>
+      </div>
+
       <h1 id="name" class="spine"><span>James</span> <span>Wiesebron</span></h1>
 
       <div class="hero-body">
@@ -38,76 +46,71 @@
           <a href="JamesWiesebronResume.pdf">Resume, PDF <span aria-hidden="true">↓</span></a>
         </p>
       </div>
-
-      <div class="hero-art" aria-hidden="true">
-        <span class="a-disc"></span>
-        <span class="a-arc"></span>
-        <span class="a-tri"></span>
-        <span class="a-dots"></span>
-        <svg class="a-squig" viewBox="0 0 300 60" fill="none"><path d="M8 30 Q 30 4 52 30 T 96 30 T 140 30 T 184 30 T 228 30 T 272 30" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>
-      </div>
     </section>
 
-    <section id="do" class="expertise" aria-labelledby="do-title">
-      <h2 id="do-title" class="heading"><span class="glyph g-disc" aria-hidden="true"></span>What I can do for your team</h2>
+    <section id="do" class="services" aria-labelledby="do-title">
+      <h2 id="do-title" class="heading">What I can do for your team</h2>
 
-      <div class="shelf">
-        <article class="book b1">
-          <h3>Guardrails</h3>
-          <div class="book-body">
-            <p>Give coding agents real tools without handing them the keys. I build the harness around the agent: sandboxes, brokered credentials and scoped permissions, with people approving the calls that matter.</p>
-          </div>
+      <div class="panels">
+        <article class="panel guard">
+          <h3>Guardrails for coding agents</h3>
+          <p>Give agents real tools without handing them the keys. I build the harness around the agent: sandboxes, brokered credentials and scoped permissions, with people approving the calls that matter.</p>
         </article>
-        <article class="book b2">
+        <article class="panel evals">
           <h3>Evals</h3>
-          <div class="book-body">
-            <p>Repeatable tests of how agents and models actually perform, with cost tracked per model, so you choose tools on evidence instead of impressions.</p>
-          </div>
+          <p>Repeatable tests of how agents and models actually perform, with cost tracked per model, so you choose tools on evidence instead of impressions.</p>
         </article>
-        <article class="book b3">
-          <h3>Code review</h3>
-          <div class="book-body">
-            <p>AI review that helps instead of nags. Findings get checked before anyone sees them, follow-ups only look at what changed, and the engineers using it shape how it works.</p>
-          </div>
+        <article class="panel review">
+          <h3>Code review that helps</h3>
+          <p>Findings get checked before anyone sees them, follow-ups only look at what changed, and the engineers using it shape how it works.</p>
         </article>
-        <article class="book b4">
-          <h3>Delivery</h3>
-          <div class="book-body">
-            <p>CI, deployment pipelines and cloud platforms that are quick, cheap to run and easy for your team to own after I'm gone.</p>
-          </div>
+        <article class="panel delivery">
+          <h3>Faster, cheaper delivery</h3>
+          <p>CI, deployment pipelines and cloud platforms that are quick, cheap to run and easy for your team to own after I'm gone.</p>
         </article>
       </div>
     </section>
 
     <section id="work" class="work" aria-labelledby="work-title">
-      <h2 id="work-title" class="heading"><span class="glyph g-tri" aria-hidden="true"></span>Track record</h2>
+      <h2 id="work-title" class="heading">Track record</h2>
 
-      <div class="proof">
-        <article class="stat-card sc1">
-          <p class="big" aria-hidden="true">⅕</p>
-          <p>My AI code reviewer at Khan Academy ran at about a fifth of the cost of the commercial bot it replaced, with deeper reviews.</p>
-        </article>
-        <article class="stat-card sc2">
-          <p class="big" aria-hidden="true">½</p>
-          <p>The autoscaling, self-hosted CI runners I built and ran at Khan Academy cut its CI compute costs in half.</p>
-        </article>
+      <div class="figures">
+        <figure class="figure f1">
+          <p class="num" aria-hidden="true">⅕</p>
+          <figcaption>My AI code reviewer at Khan Academy ran at about a fifth of the cost of the commercial bot it replaced, with deeper reviews.</figcaption>
+        </figure>
+        <figure class="figure f2">
+          <p class="num" aria-hidden="true">½</p>
+          <figcaption>The autoscaling, self-hosted CI runners I built and ran at Khan Academy cut its CI compute costs in half.</figcaption>
+        </figure>
       </div>
 
-      <article class="side">
-        <span class="badge egg-badge" aria-hidden="true"></span>
+      <div class="side">
+        <span class="egg" aria-hidden="true"></span>
         <p><strong><a href="https://github.com/jwbron/egg">egg</a> is my side project, still in development.</strong> Agent teams turn an issue into reviewed pull requests while a person makes every decision that matters. Agents hold no credentials, there's no merge button for them to press, and every review has to cite real evidence.</p>
-      </article>
+      </div>
 
       <p class="history">Ten years at Khan Academy, Asana, Rally Health, Intuit and Capital One, across education, healthcare and finance. The details are in my <a href="JamesWiesebronResume.pdf">resume</a>.</p>
     </section>
 
     <section id="approach" class="approach" aria-labelledby="approach-title">
-      <div class="moon" aria-hidden="true"></div>
-      <h2 id="approach-title" class="heading"><span class="glyph g-square" aria-hidden="true"></span>Working with me</h2>
-      <p><strong>I start with how your team works today.</strong> Before changing anything, I learn the existing workflow from the people in it.</p>
-      <p><strong>Then I pick one bounded problem.</strong> A review pipeline, an agent setup, or a slow and expensive CI system. Something with a clear before and after.</p>
-      <p><strong>I build it with the team, not for them.</strong> Their feedback shapes it, and I own the rollout and the rough edges, not just the first version.</p>
-      <p><strong>I leave something you can run.</strong> Reusable infrastructure and a real handoff, so it keeps working after I'm gone.</p>
+      <div class="stamp" aria-hidden="true">
+        <div class="stamp-art">
+          <span class="s-sun"></span>
+          <span class="s-peak p1"></span>
+          <span class="s-peak p2"></span>
+          <span class="s-lake"></span>
+        </div>
+        <span class="stamp-label">6,237 ft</span>
+      </div>
+
+      <h2 id="approach-title" class="heading">Working with me</h2>
+      <ol class="steps">
+        <li><strong>I start with how your team works today.</strong> Before changing anything, I learn the existing workflow from the people in it.</li>
+        <li><strong>Then I pick one bounded problem.</strong> A review pipeline, an agent setup, or a slow and expensive CI system. Something with a clear before and after.</li>
+        <li><strong>I build it with the team, not for them.</strong> Their feedback shapes it, and I own the rollout and the rough edges, not just the first version.</li>
+        <li><strong>I leave something you can run.</strong> Reusable infrastructure and a real handoff, so it keeps working after I'm gone.</li>
+      </ol>
       <p class="creed">Two habits come with me everywhere. If an agent mustn't do something, I remove the capability instead of writing a rule. And I want evidence, not agreement. I once watched eight out of eight AI reviewers approve code that didn't build.</p>
     </section>
 
