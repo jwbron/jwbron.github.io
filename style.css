@@ -543,6 +543,14 @@ p {
   }
 }
 
+.creed {
+  margin-top: 1.8rem !important;
+  padding-top: 1.2rem;
+  border-top: 3px dotted var(--ink);
+  font-size: 1rem;
+  color: var(--ink-2);
+}
+
 .history {
   max-width: 54rem;
   margin: 1.6rem 0 0;
