@@ -456,6 +456,7 @@ p {
 @media (max-width: 36rem) {
   .book {
     grid-template-columns: 1fr;
+    min-height: 0;
 
     & h3 {
       writing-mode: horizontal-tb;
@@ -468,140 +469,86 @@ p {
   }
 }
 
-/* ---------- selected work: three features, then a short list ---------- */
+/* ---------- track record: three numbers, a side project, a pointer to the resume ---------- */
 
 .work {
   max-width: 82rem;
   margin: 0 auto;
-  padding: clamp(3.5rem, 8vw, 5.5rem) var(--gutter) clamp(3rem, 7vw, 5rem);
+  padding: clamp(3.5rem, 8vw, 5.5rem) var(--gutter) clamp(2rem, 5vw, 3rem);
 }
 
-.features {
+.proof {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
   gap: 1.8rem;
   align-items: start;
 }
 
 /* colored cards carry their own text color so dark mode can't break contrast */
-.feature {
-  display: flex;
-  flex-direction: column;
-  padding: 1.6rem 1.5rem 1.4rem;
+.stat-card {
+  padding: 1.5rem 1.5rem 1.6rem;
   color: #141218;
   border: 2.5px solid #141218;
 
-  & h3 {
-    margin: 0 0 0.9rem;
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: 1.28rem;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-  }
-
-  & dl {
+  & p {
     margin: 0;
+    font-size: 1.05rem;
   }
 
-  & dt {
-    margin-top: 0.8rem;
-    font-weight: 800;
-    font-size: 0.82rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  &.sc1 {
+    background: #ffe04a;
+    border-radius: 50% 50% 6px 6px / 5rem 5rem 6px 6px;
+    padding-top: 2.2rem;
+    text-align: center;
   }
 
-  & dd {
-    margin: 0.15rem 0 0;
-  }
-
-  & .org {
-    margin: 1.2rem 0 0;
-    font-weight: 700;
-    font-size: 0.9rem;
-  }
-
-  &:nth-child(2) {
+  &.sc2 {
     margin-top: clamp(0rem, 4vw, 2.5rem);
+    background:
+      repeating-linear-gradient(-45deg, transparent 0 12px, rgb(20 18 24 / 0.07) 12px 14px),
+      #7fe0c3;
+    border-radius: 6px;
+  }
+
+  &.sc3 {
+    color: #ffffff;
+    background: #2a3cff;
+    border-radius: 6px 6px 60px 6px;
+
+    & .big {
+      color: #ffe04a;
+    }
   }
 }
 
-.big {
-  margin: 0 0 0.5rem;
+.stat-card .big {
+  margin: 0 0 0.6rem;
   font-family: var(--display);
   font-weight: 800;
-  font-size: 4.6rem;
+  font-size: clamp(3.6rem, 7vw, 5rem);
   line-height: 1;
   letter-spacing: -0.04em;
 }
 
-.f-review {
-  background: #ffe04a;
-  border-radius: 50% 50% 6px 6px / 6rem 6rem 6px 6px;
-  padding-top: 2.6rem;
-
-  & .big {
-    align-self: center;
-  }
-}
-
-.f-box {
-  color: #ffffff;
-  background: #2a3cff;
-  border-radius: 6px 6px 60px 6px;
-
-  & .big {
-    color: #ffe04a;
-  }
-}
-
-.f-evals {
-  background:
-    repeating-linear-gradient(-45deg, transparent 0 12px, rgb(20 18 24 / 0.07) 12px 14px),
-    #7fe0c3;
-  border-radius: 6px;
-  clip-path: polygon(0 0, 100% 0, 100% 92%, 92% 100%, 0 100%);
-
-  & .big {
-    font-size: 3.4rem;
-  }
-}
-
-.also {
-  margin: clamp(2.8rem, 6vw, 4rem) 0 1.2rem;
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 1.3rem;
-  letter-spacing: -0.02em;
-}
-
-.shorts {
+.side {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
-  gap: 1.4rem 2.6rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.short {
-  display: grid;
-  grid-template-columns: 3.2rem 1fr;
-  gap: 1rem;
-  align-items: start;
+  grid-template-columns: auto 1fr;
+  gap: 1.3rem;
+  align-items: center;
+  max-width: 54rem;
+  margin-top: clamp(2.6rem, 6vw, 3.6rem);
 
   & p {
     margin: 0;
   }
+}
 
-  & .where {
-    display: block;
-    margin-top: 0.2rem;
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--ink-2);
-  }
+.history {
+  max-width: 54rem;
+  margin: 1.6rem 0 0;
+  padding-top: 1.2rem;
+  border-top: 3px dotted var(--ink);
+  color: var(--ink-2);
 }
 
 .badge {
@@ -609,22 +556,12 @@ p {
   place-items: center;
   width: 3.2rem;
   aspect-ratio: 1;
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 1.25rem;
-  color: #141218;
   border: 2.5px solid #141218;
 }
 
-.s-ci .badge { background: #ffe04a; border-radius: 50%; }
-.s-tf .badge { background: #ff5a36; border-radius: 6px; rotate: -6deg; }
-.s-stream .badge { background: #7fe0c3; border-radius: 999px 999px 6px 6px; }
-.s-orch .badge { background: #ffadd0; border-radius: 6px 22px 6px 22px; }
-
 .egg-badge {
-  width: 2.7rem;
+  width: 2.9rem;
   aspect-ratio: 0.78;
-  justify-self: center;
   background:
     radial-gradient(circle at 32% 30%, #ff5a36 0 9%, transparent 10%),
     radial-gradient(circle at 66% 52%, #2a3cff 0 8%, transparent 9%),
@@ -634,7 +571,7 @@ p {
   transform-origin: 50% 90%;
 }
 
-.s-egg:hover .egg-badge {
+.side:hover .egg-badge {
   animation: wobble 0.9s ease-in-out;
 }
 

@@ -18,8 +18,8 @@
       <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
     </a>
     <nav aria-label="Sections">
-      <a href="#work">work</a>
       <a href="#do">what i do</a>
+      <a href="#work">track record</a>
       <a href="#approach">approach</a>
       <a href="#contact">contact</a>
     </nav>
@@ -31,10 +31,10 @@
 
       <div class="hero-body">
         <p class="where-am-i">AI agents · developer tools · platforms · South Lake Tahoe</p>
-        <p class="statement">I build the systems that let engineering teams <mark>trust AI agents</mark> with <mark class="m2">real work</mark>.</p>
-        <p class="lede">At Khan Academy I designed and ran an AI code reviewer that replaced a commercial bot at about a fifth of the cost, built the sandboxes and permission systems our coding agents ran inside, and built the evaluations we used to choose models on evidence. Underneath that is ten years of cloud, CI/CD and data platform work.</p>
+        <p class="statement">I help engineering teams <mark>trust AI agents</mark> with <mark class="m2">real work</mark>, on platforms that stay quick and cheap.</p>
+        <p class="lede">I bring coding agents into a team with real guardrails, measure whether they're paying off, and keep the CI and cloud underneath them fast and affordable. I've built all of it in production, and I'd like to build it for teams whose work does some good.</p>
         <p class="go">
-          <a href="#work">See the work <span aria-hidden="true">↓</span></a>
+          <a href="#contact">Get in touch <span aria-hidden="true">→</span></a>
           <a href="JamesWiesebronResume.pdf">Resume, PDF <span aria-hidden="true">↓</span></a>
         </p>
       </div>
@@ -48,123 +48,70 @@
       </div>
     </section>
 
-    <section id="work" class="work" aria-labelledby="work-title">
-      <h2 id="work-title" class="heading"><span class="glyph g-tri" aria-hidden="true"></span>Selected work</h2>
-
-      <div class="features">
-        <article class="feature f-review">
-          <p class="big" aria-hidden="true">⅕</p>
-          <h3>An AI code reviewer shaped by its users</h3>
-          <dl>
-            <dt>Problem</dt>
-            <dd>Khan Academy was paying for a commercial review bot across its repositories.</dd>
-            <dt>What I did</dt>
-            <dd>Designed, rolled out and ran a replacement built on github actions and the claude agent SDK. Specialized reviewers each looked for different problems, findings were checked before they reached anyone, and follow-up reviews only looked at what had changed since the last pass. Engineers' feedback shaped how it worked.</dd>
-            <dt>Result</dt>
-            <dd>About a fifth of the commercial bot's cost, with deeper, better reviews.</dd>
-          </dl>
-          <p class="org">Khan Academy</p>
-        </article>
-
-        <article class="feature f-box">
-          <p class="big" aria-hidden="true">◆</p>
-          <h3>Execution boundaries for coding agents</h3>
-          <dl>
-            <dt>Problem</dt>
-            <dd>Coding agents need real tools to be useful, and real tools are risky in the wrong hands.</dd>
-            <dt>What I did</dt>
-            <dd>Built agent harnesses, the systems that control an agent's tools, permissions and execution. Agents ran in OS-level sandboxes, credentials stayed with a broker instead of the agent, and permissions were scoped to the task. Required workflow checks were enforced in code, and tooling failures the agents reported went into a shared backlog with people triaging the unclear ones.</dd>
-            <dt>Result</dt>
-            <dd>Agents could do real work inside limits that didn't depend on them following instructions.</dd>
-          </dl>
-          <p class="org">Khan Academy</p>
-        </article>
-
-        <article class="feature f-evals">
-          <p class="big" aria-hidden="true">A/B</p>
-          <h3>Evaluations that showed what was failing</h3>
-          <dl>
-            <dt>Problem</dt>
-            <dd>Choosing models and agent setups by impression is guesswork.</dd>
-            <dt>What I did</dt>
-            <dd>Built evaluation infrastructure, repeatable tests of how agents perform, with A/B runs, regression monitoring, transcript capture and cost tracking by model.</dd>
-            <dt>Result</dt>
-            <dd>Harness and model choices rested on evidence, and we could tell a model failure apart from a problem in the test setup or scoring.</dd>
-          </dl>
-          <p class="org">Khan Academy</p>
-        </article>
-      </div>
-
-      <h3 class="also">Also</h3>
-      <ul class="shorts">
-        <li class="short s-ci">
-          <span class="badge" aria-hidden="true">½</span>
-          <p><strong>Self-hosted CI that paid for itself.</strong> Autoscaling, just-in-time github actions runners on cloud run that halved CI compute costs, which I owned through incidents and recovery. <span class="where">Khan Academy</span></p>
-        </li>
-        <li class="short s-tf">
-          <span class="badge" aria-hidden="true">tf</span>
-          <p><strong>Infrastructure as code for every team.</strong> Drove terraform adoption with a reusable framework and moved services from app engine, compute engine and kubernetes engine to cloud run. <span class="where">Khan Academy</span></p>
-        </li>
-        <li class="short s-stream">
-          <span class="badge" aria-hidden="true">∿</span>
-          <p><strong>From batches to a stream.</strong> Rebuilt a high-volume batch ETL pipeline as resilient, distributed streaming on kafka. <span class="where">Rally Health</span></p>
-        </li>
-        <li class="short s-orch">
-          <span class="badge" aria-hidden="true">⌘</span>
-          <p><strong>Orchestration for models that make decisions.</strong> A Scala and akka framework coordinating the machine learning models behind credit card application and fraud decisions. <span class="where">Capital One</span></p>
-        </li>
-        <li class="short s-egg">
-          <span class="badge egg-badge" aria-hidden="true"></span>
-          <p><strong><a href="https://github.com/jwbron/egg">egg</a>, in development.</strong> My personal project, separate from my Khan Academy work. Agent teams turn an issue into reviewed pull requests while a person makes every decision that matters. Agents hold no credentials, there's no merge capability to misuse, and reviews have to cite real evidence. <span class="where">Personal, open source</span></p>
-        </li>
-      </ul>
-    </section>
-
     <section id="do" class="expertise" aria-labelledby="do-title">
-      <h2 id="do-title" class="heading"><span class="glyph g-disc" aria-hidden="true"></span>What I do</h2>
+      <h2 id="do-title" class="heading"><span class="glyph g-disc" aria-hidden="true"></span>What I can do for your team</h2>
 
       <div class="shelf">
         <article class="book b1">
-          <h3>Agent harnesses</h3>
+          <h3>Guardrails</h3>
           <div class="book-body">
-            <p>Sandboxing, credential brokering and scoped permissions for coding agents, with people approving the decisions that matter.</p>
+            <p>Give coding agents real tools without handing them the keys. I build the harness around the agent: sandboxes, brokered credentials and scoped permissions, with people approving the calls that matter.</p>
           </div>
         </article>
         <article class="book b2">
-          <h3>Review &amp; evals</h3>
+          <h3>Evals</h3>
           <div class="book-body">
-            <p>Review systems engineers trust, and repeatable evaluations with cost tracking so model choices rest on evidence.</p>
+            <p>Repeatable tests of how agents and models actually perform, with cost tracked per model, so you choose tools on evidence instead of impressions.</p>
           </div>
         </article>
         <article class="book b3">
-          <h3>Dev tools &amp; CI</h3>
+          <h3>Code review</h3>
           <div class="book-body">
-            <p>Deployment pipelines, github actions and self-hosted runners that make shipping quick, safe and cheap.</p>
+            <p>AI review that helps instead of nags. Findings get checked before anyone sees them, follow-ups only look at what changed, and the engineers using it shape how it works.</p>
           </div>
         </article>
         <article class="book b4">
-          <h3>Platform &amp; data</h3>
+          <h3>Delivery</h3>
           <div class="book-body">
-            <p>Cloud migrations, terraform, streaming pipelines and metrics tooling that other engineers can own.</p>
+            <p>CI, deployment pipelines and cloud platforms that are quick, cheap to run and easy for your team to own after I'm gone.</p>
           </div>
         </article>
       </div>
+    </section>
+
+    <section id="work" class="work" aria-labelledby="work-title">
+      <h2 id="work-title" class="heading"><span class="glyph g-tri" aria-hidden="true"></span>Track record</h2>
+
+      <div class="proof">
+        <article class="stat-card sc1">
+          <p class="big" aria-hidden="true">⅕</p>
+          <p>The cost of the commercial code-review bot that my reviewer replaced, with deeper reviews.</p>
+        </article>
+        <article class="stat-card sc2">
+          <p class="big" aria-hidden="true">½</p>
+          <p>The CI compute bill after moving to the autoscaling, self-hosted runners I built and ran.</p>
+        </article>
+        <article class="stat-card sc3">
+          <p class="big" aria-hidden="true">8/8</p>
+          <p>AI reviewers I once watched approve code that didn't build. It's why my reviews need evidence.</p>
+        </article>
+      </div>
+
+      <article class="side">
+        <span class="badge egg-badge" aria-hidden="true"></span>
+        <p><strong><a href="https://github.com/jwbron/egg">egg</a> is my side project, still in development.</strong> Agent teams turn an issue into reviewed pull requests while a person makes every decision that matters. Agents hold no credentials, there's no merge button for them to press, and every review has to cite real evidence.</p>
+      </article>
+
+      <p class="history">Ten years at Khan Academy, Asana, Rally Health, Intuit and Capital One, across education, healthcare and finance. The details are in my <a href="JamesWiesebronResume.pdf">resume</a>.</p>
     </section>
 
     <section id="approach" class="approach" aria-labelledby="approach-title">
       <div class="moon" aria-hidden="true"></div>
       <h2 id="approach-title" class="heading"><span class="glyph g-square" aria-hidden="true"></span>How I work</h2>
       <p><strong>Remove the capability, don't add a rule.</strong> If an agent mustn't do something, the tool or permission shouldn't be there. A prompt shouldn't be the only thing in the way.</p>
-      <p><strong>Agreement isn't evidence.</strong> Findings need receipts from real artifacts. I once watched eight out of eight AI reviewers sign off on code that didn't build.</p>
+      <p><strong>Earn adoption.</strong> Tools spread when they're reliable and when the people using them help shape them.</p>
       <p><strong>Measure before choosing.</strong> Repeatable evaluations beat impressions when picking a model, a tool or an architecture.</p>
       <p><strong>Do the boring work that compounds.</strong> Pipelines, migrations and runners rarely make a demo, but every engineer feels them every day.</p>
-    </section>
-
-    <section class="foundation" aria-labelledby="foundation-title">
-      <h2 id="foundation-title">Where I've done it</h2>
-      <p>Ten years across education, healthcare, finance and productivity software, most recently four years at Khan Academy.</p>
-      <p class="orgs-line"><span>Khan Academy</span> <span>Asana</span> <span>Rally Health</span> <span>Intuit</span> <span>Capital One</span></p>
-      <p class="edu">Computer science at UNC Chapel Hill, where I was a teaching assistant for Data Structures.</p>
     </section>
 
     <section id="contact" class="contact" aria-labelledby="contact-title">
