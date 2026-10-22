@@ -35,7 +35,7 @@
 
       <p>Agents in a real workflow spend a lot of their time waiting. They wait for a review, for another agent's work, or for a person to answer a question. Left to manage that themselves, models improvise, and they improvise from whatever their training data suggests, which means sleeps, polling loops and repeated status checks.</p>
 
-      <p>In <a href="https://github.com/jwbron/egg">egg</a>'s early versions, where agents owned their own waiting, all of these showed up. One agent announced it was finished more than twenty times in a minute and a half. Another polled on a fixed schedule and missed an objection that had been sitting there for several minutes. Another waited for a signal that only its own next action could produce, and sat deadlocked for about half an hour. None of these are reasoning failures. The model was being asked to do bookkeeping, and bookkeeping is the thing it's worst at.</p>
+      <p>In early versions of a system I built, where agents owned their own waiting, all of these showed up. One agent announced it was finished more than twenty times in a minute and a half. Another polled on a fixed schedule and missed an objection that had been sitting there for several minutes. Another waited for a signal that only its own next action could produce, and sat deadlocked for about half an hour. None of these are reasoning failures. The model was being asked to do bookkeeping, and bookkeeping is the thing it's worst at.</p>
 
       <h2>The seam you can't prompt away</h2>
 
@@ -43,7 +43,7 @@
 
       <h2>Turn it inside out</h2>
 
-      <p>The fix is to stop asking the model to run the loop at all. In egg, a plain, deterministic orchestrator owns sequencing. It reads the current state of the work, works out what should happen next for each role, and waits when nothing needs doing. When something does, like a proposal to review or an objection to answer, it starts a fresh agent for that one event. The agent does its job, records its judgment and exits.</p>
+      <p>The fix is to stop asking the model to run the loop at all. Instead, a plain, deterministic orchestrator owns sequencing. It reads the current state of the work, works out what should happen next for each role, and waits when nothing needs doing. When something does, like a proposal to review or an objection to answer, it starts a fresh agent for that one event. The agent does its job, records its judgment and exits.</p>
 
       <p>A role is finished when the orchestrator records that it's finished, not when a model decides to stop talking. Nothing depends on the model choosing to come back, so there's no seam to fall through, and it works the same way regardless of which model is running.</p>
 
@@ -55,7 +55,7 @@
 
       <h2>Monitoring follows the same rule</h2>
 
-      <p>egg's first monitor ran a model over every observation. It was loud, with a steady stream of high-priority alerts that weren't real, including one where it mistook its own startup for an attack. People learned to ignore it. It was also useless at the moment it mattered, since real deadlocks showed up as vague alerts, or not at all.</p>
+      <p>My first monitor for this ran a model over every observation. It was loud, with a steady stream of high-priority alerts that weren't real, including one where it mistook its own startup for an attack. People learned to ignore it. It was also useless at the moment it mattered, since real deadlocks showed up as vague alerts, or not at all.</p>
 
       <p>The rebuilt version splits the job three ways. Deterministic detectors watch for problems they can prove, and the vast majority of observations end there, with no model involved. A model is only consulted on the ambiguous minority, and it advises rather than acts. A separate control plane carries out its advice, choosing from a short, fixed list of actions: nudge an agent, restart a group, or ask a person. Every action is deduplicated, rate-limited and logged. The advising agent can't open a decision on a person's behalf. Only the control plane can, through a path that's bounded and audited.</p>
 

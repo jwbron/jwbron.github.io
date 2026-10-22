@@ -33,7 +33,7 @@
         <p class="post-dek">When AI reviewers agree, that tells you their reasoning hangs together. It doesn't tell you the work is right.</p>
       </header>
 
-      <p>On one run in <a href="https://github.com/jwbron/egg">egg</a>, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
+      <p>On one run in a system I built, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
 
       <p>The reviewers weren't bad. In that same run they caught four real design problems that no automated check would ever find. They were just answering a different question. Consensus among agents measures coherence, meaning whether the reasoning holds together. Only execution measures correspondence, meaning whether the work actually matches reality.</p>
 
@@ -53,7 +53,7 @@
 
       <h2>Make approval cost something</h2>
 
-      <p>"Looks good to me" is cheap to say whether or not you looked. So in egg, an approval has to point at specific things, like the files, lines, commits or tests it's vouching for, and a generic approval is rejected outright. The same goes for objections. It's hard to fake specific evidence without doing the reading, which is the whole point.</p>
+      <p>"Looks good to me" is cheap to say whether or not you looked. So an approval has to point at specific things, like the files, lines, commits or tests it's vouching for, and a generic approval is rejected outright. The same goes for objections. It's hard to fake specific evidence without doing the reading, which is the whole point.</p>
 
       <h2>Judge first, then read the author's take</h2>
 

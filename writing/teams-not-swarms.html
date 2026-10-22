@@ -39,7 +39,7 @@
 
       <h2>Decide who reviews whom</h2>
 
-      <p>In <a href="https://github.com/jwbron/egg">egg</a>, agents have roles. Producers make things, like the code, the tests and the docs. Reviewers judge them, and each reviewer has a specific lens: correctness, overall design, security, concurrency, or whether the work actually meets the plan. Producers don't approve reviews of their own work. When a reviewer objects, the producer responds by fixing the work and proposing it again, never by arguing until the reviewer gives up.</p>
+      <p>In a well-run agent team, agents have roles. Producers make things, like the code, the tests and the docs. Reviewers judge them, and each reviewer has a specific lens: correctness, overall design, security, concurrency, or whether the work actually meets the plan. Producers don't approve reviews of their own work. When a reviewer objects, the producer responds by fixing the work and proposing it again, never by arguing until the reviewer gives up.</p>
 
       <p>The review relationships are drawn deliberately, not left as everyone-reviews-everyone. For a typical implementation phase that's around a dozen review relationships instead of the fifty-plus you'd get if all of them reviewed each other. Every relationship that exists is one that's worth having.</p>
 
@@ -59,7 +59,7 @@
 
       <h2>Turn every deadlock into a rule</h2>
 
-      <p>Every time egg's teams got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything, which sounds obvious until you see a team "finish" without its main deliverable because a reviewer objected to an empty proposal and then moved on.</p>
+      <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything, which sounds obvious until you see a team "finish" without its main deliverable because a reviewer objected to an empty proposal and then moved on.</p>
 
       <p>The older recovery patches, the ones that used to unstick these situations after the fact, are still there. They should never fire now, so each one counts how often it does. A count above zero means there's a gap in the rules, and that's the kind of signal you want: a measurable sign that the protocol has a hole, not a vague feeling that things are slow.</p>
 

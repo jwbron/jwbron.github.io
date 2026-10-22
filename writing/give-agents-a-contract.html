@@ -35,7 +35,7 @@
 
       <p>In most agent setups, the only record of what you asked for is the conversation. The agent's understanding of the task lives in its context window, which grows, gets summarized and eventually gets replaced. Another agent can't read it. You can't audit it. And when the agent decides partway through that the task really means something slightly different, nothing anywhere disagrees with it.</p>
 
-      <p>That's fine for a quick question. For real work, the intent needs to live somewhere more durable than a chat, somewhere the agents read from, report back to, and can't quietly rewrite. In egg, that place is a contract.</p>
+      <p>That's fine for a quick question. For real work, the intent needs to live somewhere more durable than a chat, somewhere the agents read from, report back to, and can't quietly rewrite. I call that place a contract.</p>
 
       <h2>What goes in it</h2>
 
@@ -61,7 +61,7 @@
 
       <p>Agents look for the path of least resistance, and the easiest decision to make is the one you never mention. If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
 
-      <p>So in egg, an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning, not waving through a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff, not a way for it to vanish.</p>
+      <p>So an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning, not waving through a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff, not a way for it to vanish.</p>
 
       <p>Reviewers have a job here too. A draft that quietly commits to a choice that belongs to a person gets sent back, even if the choice it made is a good one.</p>
 
@@ -75,7 +75,7 @@
 
       <p>Swap the vocabulary and this is how good professional work already runs. A legal team has an engagement scope, a matter plan, deliverables with clear standards and a partner who owns the judgment calls. An agent drafting research for that team should work against the same structure. It can't mark its own memo reviewed. The questions that belong to the partner are logged and answered once. And before anyone drafts, someone checks that the agent can actually reach the sources the plan assumes.</p>
 
-      <p>A conversation is how you talk to an agent. A contract is what you agreed on. When alignment depends on the conversation, it lasts only as long as the context does. When it's built into the structure, it holds for the whole job.</p>
+      <p>A conversation is how you talk to an agent. A contract is what you agreed on. When alignment depends on the conversation, it lasts only as long as the context does. When it's built into the structure, it holds for the whole job. That's what I mean by runtime alignment: the agent stays aligned with your intent because the system holds the intent, not because the model happens to remember it.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

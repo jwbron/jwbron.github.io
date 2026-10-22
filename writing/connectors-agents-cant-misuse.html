@@ -35,7 +35,7 @@
 
       <p>An agent that can only see its own scratch space isn't worth much. The value shows up when it can read your tickets, search your wiki, pull documents and draft replies. That's also exactly where the risk shows up, because every connection is a path for data to leave, for the wrong thing to change, or for someone else's instructions to get in.</p>
 
-      <p>In <a href="stop-telling-agents.html">Stop telling AI agents what not to do</a>, I argued for taking capabilities away instead of writing rules about them. This is the same idea applied to the connections themselves. In <a href="https://github.com/jwbron/egg">egg</a>, the agent never holds credentials for any service. It asks a gateway, and the gateway holds the credentials, enforces policy and keeps the record. What follows is how that gateway decides what to allow.</p>
+      <p>In <a href="stop-telling-agents.html">Stop telling AI agents what not to do</a>, I argued for taking capabilities away instead of writing rules about them. This is the same idea applied to the connections themselves. In the systems I design, the agent never holds credentials for any service. It asks a gateway, and the gateway holds the credentials, enforces policy and keeps the record. What follows is how that gateway decides what to allow.</p>
 
       <h2>Permissions from the vendor aren't enough</h2>
 
@@ -45,7 +45,7 @@
 
       <h2>Deny on ambiguity</h2>
 
-      <p>Search is the hardest case, because a query language is a small programming language, and an agent, or anyone who has influenced it, can be creative. egg's gateway doesn't try to sanitize arbitrary queries. It reads each query and accepts it only if it can prove the query stays inside the allowed projects. The shape has to be simple, with the project restriction at the top and nothing that could widen it. Anything it can't prove gets refused, including queries that would probably have been fine.</p>
+      <p>Search is the hardest case, because a query language is a small programming language, and an agent, or anyone who has influenced it, can be creative. A good gateway doesn't try to sanitize arbitrary queries. It reads each query and accepts it only if it can prove the query stays inside the allowed projects. The shape has to be simple, with the project restriction at the top and nothing that could widen it. Anything it can't prove gets refused, including queries that would probably have been fine.</p>
 
       <p>That trade is deliberate. A false refusal costs the agent one retry with a simpler query. A false acceptance costs a leak. When in doubt, refuse.</p>
 

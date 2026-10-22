@@ -35,13 +35,13 @@
 
       <p>Every long-running agent eventually fills its context window. What happens next is usually automatic. As the window nears full, the harness quietly summarizes the conversation and carries on with the summary. Nothing crashes. It just forgets.</p>
 
-      <p>The trouble is what it forgets. A summary keeps the gist and drops the specifics, and in structured work the specifics are the whole point. Which version did I last review? Which objections are still open? What conditions did I attach to my approval? Those are exactly the details a summarizer treats as noise, and losing them doesn't raise an error. The agent just keeps working, slightly wrong. Long before that point, a nearly full window has already started to dull the agent's judgment.</p>
+      <p>The trouble is what it forgets, and it's one of the most common runtime alignment failures there is. A summary keeps the gist and drops the specifics, and in structured work the specifics are the whole point. Which version did I last review? Which objections are still open? What conditions did I attach to my approval? Those are exactly the details a summarizer treats as noise, and losing them doesn't raise an error. The agent just keeps working, slightly wrong. Long before that point, a nearly full window has already started to dull the agent's judgment.</p>
 
       <p>The usual answer is a bigger window. That only moves the cliff. The better answer is to decide up front what must never be lost, and to make keeping it a property of the system instead of something you hope survives a summary.</p>
 
       <h2>A small, fixed core</h2>
 
-      <p>In <a href="https://github.com/jwbron/egg">egg</a>'s design, every agent works from a protected core that stays resident the whole time. It's small, and it holds only what the agent can't afford to lose. That means the role's job, the task as the person actually stated it, the binding instructions that came with it, and the current state of the work: what was last reviewed, which objections are open and what conditions are outstanding.</p>
+      <p>In the design I use, every agent works from a protected core that stays resident the whole time. It's small, and it holds only what the agent can't afford to lose. That means the role's job, the task as the person actually stated it, the binding instructions that came with it, and the current state of the work: what was last reviewed, which objections are open and what conditions are outstanding.</p>
 
       <p>Two properties make this core trustworthy. First, it's never written by the agent. The state section is derived mechanically from the record of what actually happened, so it can't drift from reality the way an agent's own recollection can. Second, it's byte-stable. The same inputs always produce exactly the same text, with fixed ordering, capped sections and no timestamps. That makes the core a stable prefix the model provider can cache, so it's served from cache on nearly every call, and it means rebuilding the agent from the core always gives you the same starting point.</p>
 
@@ -59,7 +59,7 @@
 
       <h2>An agent's notes are claims</h2>
 
-      <p>Agents write things down as they work, like summaries of what they've reviewed or assessments of a colleague's progress. Those notes are useful, but they're claims, not facts. In egg's design each note is stamped with the version of the work it describes, and when the work moves on, the note is marked stale and checked again against the actual changes rather than trusted. Memory is kept short, too. The running log of decisions is capped and condensed as it's written, so it never turns into a second, unbounded history.</p>
+      <p>Agents write things down as they work, like summaries of what they've reviewed or assessments of a colleague's progress. Those notes are useful, but they're claims, not facts. In that design, each note is stamped with the version of the work it describes, and when the work moves on, the note is marked stale and checked again against the actual changes rather than trusted. Memory is kept short, too. The running log of decisions is capped and condensed as it's written, so it never turns into a second, unbounded history.</p>
 
       <p>There's also an escape hatch. Sometimes a resumed session carries a wrong conclusion, like believing it's still blocked on a question that was answered an hour ago, and it will faithfully repeat that every time it wakes up. An operator can evict that session so the next start rebuilds from the true state of the work.</p>
 
