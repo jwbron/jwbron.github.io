@@ -37,7 +37,7 @@
 
       <h2>Your harness has opinions</h2>
 
-      <p>Agent harnesses are usually built around one model family, and they carry quiet assumptions about it. How big the context window is. What default reasoning settings to send. Which tools exist. Swap in a different model and the harness doesn't complain. It just keeps applying assumptions that no longer hold. In one system I built, a model name the harness didn't recognize was silently treated as having a particular window size, which changes when it summarizes and how much it can hold.</p>
+      <p>Agent harnesses are usually built around one model family, and they carry quiet assumptions about it. How big the context window is. What default reasoning settings to send. Which tools exist. Swap in a different model and the harness doesn't complain. It just keeps applying assumptions that no longer hold. In one of my research systems, a model name the harness didn't recognize was silently treated as having a particular window size, which changes when it summarizes and how much it can hold.</p>
 
       <p>Sometimes the assumption runs backward from what you'd expect. When I routed a non-Claude model through a translation layer, a setting requesting "high" reasoning effort actually cut that model's reasoning by close to a factor of ten compared with sending nothing at all, and the two distributions didn't even overlap. Nobody would have guessed that without measuring it.</p>
 
@@ -51,7 +51,7 @@
 
       <h2>Unknown is not zero</h2>
 
-      <p>Cost is the measurement teams most want and most often get wrong, and it usually goes wrong quietly. At one point every single call in a sample of more than a thousand from one of my runs reported its cost as unknown. The proxy in the middle simply wasn't passing a figure through. Nothing broke. The dashboards just showed less spend than there really was.</p>
+      <p>Cost is the measurement teams most want and most often get wrong, and it usually goes wrong quietly. At one point every single call in a sample of more than a thousand from one of my research runs reported its cost as unknown. The proxy in the middle simply wasn't passing a figure through. Nothing broke. The dashboards just showed less spend than there really was.</p>
 
       <p>The rule that came out of that is simple. Never record an unknown cost as zero. A zero reads as "this was free," which is the exact opposite of the truth. Keep unknowns visible, and report how many calls actually had a cost alongside the total, so a partial number can't pass as a complete one.</p>
 
@@ -61,7 +61,7 @@
 
       <p>Agent cost doesn't behave like most software cost, and the differences are worth measuring rather than guessing.</p>
 
-      <p>Every turn re-sends the whole conversation. Cached tokens are much cheaper, but they're not free, and one oversized tool result keeps getting billed on every turn after it. That's why I cap large outputs and write the overflow to a file the agent can read if it really needs it. Caching itself is fragile, too. A routing layer in one of my setups was silently discarding the provider's roughly tenfold discount on cached input, and nothing reported it as a failure. Waiting costs money as well. An agent that checks for news and finds none still pays for a full turn, which is one more reason to keep waiting in plain code, outside the model.</p>
+      <p>Every turn re-sends the whole conversation. Cached tokens are much cheaper, but they're not free, and one oversized tool result keeps getting billed on every turn after it. That's why I cap large outputs and write the overflow to a file the agent can read if it really needs it. Caching itself is fragile, too. A routing layer in one of my research setups was silently discarding the provider's roughly tenfold discount on cached input, and nothing reported it as a failure. Waiting costs money as well. An agent that checks for news and finds none still pays for a full turn, which is one more reason to keep waiting in plain code, outside the model.</p>
 
       <p>None of this argues for using AI less. It argues for using it more efficiently, so the same work costs less. You can only do that once spend is broken down by role and by phase, so "the agents are expensive" turns into "this reviewer is expensive in this phase, and here's why."</p>
 

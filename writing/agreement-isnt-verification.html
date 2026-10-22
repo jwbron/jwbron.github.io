@@ -33,7 +33,7 @@
         <p class="post-dek">When AI reviewers agree, that tells you their reasoning hangs together. It doesn't tell you the work is right.</p>
       </header>
 
-      <p>On one run in a system I built, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
+      <p>On one run in my personal agent experiments, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
 
       <p>The reviewers weren't bad. In that same run they caught four real design problems that no automated check would ever find. They were just answering a different question. Consensus among agents measures coherence, meaning whether the reasoning holds together. Only execution measures correspondence, meaning whether the work actually matches reality.</p>
 
@@ -47,9 +47,9 @@
 
       <p>The first fix is to stop asking reviewers questions that a machine can answer for certain. Does it build? Do the tests pass? Is the file under the limit? Those get settled before the work is ever offered for review. If the checks fail, it never reaches a reviewer at all. The author fixes it and tries again.</p>
 
-      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems no checker will find. The system can do the mechanical part once, deterministically, for everyone.</p>
+      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems no checker will find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, not a substitute for the shared checks.</p>
 
-      <p>One detail matters a lot here. A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast. It just isn't proof that the whole thing works.</p>
+      <p>One detail matters a lot here. A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast. It just isn't proof that the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
 
       <h2>Make approval cost something</h2>
 
