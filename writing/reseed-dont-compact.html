@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reseed, don't compact · James Wiesebron</title>
+  <meta name="description" content="Long agent work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core that holds the intent, and rebuild from it on purpose.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <link rel="stylesheet" href="../style.css?v=e132a285">
+</head>
+<body>
+  <a class="skip" href="#post">Skip to content</a>
+
+  <header class="masthead">
+    <a class="home" href="../" aria-label="James Wiesebron, home">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+    </a>
+    <nav aria-label="Site">
+      <a href="../#writing">writing</a>
+      <a href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="post" class="post">
+    <article>
+      <header class="post-head">
+        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Memory</p>
+        <h1>Reseed, don't compact</h1>
+        <p class="post-dek">Long agent work shouldn't depend on a summarizer deciding what to forget.</p>
+      </header>
+
+      <p>Every long-running agent eventually fills its context window. What happens next is usually automatic. As the window nears full, the harness quietly summarizes the conversation and carries on with the summary. Nothing crashes. It just forgets.</p>
+
+      <p>The trouble is what it forgets. A summary keeps the gist and drops the specifics, and in structured work the specifics are the whole point. Which version did I last review? Which objections are still open? What conditions did I attach to my approval? Those are exactly the details a summarizer treats as noise, and losing them doesn't raise an error. The agent just keeps working, slightly wrong. Long before that point, a nearly full window has already started to dull the agent's judgment.</p>
+
+      <p>The usual answer is a bigger window. That only moves the cliff. The better answer is to decide up front what must never be lost, and to make keeping it a property of the system instead of something you hope survives a summary.</p>
+
+      <h2>A small, fixed core</h2>
+
+      <p>In <a href="https://github.com/jwbron/egg">egg</a>'s design, every agent works from a protected core that stays resident the whole time. It's small, and it holds only what the agent can't afford to lose. That means the role's job, the task as the person actually stated it, the binding instructions that came with it, and the current state of the work: what was last reviewed, which objections are open and what conditions are outstanding.</p>
+
+      <p>Two properties make this core trustworthy. First, it's never written by the agent. The state section is derived mechanically from the record of what actually happened, so it can't drift from reality the way an agent's own recollection can. Second, it's byte-stable. The same inputs always produce exactly the same text, with fixed ordering, capped sections and no timestamps. That makes the core a stable prefix the model provider can cache, so it's served from cache on nearly every call, and it means rebuilding the agent from the core always gives you the same starting point.</p>
+
+      <h2>Everything else, on demand</h2>
+
+      <p>The bulky material, like the actual changes to review and the history of the discussion, doesn't get pasted into the core. The core holds pointers to it instead, meaning the exact query to run or the exact place to read, and the agent pulls what it needs for the task in front of it.</p>
+
+      <p>It's worth being honest about what this buys. Pulling material on demand doesn't keep the window from filling. Whatever the agent pulls stays in context until it's cleared. What it buys is a smaller permanent footprint and, more importantly, the ability to pull it all again. The reseed keeps the window bounded, and the pointers make the reseed cheap.</p>
+
+      <h2>Rebuild on purpose</h2>
+
+      <p>Before each new piece of work, the agent's context gets measured. If it's still comfortably under a threshold, the agent picks up where it left off with its warm context intact. If it's past the threshold, set well below the point where the automatic summary would kick in, the agent doesn't resume at all. It starts fresh from the core and pulls what it needs again.</p>
+
+      <p>Two details matter. The measurement has to be how full the window actually is, not how many tokens you were billed for, because cached tokens are cheap to pay for but still take up room. And any uncertainty should tip toward rebuilding. A fresh start only costs some recent detail, because everything that matters lives in the core. A wrong resume can carry an overfull window straight into the summarizer and lose exactly what the core was protecting.</p>
+
+      <h2>An agent's notes are claims</h2>
+
+      <p>Agents write things down as they work, like summaries of what they've reviewed or assessments of a colleague's progress. Those notes are useful, but they're claims, not facts. In egg's design each note is stamped with the version of the work it describes, and when the work moves on, the note is marked stale and checked again against the actual changes rather than trusted. Memory is kept short, too. The running log of decisions is capped and condensed as it's written, so it never turns into a second, unbounded history.</p>
+
+      <p>There's also an escape hatch. Sometimes a resumed session carries a wrong conclusion, like believing it's still blocked on a question that was answered an hour ago, and it will faithfully repeat that every time it wakes up. An operator can evict that session so the next start rebuilds from the true state of the work.</p>
+
+      <h2>Why not sub-agents?</h2>
+
+      <p>The other way to keep a window from filling is to split the work across sub-agents, each with its own throwaway context, and only pass back what they found. That works, and it's the only approach that truly guarantees no window ever fills. It isn't the default because it gives up the cached core, adds latency and introduces a new kind of error in how the work gets divided. In this design it's an escalation for the rare task that's too big for one context, not the everyday answer.</p>
+
+      <h2>Why this needs structure</h2>
+
+      <p>This only works because there's something durable to rebuild from. In <a href="give-agents-a-contract.html">intentional agentic work</a>, the intent lives in a contract and the state of the work lives in a record, so the core can be derived from them at any time. In a free-form chat, the only record of what matters is the chat itself, and that's exactly the thing the summarizer is about to compress.</p>
+
+      <p>The same shape fits any long piece of knowledge work. A legal matter that runs for weeks has a scope, key decisions, open issues and deadlines. That's the core. The documents and research get pulled when they're needed, and any associate's notes are dated and rechecked when the facts change. An agent working that matter should be built the same way, so that it starts every session knowing what actually matters instead of hoping a summary kept it.</p>
+
+      <footer class="post-foot">
+        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+        <p><a href="../#writing">← More writing</a></p>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <p>html and css, at 6,237 feet.</p>
+  </footer>
+</body>
+</html>
