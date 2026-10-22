@@ -15,6 +15,7 @@
   --mint: #9fd6c0;
   --sakura: #efb0c7;
   --violet: #b8a1e0;
+  --cobalt: #3a52e6;
   --on: #261d38;
 
   --contrast-bg: #2f2546;
@@ -37,6 +38,7 @@
     --ink-2: #b9afcb;
     --line-c: #ece4cd;
 
+    --cobalt: #6f86ff;
     --contrast-bg: #b8a1e0;
     --contrast-fg: #261d38;
     --contrast-accent: #261d38;
@@ -69,17 +71,17 @@ a {
   color: inherit;
   text-decoration-thickness: 2px;
   text-underline-offset: 0.22em;
-  text-decoration-color: var(--coral);
+  text-decoration-color: var(--cobalt);
   transition: text-underline-offset 0.2s ease, text-decoration-color 0.2s ease;
 
   &:hover {
     text-underline-offset: 0.34em;
-    text-decoration-color: var(--peri);
+    text-decoration-color: var(--coral);
   }
 }
 
 :focus-visible {
-  outline: 3px solid var(--peri);
+  outline: 3px solid var(--cobalt);
   outline-offset: 4px;
 }
 
@@ -150,7 +152,7 @@ p {
 
   & a {
     text-decoration: none;
-    background: linear-gradient(var(--coral), var(--coral)) 0 100% / 0 3px no-repeat;
+    background: linear-gradient(var(--cobalt), var(--cobalt)) 0 100% / 0 3px no-repeat;
     transition: background-size 0.25s ease;
 
     &:hover {
@@ -178,6 +180,8 @@ p {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  overflow-x: clip;
+  overflow-y: visible;
 
   & > * {
     position: absolute;
@@ -190,20 +194,11 @@ p {
   left: calc(var(--gutter) - 1.2rem);
   width: clamp(9rem, 13vw, 13rem);
   aspect-ratio: 1;
-  border: clamp(1.1rem, 1.8vw, 1.8rem) solid var(--peri);
+  border: clamp(1.1rem, 1.8vw, 1.8rem) solid var(--cobalt);
   border-left-color: transparent;
   border-bottom-color: transparent;
   border-radius: 50%;
   rotate: -45deg;
-}
-
-/* one bold patch of dots */
-.dots {
-  top: clamp(1.5rem, 5vw, 4rem);
-  right: var(--gutter);
-  width: clamp(8rem, 16vw, 14rem);
-  aspect-ratio: 1.5;
-  background: radial-gradient(circle, var(--butter) 0 5px, transparent 5.5px) 0 0 / 22px 22px;
 }
 
 /* a disc that crosses the hero's bottom edge into the next section */
@@ -290,12 +285,12 @@ p {
 
   & a {
     text-decoration: none;
-    border-bottom: 4px solid var(--coral);
+    border-bottom: 4px solid var(--cobalt);
     padding-bottom: 0.15rem;
     transition: border-color 0.2s ease, padding 0.2s ease;
 
     &:hover {
-      border-color: var(--peri);
+      border-color: var(--coral);
       padding-bottom: 0.35rem;
     }
   }
@@ -510,13 +505,24 @@ figcaption {
   font-size: clamp(1.08rem, 1.5vw, 1.22rem);
 }
 
+.approach-head {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+
+  & .heading {
+    margin: 0;
+  }
+}
+
 .stamp {
   --perf: 6px;
-  float: right;
+  flex: none;
   display: grid;
   gap: 0.5rem;
-  width: clamp(8.5rem, 16vw, 12rem);
-  margin: 0 0 1.5rem 2rem;
+  width: clamp(6.5rem, 14vw, 11rem);
   padding: 0.9rem 0.9rem 0.7rem;
   color: var(--on);
   background: #fcf9ff;
@@ -607,7 +613,6 @@ figcaption {
 }
 
 .creed {
-  clear: both;
   max-width: 46rem;
   margin: 2.2rem 0 0;
   font-size: 1.02rem;
@@ -725,9 +730,6 @@ figcaption {
     rotate: 45deg;
   }
 
-  .dots {
-    display: none;
-  }
 }
 
 @media (max-width: 40rem) {
@@ -757,8 +759,12 @@ figcaption {
   }
 
   .stamp {
-    width: 7.5rem;
-    margin-left: 1rem;
+    width: 5.5rem;
+    padding: 0.55rem 0.55rem 0.4rem;
+  }
+
+  .stamp-label {
+    font-size: 0.7rem;
   }
 
   .ticket {
@@ -768,8 +774,23 @@ figcaption {
   }
 
   .ticket-stub {
+    position: relative;
     border-left: 0;
     border-top: 3px dashed var(--on);
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: -0.85rem;
+      width: 1.6rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--bg);
+    }
+
+    &::before { left: -0.8rem; }
+    &::after { right: -0.8rem; }
   }
 }
 
