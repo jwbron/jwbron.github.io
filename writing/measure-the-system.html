@@ -33,13 +33,13 @@
         <p class="post-dek">Most agent evaluations test the model and trust everything around it. That's where the surprises are.</p>
       </header>
 
-      <p>When people evaluate agents, they usually evaluate models. They swap one model for another, run a benchmark and compare scores. That's useful, but in a real agent system the model is one component among many. The harness that runs it, the monitors that watch it, the proxies that route its calls and the numbers you use to judge its cost all shape the result, and they're almost never tested. In my experience, that's where the surprises come from.</p>
+      <p>When people evaluate agents, they usually evaluate models. They swap one model for another, run a benchmark and compare scores. That's useful, but in a real agent system the model is one component among many. The harness that runs it, the monitors that watch it, the proxies that route its calls and the numbers you use to judge its cost all shape the result, and they're almost never tested.</p>
 
       <h2>Your harness has opinions</h2>
 
       <p>Agent harnesses are usually built around one model family, and they carry quiet assumptions about it. How big the context window is. What default reasoning settings to send. Which tools exist. Swap in a different model and the harness doesn't complain. It just keeps applying assumptions that no longer hold. In one of my research systems, a model name the harness didn't recognize was silently treated as having a particular window size, which changes when it summarizes and how much it can hold.</p>
 
-      <p>Sometimes the assumption runs backward from what you'd expect. When I routed a non-Claude model through a translation layer, a setting requesting "high" reasoning effort actually cut that model's reasoning by close to a factor of ten compared with sending nothing at all, and the two distributions didn't even overlap. Nobody would have guessed that without measuring it.</p>
+      <p>Sometimes the assumption runs backward from what you'd expect. When I routed a non-Claude model through a translation layer, a setting requesting "high" reasoning effort actually cut that model's reasoning by close to a factor of ten compared with sending nothing at all, and the two distributions didn't even overlap.</p>
 
       <p>Two rules follow. First, when you compare models, keep the surrounding settings as close to identical as you can, even when changing them would save money, or you're comparing harness configurations instead of models. Second, fail closed. If the route to a model is broken, the request should fail loudly instead of quietly falling back to a different model. Otherwise your evaluation is measuring a mix of two models and reporting it as one.</p>
 

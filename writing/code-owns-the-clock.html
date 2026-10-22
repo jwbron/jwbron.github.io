@@ -37,9 +37,9 @@
 
       <p>In early versions of one of my research systems, where agents owned their own waiting, all of these showed up. One agent announced it was finished more than twenty times in a minute and a half. Another polled on a fixed schedule and missed an objection that had been sitting there for several minutes. Another waited for a signal that only its own next action could produce, and sat deadlocked for about half an hour. None of these are reasoning failures. The model was being asked to do bookkeeping, and bookkeeping is the thing it's worst at.</p>
 
-      <h2>The seam you can't prompt away</h2>
+      <h2>When the model ends the loop</h2>
 
-      <p>There's a deeper problem underneath. If an agent has to hold a waiting loop and re-enter it after every step, then every re-entry is a point where it can simply stop. It writes a final message, and the loop is over. One model would reliably come back. Another model, given the same instructions, often didn't. You can tune a prompt until a particular model behaves, but you've only fixed it for that model, and only until the next release.</p>
+      <p>If an agent has to hold a waiting loop and re-enter it after every step, then every re-entry is a point where it can simply stop. It writes a final message, and the loop is over. One model would reliably come back. Another model, given the same instructions, often didn't. You can tune a prompt until a particular model behaves, but you've only fixed it for that model, and only until the next release.</p>
 
       <h2>Turn it inside out</h2>
 
@@ -47,7 +47,7 @@
 
       <p>A role is finished when the orchestrator records that it's finished, not when a model decides to stop talking. Nothing depends on the model choosing to come back, so there's no seam to fall through, and it works the same way regardless of which model is running.</p>
 
-      <p>A few details keep this honest. Before acting, each agent checks once more that its event is still current, so if someone else already handled it, it skips. At most one agent runs per event. And continuity doesn't come from a long-running session. It comes from a short memory file for each role plus the protected core described in <a href="reseed-dont-compact.html">Reseed, don't compact</a>, so a brand-new agent can pick up a review cycle exactly where the last one left off.</p>
+      <p>Before acting, each agent checks once more that its event is still current, so if someone else already handled it, it skips. At most one agent runs per event. And continuity doesn't come from a long-running session. It comes from a short memory file for each role plus the protected core described in <a href="reseed-dont-compact.html">Reseed, don't compact</a>, so a brand-new agent can pick up a review cycle exactly where the last one left off.</p>
 
       <h2>Quiet isn't failure</h2>
 

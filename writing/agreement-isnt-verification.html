@@ -49,7 +49,7 @@
 
       <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems no checker will find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, not a substitute for the shared checks.</p>
 
-      <p>One detail matters a lot here. A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast. It just isn't proof that the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
+      <p>A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast. It just isn't proof that the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
 
       <h2>Make approval cost something</h2>
 
