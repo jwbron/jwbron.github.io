@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Intentional agentic work · James Wiesebron</title>
+  <meta name="description" content="Unstructured agents fail in predictable ways. Intentional agentic work answers each failure with structure, so agents stay aligned, finish the job and can be trusted.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <link rel="stylesheet" href="../style.css?v=e132a285">
+</head>
+<body>
+  <a class="skip" href="#post">Skip to content</a>
+
+  <header class="masthead">
+    <a class="home" href="../" aria-label="James Wiesebron, home">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+    </a>
+    <nav aria-label="Site">
+      <a href="../#writing">writing</a>
+      <a href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="post" class="post">
+    <article>
+      <header class="post-head">
+        <p class="post-kicker">Intentional agentic work</p>
+        <h1>Intentional agentic work</h1>
+        <p class="post-dek">Unstructured agents fail in predictable ways. Each failure has a structural answer.</p>
+      </header>
+
+      <p>Most agent work today is a conversation. You describe what you want, the agent goes off and does it, and you read what comes back. For small tasks that's fine. As the work gets longer, and as one agent becomes a team of them, the conversation stops being enough, and things go wrong in the same handful of ways every time.</p>
+
+      <p>The agent drifts from what you actually asked for, because your intent lives only in a chat that keeps growing. It makes decisions that were yours to make, because asking is more work than deciding. A group of agents reviews the work and agrees it's done, and agreement turns out to say very little about whether it's right. Hours into a task, the details that mattered get summarized away. Agents wait on each other, poll, loop and stall. And somewhere along the way, one of them does something it was told not to do.</p>
+
+      <p>None of these is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. I call the approach intentional agentic work. The intent is written down, the structure carries it, the work gets checked against reality, and people stay involved at the points where their judgment actually matters. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
+
+      <p>I've been working these ideas out in <a href="https://github.com/jwbron/egg">egg</a>, an open-source system where teams of agents turn a request into reviewed, finished work while a person holds every decision that matters. The examples come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
+
+      <h2>The pillars</h2>
+
+      <p><strong><a href="give-agents-a-contract.html">Intent: give agents a contract, not a conversation.</a></strong> The work is defined in a structured document that lives outside the chat. Each role can change only its own part, decisions owed to a person are tracked until they're answered, and the plan gets checked before anyone starts working on it.</p>
+
+      <p><strong>Memory: reseed, don't compact.</strong> Long, structured work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core of instructions that holds the intent, fetch everything else when it's needed, and rebuild from that core deliberately. <span class="soon">Coming soon</span></p>
+
+      <p><strong>Verification: agreement isn't verification.</strong> When agents agree, that shows their reasoning is consistent, not that the work is correct. Done means checked against reality, with findings backed by evidence and reviewers who form their own view before reading the author's. <span class="soon">Coming soon</span></p>
+
+      <p><strong>Coordination: teams, not swarms.</strong> A team of agents needs a protocol, not a group chat. That means deciding who reviews whom, how agreement converges and how to keep the team from deadlocking. <span class="soon">Coming soon</span></p>
+
+      <p><strong>Control: the model owns judgment, code owns the clock.</strong> Waiting, sequencing and state belong in plain, predictable code. Models should only be asked to judge, never to keep the loop running. <span class="soon">Coming soon</span></p>
+
+      <p><strong><a href="stop-telling-agents.html">Boundaries: stop telling agents what not to do.</a></strong> A rule in a prompt is a suggestion. Take the capability away instead, and give agents connections to your tools and data that can't be misused.</p>
+
+      <p><strong>Measurement: measure the system, not just the model.</strong> Evaluate the parts nobody evaluates, like the monitors and the harness, and track cost so that a missing number shows up as missing instead of as free. <span class="soon">Coming soon</span></p>
+
+      <h2>The short version</h2>
+
+      <p>The model brings judgment. Everything around it, meaning the intent, the memory, the checks, the coordination and the limits, should be structure you designed on purpose. That's what makes agent work something you can rely on instead of something you have to watch.</p>
+
+      <footer class="post-foot">
+        <p>I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+        <p><a href="../#writing">← More writing</a></p>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <p>html and css, at 6,237 feet.</p>
+  </footer>
+</body>
+</html>

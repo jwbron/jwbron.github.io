@@ -691,6 +691,28 @@ figcaption {
   padding: 0 var(--gutter) clamp(3.5rem, 8vw, 5rem);
 }
 
+.series-intro {
+  max-width: 40rem;
+  margin: -1rem 0 1.8rem;
+  color: var(--ink-2);
+}
+
+.soon {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--on);
+  background: var(--butter);
+  border-radius: 999px;
+  vertical-align: 0.1em;
+}
+
+.post-kicker a {
+  text-decoration: none;
+}
+
 .posts {
   display: grid;
   gap: 1.6rem;

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Give agents a contract, not a conversation · James Wiesebron</title>
+  <meta name="description" content="When intent lives in a chat, agents drift. A contract that each role can only partly edit keeps agent work aligned and makes &quot;done&quot; mean something.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <link rel="stylesheet" href="../style.css?v=e132a285">
+</head>
+<body>
+  <a class="skip" href="#post">Skip to content</a>
+
+  <header class="masthead">
+    <a class="home" href="../" aria-label="James Wiesebron, home">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+    </a>
+    <nav aria-label="Site">
+      <a href="../#writing">writing</a>
+      <a href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="post" class="post">
+    <article>
+      <header class="post-head">
+        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Intent</p>
+        <h1>Give agents a contract, not a conversation</h1>
+        <p class="post-dek">When intent lives in a chat, agents drift. Write it down somewhere they can't quietly rewrite.</p>
+      </header>
+
+      <p>In most agent setups, the only record of what you asked for is the conversation. The agent's understanding of the task lives in its context window, which grows, gets summarized and eventually gets replaced. Another agent can't read it. You can't audit it. And when the agent decides partway through that the task really means something slightly different, nothing anywhere disagrees with it.</p>
+
+      <p>That's fine for a quick question. For real work, the intent needs to live somewhere more durable than a chat, somewhere the agents read from, report back to, and can't quietly rewrite. In egg, that place is a contract.</p>
+
+      <h2>What goes in it</h2>
+
+      <p>A contract is a structured document that sits outside any agent's conversation. It holds the goal and the phases the work moves through. It breaks each phase into tasks, and every task carries acceptance criteria and the areas of the work it expects to touch. It also lists every decision that belongs to a person, along with that person's answer once there is one.</p>
+
+      <p>Every agent that joins the work starts from the contract, and every agent records its progress back into it as it goes, not in a burst at the end. The conversation is still how agents think. The contract is what everyone agreed to.</p>
+
+      <h2>Each role owns part of it, and only part</h2>
+
+      <p>A shared document that anyone can edit isn't much of a contract. What makes it hold is that each role can change only the fields it owns, and the system enforces that, not a prompt.</p>
+
+      <p>The agent doing the work can record what it did, link the change to its task and leave notes. It can't mark its own task complete. A reviewer can mark tasks and phases done, but it can't touch the work itself. Only a person can resolve a decision. Once the contract is created, nobody can go back and rewrite its scaffolding. An agent can't edit the plan it's in the middle of executing, which turns out to be exactly the move an agent under pressure wants to make.</p>
+
+      <p>This is the same idea as removing capabilities instead of writing rules. "Don't approve your own work" is a suggestion. An implementer that has no way to set a task's status doesn't need to be told.</p>
+
+      <h2>Decisions are part of the contract</h2>
+
+      <p>The most important thing a contract tracks is which questions are yours. When an agent hits a real choice, like a scope question, a tradeoff or anything a reasonable person would want a say in, it adds a decision to the contract instead of resolving it in its head.</p>
+
+      <p>A few rules keep this honest. Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so you're never asked the same question twice, and the loop always settles. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, not a quiet push forward with open questions.</p>
+
+      <h2>"Nothing to decide" is a claim</h2>
+
+      <p>Agents look for the path of least resistance, and the easiest decision to make is the one you never mention. If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
+
+      <p>So in egg, an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning, not waving through a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff, not a way for it to vanish.</p>
+
+      <p>Reviewers have a job here too. A draft that quietly commits to a choice that belongs to a person gets sent back, even if the choice it made is a good one.</p>
+
+      <h2>Catch it at the plan</h2>
+
+      <p>The contract is also where you catch mistakes while they're cheap. Redirecting an agent before it starts costs minutes. Redirecting it after a day of implementation costs a day.</p>
+
+      <p>That's why the plan is a phase with its own gate, and why plan reviewers do more than read for sense. They check that everything the plan depends on actually exists, in the place where the work will run. A plan can be perfectly reasonable on paper and still assume a tool, a data source or a permission the executing agent will never have. The more you constrain agents, the more important this check becomes, because the planner can't see the walls unless someone looks for them. I've watched a confident plan burn most of a day of agent time on exactly that, when one quick search during planning would have caught it.</p>
+
+      <h2>Beyond code</h2>
+
+      <p>Swap the vocabulary and this is how good professional work already runs. A legal team has an engagement scope, a matter plan, deliverables with clear standards and a partner who owns the judgment calls. An agent drafting research for that team should work against the same structure. It can't mark its own memo reviewed. The questions that belong to the partner are logged and answered once. And before anyone drafts, someone checks that the agent can actually reach the sources the plan assumes.</p>
+
+      <p>A conversation is how you talk to an agent. A contract is what you agreed on. When alignment depends on the conversation, it lasts only as long as the context does. When it's built into the structure, it holds for the whole job.</p>
+
+      <footer class="post-foot">
+        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+        <p><a href="../#writing">← More writing</a></p>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <p>html and css, at 6,237 feet.</p>
+  </footer>
+</body>
+</html>
