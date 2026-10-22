@@ -612,13 +612,6 @@ figcaption {
   & li:nth-child(4)::before { background: var(--sakura); border-radius: 4px 50% 4px 50%; }
 }
 
-.creed {
-  max-width: 46rem;
-  margin: 2.2rem 0 0;
-  font-size: 1.02rem;
-  color: var(--ink-2);
-}
-
 /* ---------- contact: a ticket ---------- */
 
 .contact {
