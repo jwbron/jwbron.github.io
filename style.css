@@ -754,6 +754,22 @@ figcaption {
     margin: 0 0 1.15rem;
   }
 
+  & ol,
+  & ul {
+    margin: 0 0 1.15rem;
+    padding-left: 1.4rem;
+  }
+
+  & li {
+    margin-bottom: 0.4rem;
+  }
+
+  & li::marker {
+    font-family: var(--display);
+    font-weight: 800;
+    color: var(--cobalt);
+  }
+
   & h2 {
     margin: 2.4rem 0 0.8rem;
     font-family: var(--display);
