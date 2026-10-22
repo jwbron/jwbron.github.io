@@ -327,7 +327,6 @@ p {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1.4rem;
-  align-items: start;
 }
 
 .panel {
@@ -382,6 +381,7 @@ p {
 
 .review {
   grid-column: span 2;
+  grid-row: span 2;
   color: var(--contrast-fg);
   background: var(--contrast-bg);
   border-radius: 40px 4px 4px 4px;
@@ -401,7 +401,7 @@ p {
 
 /* one patch of dots, kept clear of the lettering */
 .delivery {
-  grid-column: span 6;
+  grid-column: span 4;
   padding-right: clamp(7rem, 16vw, 12rem);
   color: var(--on);
   background: var(--butter);
@@ -708,6 +708,7 @@ figcaption {
   .evals,
   .review {
     grid-column: span 1;
+    grid-row: auto;
   }
 }
 
@@ -746,6 +747,7 @@ figcaption {
   .evals,
   .review {
     grid-column: auto;
+    grid-row: auto;
   }
 
   .delivery {
