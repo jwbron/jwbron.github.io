@@ -45,7 +45,7 @@
 
       <p>The fix is to stop asking the model to run the loop at all. Instead, a plain, deterministic orchestrator owns sequencing. It reads the current state of the work, works out what should happen next for each role, and waits when nothing needs doing. When something does, like a proposal to review or an objection to answer, it starts a fresh agent for that one event. The agent does its job, records its judgment and exits.</p>
 
-      <p>A role is finished when the orchestrator records that it's finished, not when a model decides to stop talking. Nothing depends on the model choosing to come back, so there's no seam to fall through, and it works the same way regardless of which model is running.</p>
+      <p>A role is finished when the orchestrator records that it's finished, not when a model decides to stop talking. The orchestrator schedules the next step without depending on the model choosing to continue, and it works the same way regardless of which model is running.</p>
 
       <p>Before acting, each agent checks once more that its event is still current, so if someone else already handled it, it skips. At most one agent runs per event. And continuity doesn't come from a long-running session. It comes from a short memory file for each role plus the protected core described in <a href="reseed-dont-compact.html">Reseed, don't compact</a>, so a brand-new agent can pick up a review cycle exactly where the last one left off.</p>
 
