@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stop telling AI agents what not to do · James Wiesebron</title>
+  <meta name="description" content="A prompt that says &quot;don't&quot; is a suggestion. The safer move is to take the capability away, and let the wall explain itself.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <link rel="stylesheet" href="../style.css?v=60a980fc">
+</head>
+<body>
+  <a class="skip" href="#post">Skip to content</a>
+
+  <header class="masthead">
+    <a class="home" href="../" aria-label="James Wiesebron, home">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+    </a>
+    <nav aria-label="Site">
+      <a href="../#writing">writing</a>
+      <a href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="post" class="post">
+    <article>
+      <header class="post-head">
+        <p class="post-kicker">Writing</p>
+        <h1>Stop telling AI agents what not to do</h1>
+        <p class="post-dek">A prompt that says "don't" is a suggestion. Take the capability away instead.</p>
+      </header>
+
+      <p>When people start putting AI agents to work, the first safety tool they reach for is the prompt. Never merge a pull request. Don't touch the production database. Don't email the client. Almost every team starts there, and it works right up until it doesn't.</p>
+
+      <p>A prompt is a suggestion. It's one more thing in the agent's context, weighed against everything else it's trying to get done. A few hours into a long task, with your instructions buried under a pile of newer messages, an agent that was told never to merge can decide that merging is obviously the helpful thing to do. And if someone slips their own instructions into a document the agent reads, your prompt is the first thing they'll talk it out of.</p>
+
+      <p>Writing the rule in capital letters doesn't change any of that. The agent can still merge. You've just asked it very nicely not to.</p>
+
+      <h2>Take the door away</h2>
+
+      <p>In <a href="https://github.com/jwbron/egg">egg</a>, the open-source agent system I've been building, the agents can't merge at all. Everything they do with git and GitHub goes through a gateway that lives outside their sandbox, and that gateway simply doesn't have a merge operation. There's no flag that unlocks it and nobody to talk into it. If an agent tries, it's told that merging isn't something it can do, and that a person has to.</p>
+
+      <p>Credentials work the same way. There are no tokens or keys anywhere in the agent's environment. They get attached to requests on the way out, after the agent is done with them, so the agent can't leak something it never had. "Don't print your API key" stops being a rule you have to hope it follows.</p>
+
+      <p>Once you start looking at problems this way, a lot of rules turn into missing doors. Agents can only push to their own branches. An agent that's planning can't write code, and an agent that's writing code can't quietly edit the plan it was handed.</p>
+
+      <h2>Let the wall explain itself</h2>
+
+      <p>The other half of this matters just as much. When an agent bumps into a limit, what comes back should tell it why, and what to do instead. If it pushes to the wrong branch, the error spells out the naming convention, and it fixes the mistake on its next try.</p>
+
+      <p>That works far better than cramming every rule into the system prompt up front. The agent doesn't spend attention on rules it may never need, and when it does need one, the explanation shows up right when it matters, not fifty thousand tokens ago.</p>
+
+      <p>Sometimes the best version is one the agent never notices. GitHub won't let a bot approve its own pull request, so egg quietly turns those approvals into comments and keeps the verdict. The agent gets what it was going for, and nobody wastes a retry.</p>
+
+      <h2>It isn't just about code</h2>
+
+      <p>The same idea carries straight over to agents doing everyday knowledge work. Say a firm wants an agent that drafts replies from a shared inbox. You could tell it never to send anything without sign-off. Or you could give it a connection that can read and draft but has no way to send, and let a person press the button. Only one of those still holds on the agent's worst day, or on the day someone emails it a cleverly worded request.</p>
+
+      <p>egg's Jira connection works this way. Its agents can read tickets, file new ones and leave comments. Deleting a ticket isn't something they're told not to do. It just isn't something they can do.</p>
+
+      <p>The same goes for what agents read. A wiki page or an email is information to work with, never a list of orders, and the system has to treat it that way no matter how authoritative the text sounds.</p>
+
+      <h2>The short version</h2>
+
+      <p>Limits belong in the system, not the prompt. Prompts fade as a conversation gets long, and the system doesn't. An agent two hours into a task hits the same wall it would have hit in its first minute. Someone can change what an agent wants to do by slipping it the right words, but they can't hand it abilities it was never given.</p>
+
+      <p>If you catch yourself writing a sterner prompt to stop an agent from doing something, take the ability away instead. It's the difference between a sign that says "don't open this door" and not having a door.</p>
+
+      <footer class="post-foot">
+        <p>I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+        <p><a href="../#writing">← More writing</a></p>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <p>html and css, at 6,237 feet.</p>
+  </footer>
+</body>
+</html>
