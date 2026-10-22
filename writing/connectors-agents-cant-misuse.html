@@ -3,21 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Connectors an agent can't misuse · James Wiesebron</title>
+  <title>Connectors with enforceable boundaries · James Wiesebron</title>
   <meta name="description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can't be misused, even on the agent's worst day.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://jameswiesebron.com/writing/connectors-agents-cant-misuse.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Connectors with enforceable boundaries · James Wiesebron">
+  <meta property="og:description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can't be misused, even on the agent's worst day.">
+  <meta property="og:url" content="https://jameswiesebron.com/writing/connectors-agents-cant-misuse.html">
+  <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=e92c6d9c">
+  <link rel="stylesheet" href="../style.css?v=09435b25">
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
-      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="mark-name">James Wiesebron</span>
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
@@ -29,8 +37,9 @@
     <article>
       <header class="post-head">
         <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Boundaries</p>
-        <h1>Connectors an agent can't misuse</h1>
+        <h1>Connectors with enforceable boundaries</h1>
         <p class="post-dek">Agents get useful when they reach your real systems. Design those connections for the agent's worst day.</p>
+        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
       <p>An agent that can only see its own scratch space isn't worth much. The value shows up when it can read your tickets, search your wiki, pull documents and draft replies. That's also exactly where the risk shows up, because every connection is a path for data to leave, for the wrong thing to change, or for someone else's instructions to get in.</p>
@@ -39,7 +48,7 @@
 
       <h2>Permissions from the vendor aren't enough</h2>
 
-      <p>The first instinct is to make a narrowly scoped token and call it done. It rarely works. Vendor permissions are drawn around the vendor's idea of a role, not yours. On GitHub, the permission that lets an agent open a pull request is the same one that lets it merge one. In Jira or Confluence, a bot account may see things a human in the same role wouldn't, or the other way around. "Only these projects" or "only this client's matters" is usually not something a token can express at all.</p>
+      <p>The first instinct is to make a narrowly scoped token and call it done. It rarely works. Vendor permissions are drawn around the vendor's idea of a role, not yours. On GitHub, an agent that can push code and open pull requests already holds enough permission to merge them. In Jira or Confluence, a bot account may see things a human in the same role wouldn't, or the other way around. "Only these projects" or "only this client's matters" is usually not something a token can express at all.</p>
 
       <p>So the scope has to be enforced in front of the service, by something that understands what you actually mean.</p>
 

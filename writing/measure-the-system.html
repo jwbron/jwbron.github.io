@@ -7,17 +7,25 @@
   <meta name="description" content="Most agent evaluations test the model and trust everything around it. The monitors, the harness and the cost numbers need evaluating too, and unknown should never read as zero.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://jameswiesebron.com/writing/measure-the-system.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Measure the system, not just the model · James Wiesebron">
+  <meta property="og:description" content="Most agent evaluations test the model and trust everything around it. The monitors, the harness and the cost numbers need evaluating too, and unknown should never read as zero.">
+  <meta property="og:url" content="https://jameswiesebron.com/writing/measure-the-system.html">
+  <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=e92c6d9c">
+  <link rel="stylesheet" href="../style.css?v=09435b25">
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
-      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="mark-name">James Wiesebron</span>
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
@@ -31,6 +39,7 @@
         <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Measurement</p>
         <h1>Measure the system, not just the model</h1>
         <p class="post-dek">Most agent evaluations test the model and trust everything around it. That's where the surprises are.</p>
+        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
       <p>When people evaluate agents, they usually evaluate models. They swap one model for another, run a benchmark and compare scores. That's useful, but in a real agent system the model is one component among many. The harness that runs it, the monitors that watch it, the proxies that route its calls and the numbers you use to judge its cost all shape the result, and they're almost never tested.</p>

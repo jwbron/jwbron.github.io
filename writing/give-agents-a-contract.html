@@ -7,17 +7,25 @@
   <meta name="description" content="When intent lives in a chat, agents drift. A contract that each role can only partly edit keeps agent work aligned and makes &quot;done&quot; mean something.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://jameswiesebron.com/writing/give-agents-a-contract.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Give agents a contract, not a conversation · James Wiesebron">
+  <meta property="og:description" content="When intent lives in a chat, agents drift. A contract that each role can only partly edit keeps agent work aligned and makes &quot;done&quot; mean something.">
+  <meta property="og:url" content="https://jameswiesebron.com/writing/give-agents-a-contract.html">
+  <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=e92c6d9c">
+  <link rel="stylesheet" href="../style.css?v=09435b25">
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
-      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="mark-name">James Wiesebron</span>
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
@@ -31,6 +39,7 @@
         <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Intent</p>
         <h1>Give agents a contract, not a conversation</h1>
         <p class="post-dek">When intent lives in a chat, agents drift. Write it down somewhere they can't quietly rewrite.</p>
+        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
       <p>In most agent setups, the only record of what you asked for is the conversation. The agent's understanding of the task lives in its context window, which grows, gets summarized and eventually gets replaced. Another agent can't read it. You can't audit it. And when the agent decides partway through that the task really means something slightly different, nothing anywhere disagrees with it.</p>
@@ -55,7 +64,7 @@
 
       <p>The most important thing a contract tracks is which questions are yours. When an agent hits a real choice, like a scope question, a tradeoff or anything a reasonable person would want a say in, it adds a decision to the contract instead of resolving it in its head.</p>
 
-      <p>Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so you're never asked the same question twice, which keeps each round smaller than the last. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, not a quiet push forward with open questions.</p>
+      <p>Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so a decision that's already been made isn't asked again. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, not a quiet push forward with open questions.</p>
 
       <h2>"Nothing to decide" is a claim</h2>
 

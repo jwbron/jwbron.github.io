@@ -7,17 +7,25 @@
   <meta name="description" content="When AI reviewers agree, that tells you their reasoning hangs together, not that the work is right. How to build review that checks the work.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://jameswiesebron.com/writing/agreement-isnt-verification.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Agreement isn&#x27;t verification · James Wiesebron">
+  <meta property="og:description" content="When AI reviewers agree, that tells you their reasoning hangs together, not that the work is right. How to build review that checks the work.">
+  <meta property="og:url" content="https://jameswiesebron.com/writing/agreement-isnt-verification.html">
+  <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=e92c6d9c">
+  <link rel="stylesheet" href="../style.css?v=09435b25">
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
-      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="mark-name">James Wiesebron</span>
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
@@ -31,11 +39,12 @@
         <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Verification</p>
         <h1>Agreement isn't verification</h1>
         <p class="post-dek">When AI reviewers agree, that tells you their reasoning hangs together. It doesn't tell you the work is right.</p>
+        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
       <p>On one run in my personal agent experiments, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
 
-      <p>The reviewers weren't bad. In that same run they caught four real design problems that no automated check would ever find. They were just answering a different question. Consensus among agents measures coherence, meaning whether the reasoning holds together. Only execution measures correspondence, meaning whether the work actually matches reality.</p>
+      <p>The reviewers weren't bad. In that same run they caught four real design problems that none of the automated checks were built to catch. They were just answering a different question. Consensus among agents measures coherence, meaning whether the reasoning holds together. Execution is how you measure correspondence, meaning whether the work actually matches reality.</p>
 
       <h2>Why agents agree</h2>
 
@@ -47,7 +56,7 @@
 
       <p>The first fix is to stop asking reviewers questions that a machine can answer for certain. Does it build? Do the tests pass? Is the file under the limit? Those get settled before the work is ever offered for review. If the checks fail, it never reaches a reviewer at all. The author fixes it and tries again.</p>
 
-      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems no checker will find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, not a substitute for the shared checks.</p>
+      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems checkers aren't built to find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, not a substitute for the shared checks.</p>
 
       <p>A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast. It just isn't proof that the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
 
