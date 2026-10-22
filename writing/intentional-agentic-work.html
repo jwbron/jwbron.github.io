@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Intentional agentic work · James Wiesebron</title>
+  <title>Runtime alignment and intentional agentic work · James Wiesebron</title>
   <meta name="description" content="Runtime alignment means keeping an agent doing what you intended while it runs. Intentional agentic work is how to get there: answer each predictable failure with structure.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=e132a285">
+  <link rel="stylesheet" href="../style.css?v=c041dfb8">
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
@@ -28,8 +28,8 @@
   <main id="post" class="post">
     <article>
       <header class="post-head">
-        <p class="post-kicker">Intentional agentic work</p>
-        <h1>Intentional agentic work</h1>
+        <p class="post-kicker">Intentional agentic work · Overview</p>
+        <h1>Runtime alignment</h1>
         <p class="post-dek">Runtime alignment means keeping agents doing what you intended while they run. Here's how to build for it.</p>
       </header>
 
@@ -43,13 +43,13 @@
 
       <p>A well-trained model can still drift from the task in front of it, quietly settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model, and it goes hand in hand with trust and safety. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
 
-      <h2>Intentional agentic work</h2>
+      <h2>How to build for it</h2>
 
-      <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. I call the approach intentional agentic work, and it's how I get to runtime alignment in practice. The intent is written down, the structure carries it, the work gets checked against reality, and people stay involved at the points where their judgment actually matters. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
+      <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. Write the intent down somewhere the agent can't quietly rewrite. Limit what the agent can do instead of asking it to behave. Check the work independently, against reality. Keep people at the decisions that are actually theirs. I think of this as intentional agentic work, and this series is how I approach each piece. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
 
-      <p>These ideas come out of my own research building agent systems. The examples come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
+      <p>The examples come from personal research systems I've built and run, mostly <a href="https://github.com/jwbron/egg">egg</a>, an open-source testbed for these ideas, not from production deployments. They come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
 
-      <h2>The pillars</h2>
+      <h2 id="series">The series</h2>
 
       <p><strong><a href="give-agents-a-contract.html">Intent: give agents a contract, not a conversation.</a></strong> The work is defined in a structured document that lives outside the chat. Each role can change only its own part, decisions owed to a person are tracked until they're answered, and the plan gets checked before anyone starts working on it.</p>
 

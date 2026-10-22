@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Teams, not swarms · James Wiesebron</title>
-  <meta name="description" content="A group of agents in a shared chat is a swarm. A team needs a protocol: who reviews whom, how approvals stay current, and rules that make deadlocks impossible.">
+  <meta name="description" content="A group of agents in a shared chat is a swarm. A team needs a protocol: who reviews whom, how approvals stay current, and checks that turn known deadlocks into rules.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=e132a285">
+  <link rel="stylesheet" href="../style.css?v=c041dfb8">
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
@@ -59,7 +59,7 @@
 
       <h2>Turn every deadlock into a rule</h2>
 
-      <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything, which sounds obvious until you see a team "finish" without its main deliverable because a reviewer objected to an empty proposal and then moved on.</p>
+      <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. These rules stop a team from finishing in an invalid state. They don't guarantee it finishes, which is why a team that stops making progress gets escalated to a person rather than forced through. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything, which sounds obvious until you see a team "finish" without its main deliverable because a reviewer objected to an empty proposal and then moved on.</p>
 
       <p>The older recovery patches, the ones that used to unstick these situations after the fact, are still there. They should never fire now, so each one counts how often it does. A count above zero means there's a gap in the rules, and that's the kind of signal you want: a measurable sign that the protocol has a hole, not a vague feeling that things are slow.</p>
 
