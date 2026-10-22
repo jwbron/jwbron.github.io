@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connectors an agent can't misuse · James Wiesebron</title>
+  <meta name="description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can't be misused, even on the agent's worst day.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <link rel="stylesheet" href="../style.css?v=e132a285">
+</head>
+<body>
+  <a class="skip" href="#post">Skip to content</a>
+
+  <header class="masthead">
+    <a class="home" href="../" aria-label="James Wiesebron, home">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+    </a>
+    <nav aria-label="Site">
+      <a href="../#writing">writing</a>
+      <a href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="post" class="post">
+    <article>
+      <header class="post-head">
+        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Boundaries</p>
+        <h1>Connectors an agent can't misuse</h1>
+        <p class="post-dek">Agents get useful when they reach your real systems. Design those connections for the agent's worst day.</p>
+      </header>
+
+      <p>An agent that can only see its own scratch space isn't worth much. The value shows up when it can read your tickets, search your wiki, pull documents and draft replies. That's also exactly where the risk shows up, because every connection is a path for data to leave, for the wrong thing to change, or for someone else's instructions to get in.</p>
+
+      <p>In <a href="stop-telling-agents.html">Stop telling AI agents what not to do</a>, I argued for taking capabilities away instead of writing rules about them. This is the same idea applied to the connections themselves. In <a href="https://github.com/jwbron/egg">egg</a>, the agent never holds credentials for any service. It asks a gateway, and the gateway holds the credentials, enforces policy and keeps the record. What follows is how that gateway decides what to allow.</p>
+
+      <h2>Permissions from the vendor aren't enough</h2>
+
+      <p>The first instinct is to make a narrowly scoped token and call it done. It rarely works. Vendor permissions are drawn around the vendor's idea of a role, not yours. On GitHub, the permission that lets an agent open a pull request is the same one that lets it merge one. In Jira or Confluence, a bot account may see things a human in the same role wouldn't, or the other way around. "Only these projects" or "only this client's matters" is usually not something a token can express at all.</p>
+
+      <p>So the scope has to be enforced in front of the service, by something that understands what you actually mean.</p>
+
+      <h2>Deny on ambiguity</h2>
+
+      <p>Search is the hardest case, because a query language is a small programming language, and an agent, or anyone who has influenced it, can be creative. egg's gateway doesn't try to sanitize arbitrary queries. It reads each query and accepts it only if it can prove the query stays inside the allowed projects. The shape has to be simple, with the project restriction at the top and nothing that could widen it. Anything it can't prove gets refused, including queries that would probably have been fine.</p>
+
+      <p>That trade is deliberate. A false refusal costs the agent one retry with a simpler query. A false acceptance costs a leak. When in doubt, refuse.</p>
+
+      <p>The same thinking shows up in quieter places. When the agent asks for a page, the gateway checks which space it came from before handing it over, so an out-of-scope page never reaches the agent. When the agent lists what's available, it only sees what it's allowed to touch, so it can't map the rest of the system. A new connector starts with an empty allowlist, so it's installed but does nothing until someone deliberately turns it on. The ticket an agent was asked to work on is recorded for context, but it never grants access by itself.</p>
+
+      <h2>A few narrow verbs</h2>
+
+      <p>Writes get even more care. Instead of exposing the vendor's whole API, the connector offers a handful of specific actions, like create a ticket, edit one, comment on one and link two together. Some actions are permanently off the table. Deleting things and moving them through a workflow aren't restricted, they simply don't exist. Every write is checked against an allowlist of fields, so an agent can't smuggle changes in through obscure custom fields. Notifications default to off, so an agent's edits don't email half the company unless someone asks for that.</p>
+
+      <h2>Safe retries</h2>
+
+      <p>Agents retry. Networks fail, services time out, and an agent that isn't sure whether its write went through will try again. That's how you get three identical tickets. The fix is an idempotency key, but the detail that matters is how it's chosen. The key has to come from what the request means, like "file the follow-up for this specific finding," so that a retry produces the same key. A random key is worse than useless, because every retry looks new.</p>
+
+      <h2>Log the shape, not the content</h2>
+
+      <p>Every call through the gateway is logged, with who made it, which role, what project, which action and what happened. What's never logged is the content. Ticket text, page bodies and comments stay out of the audit trail, and only their size and structure are recorded. An audit log that copies every confidential document it touches becomes a liability of its own.</p>
+
+      <p>The gateway also records who did what in a way the agent can't fake. When several agents work on the same branch, it notes which role created each change at the moment the change passes through, rather than trusting what the agent says about itself.</p>
+
+      <h2>What comes back is data, not orders</h2>
+
+      <p>Everything a connector returns, whether a wiki page, a ticket or an email, was written by someone, and increasingly by other bots. Some of it will contain instructions aimed at whatever agent reads it. Connectors should hand that material over as information to work with, and the rest of the system should treat it that way. The defense isn't a better prompt. It's that even a convinced agent can only use the narrow, scoped, logged actions the connector offers.</p>
+
+      <h2>Grow access in stages</h2>
+
+      <p>For a team just starting out, the most useful habit is to grow access on purpose instead of all at once. Start with no outside access at all. Then let agents read public material, then your own systems read-only, and only then let them write, through connectors like these. Learn how agents behave at each level before granting the next one, and treat every new destination as a decision someone made, never something that happens because an agent asked.</p>
+
+      <h2>Beyond code</h2>
+
+      <p>For a law firm, all of this translates directly. A research agent's search has to be provably limited to one client's matters, and anything that can't be proven gets refused. A drafting agent gets "draft" and "save to the matter" but not "send" and not "delete." Retries never file the same document twice. The log records that the agent opened a document in a matter, not what the document said. And anything the agent reads, including a cleverly worded email from opposing counsel, is material to analyze, never instructions to follow.</p>
+
+      <p>Connections are where agents become useful and where they become dangerous. Design each one as if the agent on the other end is having its worst day, because eventually it will be.</p>
+
+      <footer class="post-foot">
+        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+        <p><a href="../#writing">← More writing</a></p>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <p>html and css, at 6,237 feet.</p>
+  </footer>
+</body>
+</html>
