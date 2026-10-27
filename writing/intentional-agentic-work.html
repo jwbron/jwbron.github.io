@@ -46,17 +46,17 @@
 
       <p>The agent drifts from what you actually asked for, because your intent lives only in a chat that keeps growing. It makes decisions that were yours to make, because asking is more work than deciding. A group of agents reviews the work and agrees it's done, and agreement turns out to say very little about whether it's right. Hours into a task, the details that mattered get summarized away. Agents wait on each other, poll, loop and stall. And somewhere along the way, one of them does something it was told not to do.</p>
 
-      <h2>Runtime alignment</h2>
+      <h2>What I mean by it</h2>
 
       <p>Most conversations about alignment are about training, meaning what a model values and how it behaves before it ever ships. That work matters, and it's mostly the model makers' job. The problem I work on is different. I call it runtime alignment: keeping an agent doing what you actually intended while it runs, in your environment, on your work, over hours, alongside other agents.</p>
 
-      <p>A well-trained model can still drift from the task in front of it, settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model, and it goes hand in hand with trust and safety. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
+      <p>A well-trained model can still drift from the task in front of it, settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
 
       <h2>How to build for it</h2>
 
       <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. Write the intent down somewhere the agent can't rewrite. Limit what the agent can do instead of asking it to behave. Check the work independently, against reality. Keep people at the decisions that are actually theirs. I think of this as intentional agentic work, and this series is how I approach each piece. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
 
-      <p>Most examples come from personal research systems I've built and run, mostly <a href="https://github.com/jwbron/egg">egg</a>, an open-source testbed for these ideas. <a href="attention-is-all-you-need-to-protect.html">Attention is all you need (to protect)</a> also draws on an AI code reviewer I built and ran in production. They come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
+      <p>Most examples come from personal research systems I've built and run, primarily <a href="https://github.com/jwbron/egg">egg</a>, an open-source testbed for these ideas. <a href="attention-is-all-you-need-to-protect.html">Attention is all you need (to protect)</a> also draws on an AI code reviewer I built and ran in production. They come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
 
       <h2 id="series">The series</h2>
 
@@ -66,9 +66,9 @@
 
       <p><strong><a href="reseed-dont-compact.html">Memory: reseed, don't compact.</a></strong> Long, structured work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core of instructions that holds the intent, fetch everything else when it's needed, and rebuild from that core on purpose.</p>
 
-      <p><strong><a href="agreement-isnt-verification.html">Verification: agreement isn't verification.</a></strong> When agents agree, that shows their reasoning is consistent, not that the work is correct. Done means checked against reality, with findings backed by evidence and reviewers who form their own view before reading the author's.</p>
+      <p><strong><a href="agreement-isnt-verification.html">Verification: agreement isn't verification.</a></strong> When agents agree, that shows their reasoning is consistent. Done means checked against reality, with findings backed by evidence and reviewers who form their own view before reading the author's.</p>
 
-      <p><strong><a href="teams-not-swarms.html">Coordination: teams, not swarms.</a></strong> A team of agents needs a protocol, not a group chat. That means deciding who reviews whom, how agreement converges and how to keep the team from deadlocking.</p>
+      <p><strong><a href="teams-not-swarms.html">Coordination: teams, not swarms.</a></strong> A team of agents needs a protocol. That means deciding who reviews whom, how agreement converges and how to keep the team from deadlocking.</p>
 
       <p><strong><a href="code-owns-the-clock.html">Control: the model owns judgment, code owns the clock.</a></strong> Waiting, sequencing and state belong in plain, predictable code. Models should only be asked to judge, never to keep the loop running.</p>
 
@@ -76,9 +76,6 @@
 
       <p><strong><a href="measure-the-system.html">Measurement: measure the system, not just the model.</a></strong> Evaluate the parts nobody evaluates, like the monitors and the harness, and track cost so that a missing number shows up as missing instead of as free.</p>
 
-      <h2>The short version</h2>
-
-      <p>The model brings judgment. Everything around it, meaning the intent, the memory, the checks, the coordination and the limits, should be structure you designed on purpose. That's what makes agent work something you can rely on instead of something you have to watch.</p>
 
       <footer class="post-foot">
         <p>I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

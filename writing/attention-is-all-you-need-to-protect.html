@@ -935,7 +935,7 @@ html.motion .dots i { background: var(--coral); }
         <p><b>issue (blocking):</b> this endpoint skips the permission check the others run.</p>
         <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
       </div>
-      <p class="small">Illustration. The meter isn't a measurement.</p>
+      <p class="small">Illustration, not measured data.</p>
     </div>
   </div>
   <p class="pullquote rise">Comment six teaches people to skim, and they skim past the blocking finding too.</p>
@@ -970,7 +970,7 @@ html.motion .dots i { background: var(--coral); }
   <div class="story" data-story="chain">
     <div class="prose">
       <p data-step="1">Trust that actually saves attention can't come from a good prompt or a good model alone. It comes from structure around the model, checked while the work happens. Start with intent written down somewhere the agent can't rewrite.</p>
-      <p data-step="2">Then check each handoff against it: the plan against the original request, the implementation against the plan with no unexpected additions, and the docs against the implementation. Agents wrote the reviewer's code, and checks like these ran at every handoff, with me reading the sensitive parts myself.</p>
+      <p data-step="2">Then check each handoff against it: the plan against the original request, the implementation against the plan with no unexpected additions, and the docs against the implementation. Agents wrote the reviewer's code, checks like these ran at every handoff, and I read the sensitive parts myself.</p>
       <p data-step="3">Enforce limits outside the prompt. The reviewer's agents held no credentials. They read what the pipeline gave them and wrote results back, and the pipeline did the posting. Opening a PR, merging it and rolling it out are separate permissions, and handing work to another agent shouldn't widen them. <a href="stop-telling-agents.html">Stop telling agents what not to do</a> has more on this.</p>
       <p data-step="4">And put required steps in code. The reviewer's orchestrating model was told to dispatch its specialist reviewers before posting. In a seeded trial, all five runs posted a review that looked fine, and two of them had skipped dispatch and written the review themselves. Dispatch moved into code, the model kept the judgment calls, and the orchestrator went from about 80 percent of a review's cost to about a quarter.</p>
     </div>
@@ -1030,17 +1030,10 @@ html.motion .dots i { background: var(--coral); }
   <h2>Give shared tools an owner</h2>
   <div class="prose-only">
     <p class="rise">Most AI developer tooling starts as somebody's side project and ends up maintained in their spare time. Regressions sit, people stop trusting the tool, and they go back to checking everything themselves.</p>
-    <p class="rise">Shared tools need an owner who keeps them working, tracks what they cost, and decides what to keep, change or stop based on feedback and evidence. That owner should also prefer existing tools when they meet the need, and accept that a fix without AI is sometimes the right answer. The evidence that counts comes from other teams. A tool that works for the people who built it hasn't really been tested yet.</p>
+    <p class="rise">Shared tools need an owner who keeps them working, tracks what they cost, and decides what to keep, change or stop based on feedback and evidence. That owner should also prefer existing tools when they meet the need, and accept that a fix without AI is sometimes the right answer. The evidence that counts comes from other teams.</p>
   </div>
 </section>
 
-<section class="chapter">
-  <h2>Beyond code</h2>
-  <div class="prose-only closing">
-    <p class="rise">The same applies anywhere AI reviews or does people's work. An assistant that flags every possible issue in a contract or a support reply trains people to skim it. An agent drafting replies with no evidence attached gets every reply re-read. Triage what reaches people, attach the evidence, keep the limits outside the prompt, and carry the follow-through.</p>
-    <p class="rise last-line">Runtime alignment isn't about watching agents more closely. Done well, people spend their attention on fewer decisions, and better ones.</p>
-  </div>
-</section>
 
 </main>
 
