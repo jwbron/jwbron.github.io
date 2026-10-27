@@ -641,46 +641,82 @@
     const bridgeState = { turned: false, t: 0, turning: false };
     const bridgeTiles = [0, 1, 2].map((i) => ({ x: 2, z: 3 + i, kind: "bridge", top: 0.3, blocked: false }));
 
+    // A winch: two posts, a rope drum, and an arm with a handle that turns.
     const crank = new THREE.Group();
     crank.position.set(4, LAND_TOP, 2);
+    crank.rotation.y = Math.PI / 2;
     scene.add(crank);
-    const crankPost = mesh(new THREE.BoxGeometry(0.16, 0.6, 0.16), mat("post"));
-    crankPost.position.y = 0.3;
-    crank.add(crankPost);
-    const wheel = new THREE.Group();
-    wheel.position.y = 0.62;
-    crank.add(wheel);
-    wheel.add(mesh(new THREE.TorusGeometry(0.24, 0.045, 6, 18), mat("lamp")));
-    for (let i = 0; i < 3; i++) {
-      const spoke = mesh(new THREE.BoxGeometry(0.46, 0.04, 0.04), mat("lamp"));
-      spoke.rotation.z = (i / 3) * Math.PI;
-      wheel.add(spoke);
+    for (const side of [-0.24, 0.24]) {
+      const post = mesh(new THREE.BoxGeometry(0.1, 0.56, 0.12), mat("post"));
+      post.position.set(side, 0.28, 0);
+      crank.add(post);
     }
-    wheel.rotation.y = Math.PI / 4;
+    const base = mesh(new THREE.BoxGeometry(0.62, 0.06, 0.26), mat("post"));
+    base.position.y = 0.03;
+    crank.add(base);
+    const drum = mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.38, 10), mat("plank"));
+    drum.rotation.z = Math.PI / 2;
+    drum.position.y = 0.44;
+    crank.add(drum);
+    for (const side of [-0.12, 0, 0.12]) {
+      const coil = mesh(new THREE.TorusGeometry(0.115, 0.018, 4, 14), mat("plankSide"));
+      coil.rotation.y = Math.PI / 2;
+      coil.position.set(side, 0.44, 0);
+      crank.add(coil);
+    }
+    // The arm turns around the drum's axis.
+    const wheel = new THREE.Group();
+    wheel.position.set(-0.32, 0.44, 0);
+    crank.add(wheel);
+    const arm = mesh(new THREE.BoxGeometry(0.05, 0.34, 0.06), mat("lamp"));
+    arm.position.y = 0.15;
+    wheel.add(arm);
+    const handle = mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8), mat("lamp"));
+    handle.rotation.z = Math.PI / 2;
+    handle.position.set(-0.1, 0.3, 0);
+    wheel.add(handle);
+    const hub = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 8), mat("lamp"));
+    hub.rotation.z = Math.PI / 2;
+    wheel.add(hub);
     tiles.get(key(4, 2)).blocked = true;
     crank.traverse((o) => o.isMesh && (o.userData.action = "crank", pickables.push(o)));
 
     // ---------- the lantern ----------
+    // A lantern on a post: a glass box in a frame, a little roof, and a halo once it's lit.
 
     const lantern = new THREE.Group();
     lantern.position.set(4, LAND_TOP, 14);
     scene.add(lantern);
-    const lpost = mesh(new THREE.BoxGeometry(0.14, 1.1, 0.14), mat("post"));
+    const lbase = mesh(new THREE.BoxGeometry(0.3, 0.08, 0.3), mat("post"));
+    lbase.position.y = 0.04;
+    lantern.add(lbase);
+    const lpost = mesh(new THREE.BoxGeometry(0.1, 0.95, 0.1), mat("post"));
     lpost.position.y = 0.55;
     lantern.add(lpost);
+    const lfloor = mesh(new THREE.BoxGeometry(0.36, 0.05, 0.36), mat("post"));
+    lfloor.position.y = 1.04;
+    lantern.add(lfloor);
     const lampMat = new THREE.MeshBasicMaterial({ color: pal.lampOff });
-    const lamp = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), lampMat);
-    lamp.position.y = 1.25;
+    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.3, 0.24), lampMat);
+    lamp.position.y = 1.22;
     lantern.add(lamp);
-    const lampCap = mesh(new THREE.ConeGeometry(0.2, 0.18, 4), mat("post"));
-    lampCap.position.y = 1.5;
-    lampCap.rotation.y = Math.PI / 4;
-    lantern.add(lampCap);
-    const lampLight = new THREE.PointLight("#ffe7a8", 0, 14, 1.4);
-    lampLight.position.y = 1.3;
-    lantern.add(lampLight);
+    for (const [cx, cz] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
+      const bar = mesh(new THREE.BoxGeometry(0.04, 0.34, 0.04), mat("post"));
+      bar.position.set(cx * 0.14, 1.22, cz * 0.14);
+      lantern.add(bar);
+    }
+    const lroof = mesh(new THREE.ConeGeometry(0.28, 0.2, 4), mat("post"));
+    lroof.position.y = 1.48;
+    lroof.rotation.y = Math.PI / 4;
+    lantern.add(lroof);
+    const finial = mesh(new THREE.SphereGeometry(0.045, 8, 6), mat("lamp"));
+    finial.position.y = 1.62;
+    lantern.add(finial);
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(0.6, 28), new THREE.MeshBasicMaterial({ color: pal.lamp, transparent: true, opacity: 0, depthWrite: false }));
+    halo.position.y = 1.22;
+    lantern.add(halo);
     tiles.get(key(4, 14)).blocked = true;
-    lantern.traverse((o) => o.isMesh && (o.userData.action = "lantern", pickables.push(o)));
+    lantern.traverse((o) => o.isMesh && o !== halo && (o.userData.action = "lantern", pickables.push(o)));
     // The light's reach across the long stretch, drawn as a soft glow on the water.
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: pal.lamp, transparent: true, opacity: 0, depthWrite: false }));
     glow.rotation.x = -Math.PI / 2;
@@ -793,7 +829,11 @@
       const rest = first && bfs([via], goalPred, ok);
       return rest ? first.concat(rest.slice(1)) : null;
     }
-    const nextTo = (region) => (x, z) => DIRS.some(([dx, dz]) => tiles.get(key(x + dx, z + dz))?.region === region);
+    // A route has to end next to land you can actually step onto, not a tree or the lantern.
+    const nextTo = (region) => (x, z) => DIRS.some(([dx, dz]) => {
+      const t = tiles.get(key(x + dx, z + dz));
+      return t && t.region === region && !t.blocked;
+    });
 
     // The route you're shown before any stones go down.
     const dotGeo = new THREE.CircleGeometry(0.1, 10);
@@ -861,9 +901,9 @@
     traveler.allowPartial = true;
 
     const helperDefs = {
-      wren: { name: "Wren", start: [1, 7], interval: 1.5, slop: 0.2 },
-      moss: { name: "Moss", start: [3, 13], interval: 0.75, slop: 0.45 },
-      fizz: { name: "Fizz", start: [3, 14], interval: 1.05, slop: 0.3 },
+      wren: { name: "Wren", start: [1, 7], interval: 1.5 },
+      moss: { name: "Moss", start: [3, 13], interval: 0.75 },
+      fizz: { name: "Fizz", start: [3, 14], interval: 1.05 },
     };
     const helpers = {};
     for (const [id, d] of Object.entries(helperDefs)) {
@@ -1254,6 +1294,19 @@
       }
     }
 
+    // Which stones are slop is scripted, so every walk has the same few failures:
+    // one on Wren's stretch, one before the mist, and two inside it for the lantern to find.
+    // A replacement is always sound, so failures never cascade.
+    function scriptedSlop(s) {
+      if (s.throws) return false;
+      if (s.lane === 2) return s.i === 2;
+      const lane = stones.filter((t) => t.lane === 3);
+      const clear = lane.filter((t) => t.z < MIST_Z);
+      const misty = lane.filter((t) => t.z >= MIST_Z);
+      const picks = [clear[Math.min(1, clear.length - 1)], misty[Math.min(1, misty.length - 1)], misty[Math.min(3, misty.length - 1)]];
+      return picks.includes(s);
+    }
+
     // Helpers throw stones into empty spots on their lane.
     const throws = [];
     const flyGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.25, 8);
@@ -1267,7 +1320,8 @@
       h.timer = h.interval * (0.8 + rand() * 0.4);
       s.state = "flying";
       s.by = h;
-      s.slop = h.lane === 2 && s.i === 2 && !game.forcedSlop ? (game.forcedSlop = true) : rand() < h.slop;
+      s.slop = scriptedSlop(s);
+      s.throws = (s.throws || 0) + 1;
       s.topMat.color.set(pal.stone);
       s.sideMat.color.set(pal.stoneSide);
       h.face = Math.atan2(s.x - h.x, s.z - h.z);
@@ -1533,6 +1587,7 @@
       hemi.intensity = pal.hemi;
       sunLight.intensity = pal.dir;
       lampMat.color.set(game.lit ? pal.lamp : pal.lampOff);
+      halo.material.color.set(pal.lamp);
       glow.material.color.set(pal.lamp);
       farGlow.material.color.set(pal.lamp);
       for (const m of mists) m.material.color.set(pal.mist);
@@ -1636,7 +1691,7 @@
         bridgeState.t = Math.min(1, bridgeState.t + dt / 1.8);
         const k = bridgeState.t < 0.5 ? 2 * bridgeState.t ** 2 : 1 - (-2 * bridgeState.t + 2) ** 2 / 2;
         bridge.rotation.y = -k * Math.PI / 2;
-        wheel.rotation.z = -k * Math.PI * 4;
+        wheel.rotation.x = -k * Math.PI * 4;
         if (bridgeState.t >= 1) {
           bridgeState.turning = false;
           bridgeState.turned = true;
@@ -1679,8 +1734,8 @@
       }
       if (game.lit) {
         glow.material.opacity = Math.min(0.22, glow.material.opacity + dt * 0.2);
-        lampLight.intensity = Math.min(6, lampLight.intensity + dt * 5);
-        lamp.rotation.y += dt;
+        halo.material.opacity = Math.min(0.4, halo.material.opacity + dt * 0.5);
+        halo.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
       }
       if (!bridgeState.turned && !bridgeState.turning && game.started) {
         wheel.scale.setScalar(1 + Math.max(0, Math.sin(time * 2.5)) * 0.08);
@@ -1702,6 +1757,7 @@
       camera.position.copy(view.target).addScaledVector(ISO, 30);
       camera.lookAt(view.target);
       camera.updateMatrixWorld();
+      halo.quaternion.copy(camera.quaternion);
       sunLight.position.copy(view.target).add(new V3(6, 14, 4));
       sunLight.target.position.copy(view.target);
 
@@ -1748,7 +1804,7 @@
     }
 
     // Hooks for automated checks of the page.
-    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, bridgeState, begin };
+    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, bridgeState, begin, planRoute, nextTo };
   </script>
 </body>
 </html>

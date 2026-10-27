@@ -1,4 +1,4 @@
-/* Personal site. Pure css, no javascript.
+/* Personal site.
    Palette borrows from kanagawa: a violet ink for dark mode, warm off-white text, pastel accents. */
 
 :root {
@@ -837,17 +837,6 @@ p {
 }
 
 /* ---------- footer ---------- */
-
-.footer {
-  padding: 0 var(--gutter) 2.5rem;
-  text-align: center;
-
-  & p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--ink-2);
-  }
-}
 
 /* ---------- small screens: horizontal labels and a clear reading order ---------- */
 
