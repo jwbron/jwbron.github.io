@@ -74,7 +74,7 @@
 
 html {
   /* sized for a 1080p screen share: about 30px body text at 1920 wide */
-  font-size: clamp(15px, 1.45vw + 0.3vh, 36px);
+  font-size: clamp(15px, 1.6vw + 0.35vh, 40px);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -137,8 +137,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.4rem;
-  padding: clamp(2.5rem, 7vh, 5rem) var(--gutter) clamp(3rem, 8vh, 5.5rem);
+  gap: 1.2rem;
+  padding: clamp(2rem, 5.5vh, 4.5rem) var(--gutter) clamp(2.5rem, 6.5vh, 4.5rem);
   overflow: clip;
 }
 
@@ -210,7 +210,7 @@ mark {
   &.m3 { background: var(--sakura); }
 }
 
-.small { font-size: 0.8rem; color: var(--ink-2); }
+.small { font-size: 0.9rem; color: var(--ink-2); }
 
 .card {
   padding: 1rem 1.2rem;
@@ -218,7 +218,7 @@ mark {
   border: var(--line);
   border-radius: 4px 22px 4px 4px;
   & h3 { margin-bottom: 0.35rem; }
-  & p { font-size: 0.9rem; color: var(--ink-2); }
+  & p { font-size: 1rem; color: var(--ink-2); }
 }
 
 .grid {
@@ -325,10 +325,10 @@ mark {
 
 .goals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   & div {
-    min-height: 8rem;
+    min-height: 6.5rem;
     padding: 1.2rem;
     font-family: var(--display);
     font-weight: 600;
@@ -383,6 +383,7 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 .diagram .loop { fill: none; stroke: var(--cobalt); stroke-width: 4; }
 .diagram .fence { fill: none; stroke: var(--cobalt); stroke-width: 4; stroke-dasharray: 14 10; }
 .diagram .fence-label { fill: var(--cobalt); font-weight: 700; }
+.diagram .fence-label.t-s { fill: var(--cobalt); }
 .diagram .track { fill: none; stroke: var(--cobalt); stroke-width: 8; stroke-linecap: round; }
 .diagram .node { fill: var(--card); stroke: var(--line-c); stroke-width: 4; }
 .diagram .node.hot { fill: var(--coral); }
@@ -391,7 +392,7 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem 1.2rem;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 700;
   & span { display: inline-flex; gap: 0.4rem; align-items: center; }
   & i { width: 1.1rem; height: 1.1rem; border: 2.5px solid var(--line-c); border-radius: 4px; }
@@ -409,7 +410,7 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
     gap: 0.4rem 1.2rem;
     align-items: center;
   }
-  & .label { font-weight: 700; font-size: 0.85rem; line-height: 1.2; }
+  & .label { font-weight: 700; font-size: 1rem; line-height: 1.2; }
   & .label span { display: block; font-weight: 400; color: var(--ink-2); }
   & .lane {
     display: flex;
@@ -451,17 +452,17 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 
 .wall {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
-  gap: 0.6rem;
-  max-width: 64rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+  gap: 0.5rem;
+  max-width: none;
   & div {
     padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     background: var(--card);
     border: 2.5px solid var(--line-c);
     border-radius: 4px 14px 4px 4px;
   }
-  & b { display: block; font-size: 0.9rem; }
+  & b { display: block; font-size: 1rem; }
 }
 
 .off {
@@ -478,11 +479,11 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 
 .mock {
   padding: 0.9rem 1.1rem;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   background: var(--card);
   border: var(--line);
   border-radius: 4px;
-  & .who { font-weight: 800; font-size: 0.7rem; color: var(--ink-2); margin-bottom: 0.3rem; }
+  & .who { font-weight: 800; font-size: 0.8rem; color: var(--ink-2); margin-bottom: 0.3rem; }
   & details { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px dashed var(--ink-2); color: var(--ink-2); }
   & summary { font-weight: 700; cursor: pointer; }
 }
@@ -496,11 +497,11 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
   & div {
     display: grid;
     place-items: center;
-    width: 6.5rem;
-    height: 6.5rem;
-    padding: 0.4rem;
+    width: 7.5rem;
+    height: 7.5rem;
+    padding: 0.5rem;
     text-align: center;
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     font-weight: 800;
     border: var(--line);
     border-radius: 50%;
@@ -523,7 +524,7 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
     border: var(--line);
     border-radius: 4px;
   }
-  & span { font-size: 0.7rem; font-weight: 700; color: var(--ink-2); }
+  & span { font-size: 0.85rem; font-weight: 700; color: var(--ink-2); }
 }
 
 .roles {
@@ -531,15 +532,15 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
   gap: 0.8rem;
   & div { padding: 0.8rem 1rem; background: var(--card); border: var(--line); border-radius: 4px; }
-  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.85rem; }
-  & span { font-size: 0.8rem; color: var(--ink-2); }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+  & span { font-size: 0.95rem; color: var(--ink-2); }
 }
 
 .reported {
   display: inline-block;
   margin-left: 0.3rem;
-  padding: 0 0.45rem;
-  font-size: 0.6rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
   font-weight: 800;
   vertical-align: 0.2em;
   border: 2px solid var(--line-c);
@@ -566,13 +567,15 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 /* ---------- quieter surface visual ---------- */
 
 .quiet-visual { display: grid; gap: 0.8rem; align-content: start; }
+.ticks { align-content: start; align-self: start; }
 .mini-wall {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   & div {
-    margin-bottom: 0.4rem;
-    padding: 0.35rem 0.6rem;
-    font-size: 0.7rem;
+    white-space: nowrap;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
     font-weight: 700;
     background: var(--card);
     border: 2.5px solid var(--line-c);
@@ -604,22 +607,25 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
   gap: 1.2rem 2.4rem;
   align-items: start;
 }
-.yes { display: grid; gap: 0.7rem; }
-.yes .card b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.85rem; }
-.yes .card span { font-size: 0.8rem; color: var(--ink-2); }
-.goals-sm div { min-height: 4.6rem; padding: 0.8rem 1rem; font-size: 0.85rem; }
+.yes { display: grid; gap: 0.6rem; }
+.yes .card { padding: 0.7rem 1rem; }
+.yes .card b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.yes .card span { font-size: 0.9rem; color: var(--ink-2); }
+.goals-sm div { min-height: 4.6rem; padding: 0.8rem 1rem; font-size: 0.95rem; }
 .goals-label { margin-bottom: -0.6rem; }
-.diagram.tl { max-height: 40vh; }
-.diagram.arch { max-height: 54vh; }
+.diagram.tl, .diagram.arch { flex: 1 1 0; min-height: 0; width: 100%; height: auto; max-height: none; }
+.diagram.tl text { font-size: 36px; }
+.diagram.tl .t-s { font-size: 29px; }
+.toprow { display: flex; flex-wrap: wrap; gap: 0.8rem 1.6rem; align-items: center; }
 .phases {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
   gap: 0.7rem;
   & div { padding: 0.6rem 0.9rem; background: var(--card); border: var(--line); border-radius: 4px 18px 4px 4px; }
-  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.75rem; color: var(--cobalt); }
-  & span { font-size: 0.8rem; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.9rem; color: var(--cobalt); }
+  & span { font-size: 0.95rem; }
 }
-.deferred { font-size: 0.8rem; color: var(--ink-2); }
+.deferred { font-size: 0.95rem; color: var(--ink-2); }
 .deferred b { color: var(--ink); }
 .proof {
   padding: 1rem 1.2rem;
@@ -627,7 +633,7 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
   background: var(--contrast-bg);
   border-radius: 4px 26px 4px 4px;
   & h3 { margin-bottom: 0.35rem; }
-  & p { font-size: 0.85rem; }
+  & p { font-size: 1rem; }
 }
 .grid.next { grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
 .grid.next .card { padding: 0.7rem 0.9rem; }
@@ -659,12 +665,16 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
   left: 1rem;
   bottom: 0.8rem;
   z-index: 5;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   color: var(--ink-2);
-  opacity: 0.8;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
+.help.show { opacity: 0.85; }
+
 @media (max-width: 760px) {
+  .goals { grid-template-columns: 1fr 1fr; }
   .versus { grid-template-columns: 1fr; }
   .versus .plus { justify-self: center; }
   .bars .row { grid-template-columns: 1fr; }
@@ -720,7 +730,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 5" data-steps="5" data-title="Why now" data-time="150">
+<section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,2,4" data-title="Why now" data-time="150">
   <div class="stage">
     <span class="deco circle" style="top: 10vh; right: 8vw; width: 6rem; aspect-ratio: 1"></span>
     <span class="kicker">Why now</span>
@@ -801,13 +811,15 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide build" style="--steps: 6" data-steps="6" data-title="Architecture" data-time="180">
   <div class="stage">
-    <span class="kicker">How it works</span>
-    <h2 class="wide">Code does the mechanics, models do the judgment</h2>
-    <div class="legend">
-      <span><i style="background: var(--butter)"></i>Code</span>
-      <span><i style="background: var(--peri)"></i>Model sub-agents</span>
-      <span><i style="background: var(--coral)"></i>GitHub event</span>
+    <div class="toprow">
+      <span class="kicker">How it works</span>
+      <div class="legend">
+        <span><i style="background: var(--butter)"></i>Code</span>
+        <span><i style="background: var(--peri)"></i>Model sub-agents</span>
+        <span><i style="background: var(--coral)"></i>GitHub event</span>
+      </div>
     </div>
+    <h2 class="wide">Code does the mechanics, models do the judgment</h2>
     <svg class="diagram arch" viewBox="0 0 1600 780" role="img" aria-labelledby="arch-t arch-d">
       <title id="arch-t">Reviewer architecture</title>
       <desc id="arch-d">A PR event goes to a code router, which picks specialist model sub-agents: correctness, tests, docs, security where configured, a holistic pass and Khan best-practice skills. Their claims are validated and deduplicated in code, then code computes the verdict and posts. On each push, the reviewer reconciles open threads and re-arms a full review if the diff shifts a lot. The sub-agents sit inside a boundary with no credentials and no permissions.</desc>
@@ -818,8 +830,8 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       </defs>
       <g style="color: var(--line-c)">
         <g class="fence-g">
-          <rect class="fence" x="535" y="20" width="490" height="640" rx="28"/>
-          <text class="fence-label" x="780" y="68" text-anchor="middle">No credentials · no permissions</text>
+          <rect class="fence" x="515" y="8" width="530" height="652" rx="28"/>
+          <text class="fence-label" x="780" y="60" text-anchor="middle" style="font-size: 29px">No credentials · no permissions</text>
         </g>
         <g class="pr">
           <rect class="box event" x="10" y="280" width="200" height="120" rx="18"/>
@@ -895,7 +907,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide" data-title="Evals" data-time="90">
   <div class="stage">
-    <span class="deco tri" style="bottom: 12vh; right: 10vw; width: 6rem; aspect-ratio: 1"></span>
+    <span class="deco tri" style="top: 10vh; right: 8vw; width: 6rem; aspect-ratio: 1"></span>
     <span class="kicker rise">Evaluating changes</span>
     <h2 class="rise">Measured before shipped</h2>
     <div class="grid rise">
@@ -911,7 +923,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 4" data-steps="4" data-title="Field week" data-time="150">
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Field week" data-time="150">
   <div class="stage">
     <span class="kicker">The first week with real users</span>
     <h2>The findings held up. The volume didn't.</h2>
@@ -926,7 +938,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div style="border-style: dashed"><b>+5 more</b>two days later</div>
     </div>
     <p class="small">Illustration of one PR's first push. Real catches that week included a cross-package compile break.</p>
-    <p class="off step r3-1">The chief architect's team switched auto-review off</p>
+    <p class="off step r3-1">The frontend infra team switched auto-review off</p>
     <p class="quote step r3-2">“Comment six teaches people to skim, and they skim past the blocking finding too.”</p>
   </div>
   <span class="num"></span>
@@ -969,7 +981,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 4" data-steps="4" data-title="Cost ladder" data-time="105">
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Cost ladder" data-time="105">
   <div class="stage">
     <span class="kicker">Cost</span>
     <h2>Thoroughness bought with engineering, not spend</h2>
@@ -1026,11 +1038,11 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 5" data-steps="5" data-title="Rollout" data-time="150">
+<section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,3,4" data-title="Rollout" data-time="150">
   <div class="stage">
     <span class="kicker">Rollout</span>
     <h2 class="wide">Earned one step at a time</h2>
-    <svg class="diagram tl" viewBox="0 0 1600 540" role="img" aria-labelledby="tl-t tl-d">
+    <svg class="diagram tl" viewBox="40 120 1520 400" role="img" aria-labelledby="tl-t tl-d">
       <title id="tl-t">Rollout timeline</title>
       <desc id="tl-d">Triage bot in frontend. Written proposal. A trial of a few weeks on my team's PRs beside the managed review. A field week with too many comments. A quieter surface ships. The launch brief is approved. Default-on in the backend monorepo, then frontend. The main reviewer for a couple of months.</desc>
       <line class="track tl-track" x1="150" y1="280" x2="1450" y2="280"/>
@@ -1048,7 +1060,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <circle class="node" cx="521" cy="280" r="20"/>
         <text x="521" y="168" text-anchor="middle" class="t-b">Trial beside</text>
         <text x="521" y="200" text-anchor="middle" class="t-b">the managed review</text>
-        <text x="521" y="232" text-anchor="middle" class="t-s">my team's PRs, a few weeks</text>
+        <text x="521" y="232" text-anchor="middle" class="t-s">a few weeks</text>
       </g>
       <g class="tl-node" data-x="707">
         <circle class="node hot" cx="707" cy="280" r="20"/>
@@ -1075,7 +1087,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <text x="1450" y="350" text-anchor="middle" class="t-b">Main reviewer</text>
         <text x="1450" y="382" text-anchor="middle" class="t-s">for a couple of months</text>
       </g>
-      <text class="tl-coda" x="800" y="500" text-anchor="middle" font-weight="700">And the chief architect's team turned auto-review back on.</text>
+      <text class="tl-coda" x="800" y="500" text-anchor="middle" font-weight="700">And the frontend infra team turned auto-review back on.</text>
       <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
     </svg>
     <div class="phases">
@@ -1233,7 +1245,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide backup" data-title="Backup: operating it" data-time="0">
   <div class="stage">
-    <span class="deco diamond" style="bottom: 10vh; right: 10vw; width: 5rem; aspect-ratio: 1"></span>
+    <span class="deco diamond" style="top: 10vh; right: 8vw; width: 4rem; aspect-ratio: 1"></span>
     <span class="kicker rise">Operating it</span>
     <h2 class="rise">Feedback without filing tickets</h2>
     <div class="flow rise">
@@ -1350,14 +1362,15 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     },
 
     "Field week"(tl, q) {
-      tl.from(q(".wall > div"), {
+      // the pile lands while the slide scrolls in, so it's there on arrival
+      gsap.from(q(".wall > div"), {
         y: -140, rotation: (i) => [-7, 5, -3, 8, -6, 4, -5, 6][i % 8], opacity: 0,
-        stagger: 0.06, ease: "bounce.out", duration: 0.35,
-      }, at(1));
-      tl.from(q(".stage > .small"), { opacity: 0, duration: 0.2 }, at(1) + 0.5);
-      tl.from(q(".off"), { scale: 2.4, rotation: -14, opacity: 0, ease: "back.out(1.8)", duration: 0.4 }, at(2));
-      tl.to(q(".wall"), { opacity: 0.35, duration: 0.3 }, at(3));
-      tl.from(q(".quote"), { y: 50, opacity: 0, duration: 0.45 }, at(3) + 0.1);
+        stagger: 0.06, ease: "bounce.out",
+        scrollTrigger: { trigger: tl.scrollTrigger.trigger, start: "top 75%", end: "top top", scrub: 0.6 },
+      });
+      tl.from(q(".off"), { scale: 2.4, rotation: -14, opacity: 0, ease: "back.out(1.8)", duration: 0.4 }, at(1));
+      tl.to(q(".wall"), { opacity: 0.35, duration: 0.3 }, at(2));
+      tl.from(q(".quote"), { y: 50, opacity: 0, duration: 0.45 }, at(2) + 0.1);
     },
 
     "Quiet the human surface"(tl, q) {
@@ -1365,7 +1378,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       gsap.set(items, { opacity: 0.25 });
       tl.to([items[0], items[1]], { opacity: 1, stagger: 0.15, duration: 0.3 }, at(1));
       tl.to(q(".mini-wall .extra"), {
-        opacity: 0, scale: 0.4, height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: 0, borderWidth: 0,
+        opacity: 0, scale: 0.4, width: 0, paddingLeft: 0, paddingRight: 0, borderWidth: 0, marginLeft: -6,
         stagger: 0.05, duration: 0.45,
       }, at(1) + 0.1);
       tl.from(q(".fold"), { opacity: 0, scale: 0.5, duration: 0.3 }, at(1) + 0.4);
@@ -1378,16 +1391,14 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
     "Cost ladder"(tl, q) {
       const rows = q(".row"), bars = q(".bar");
-      tl.from(rows[0], { opacity: 0, y: 20, duration: 0.2 }, at(1));
-      tl.fromTo(bars[0], { width: "0%" }, { width: "45%", duration: 0.5 }, at(1) + 0.1);
-      tl.from(rows[1], { opacity: 0, y: 20, duration: 0.2 }, at(2));
-      tl.to(bars[0], { width: "20%", duration: 0.5 }, at(2) + 0.1);
-      tl.fromTo(bars[1], { width: "0%" }, { width: "45%", duration: 0.5 }, at(2) + 0.1);
-      tl.from(rows[2], { opacity: 0, y: 20, duration: 0.2 }, at(3));
-      tl.to(bars[0], { width: "9%", duration: 0.55 }, at(3) + 0.1);
-      tl.to(bars[1], { width: "20%", duration: 0.55 }, at(3) + 0.1);
-      tl.fromTo(bars[2], { width: "0%" }, { width: "100%", duration: 0.55 }, at(3) + 0.1);
-      tl.from(q(".pill"), { opacity: 0, y: 20, duration: 0.25 }, at(3) + 0.45);
+      tl.fromTo(bars[0], { width: "45%" }, { width: "20%", duration: 0.5 }, at(1) + 0.1);
+      tl.from(rows[1], { opacity: 0, y: 20, duration: 0.2 }, at(1));
+      tl.fromTo(bars[1], { width: "0%" }, { width: "45%", duration: 0.5 }, at(1) + 0.1);
+      tl.from(rows[2], { opacity: 0, y: 20, duration: 0.2 }, at(2));
+      tl.to(bars[0], { width: "9%", duration: 0.55 }, at(2) + 0.1);
+      tl.to(bars[1], { width: "20%", duration: 0.55 }, at(2) + 0.1);
+      tl.fromTo(bars[2], { width: "0%" }, { width: "100%", duration: 0.55 }, at(2) + 0.1);
+      tl.from(q(".pill"), { opacity: 0, y: 20, duration: 0.25 }, at(2) + 0.45);
     },
 
     "Model comparison"(tl, q) {
@@ -1445,7 +1456,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       if (steps > 1) {
         const tl = gsap.timeline({
           defaults: { ease: "power2.inOut", duration: 0.5 },
-          scrollTrigger: { trigger: s, start: "top top", end: `+=${(steps - 1) * 100}%`, pin: true, scrub: 0.6 },
+          scrollTrigger: { trigger: s, start: "top top", end: `+=${(steps - 1) * 100}%`, pin: true, scrub: 0.6, pinSpacing: true },
         });
         builders[s.dataset.title]?.(tl, q);
         tl.set({}, {}, steps - 1);
@@ -1488,8 +1499,10 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   const stops = () => slides.filter((s) => s.style.display !== "none").flatMap((s) => {
     const st = pins.get(s);
     if (st) {
+      // data-stops lets the keyboard glide through several steps in one press
       const n = Number(s.dataset.steps);
-      return Array.from({ length: n }, (_, k) => ({ top: st.start + (st.end - st.start) * k / (n - 1), slide: s }));
+      const ks = s.dataset.stops ? s.dataset.stops.split(",").map(Number) : Array.from({ length: n }, (_, k) => k);
+      return ks.map((k) => ({ top: st.start + (st.end - st.start) * k / (n - 1), slide: s }));
     }
     const n = motion ? 1 : Math.max(1, Math.round(s.offsetHeight / innerHeight));
     const top = s.getBoundingClientRect().top + scrollY;
@@ -1510,7 +1523,9 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     target = Math.max(0, Math.min(list.length - 1, from + delta));
     const y = Math.round(list[target].top);
     const done = () => { target = null; };
-    if (motion) gsap.to(window, { scrollTo: { y, autoKill: false }, duration: 1.1, ease: "power2.inOut", overwrite: true, onComplete: done });
+    const screens = Math.abs(y - scrollY) / innerHeight;
+    const duration = Math.min(2.4, 1.1 + 0.45 * Math.max(0, screens - 1));
+    if (motion) gsap.to(window, { scrollTo: { y, autoKill: false }, duration, ease: "power2.inOut", overwrite: true, onComplete: done });
     else { scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" }); setTimeout(done, 700); }
   };
 
@@ -1547,6 +1562,9 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     notesWin.document.body.style.cssText = "font:22px/1.5 system-ui,sans-serif;padding:24px 32px;background:#251e37;color:#ece4cd";
     renderNotes();
   };
+
+  const help = document.querySelector(".help");
+  addEventListener("mousemove", (e) => help.classList.toggle("show", e.clientY > innerHeight - 90));
 
   setInterval(renderNotes, 1000);
   addEventListener("scroll", () => requestAnimationFrame(renderNotes), { passive: true });
