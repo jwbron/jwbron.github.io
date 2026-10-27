@@ -6,7 +6,7 @@
 <title>AI Reviewer Writeup</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="description" content="How I built the AI code reviewer Khan Academy turned on for every pull request.">
+<meta name="description" content="Reducing cognitive burden on developers with a custom AI review system at Khan Academy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
@@ -713,7 +713,7 @@ body { line-height: 1.65; }
   border-bottom: var(--line);
   overflow: clip;
 }
-.hero .title { font-size: clamp(2.4rem, 6.4vw, 6rem); max-width: 15ch; }
+.hero .title { font-size: clamp(2.4rem, 6vw, 5.6rem); max-width: 17ch; }
 .dek { max-width: 36rem; font-size: 1.25rem; color: var(--ink-2); }
 .byline { font-weight: 700; }
 .byline span { display: block; font-weight: 400; color: var(--ink-2); }
@@ -806,11 +806,11 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 <header class="hero">
   <a class="home-link" href="/"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span> James Wiesebron</a>
   <span class="deco ring" style="top: 10vh; right: 9vw; width: 16rem; aspect-ratio: 1"></span>
-  <span class="deco tri" style="top: 30vh; right: 30vw; width: 4.5rem; aspect-ratio: 1"></span>
+  <span class="deco tri" style="bottom: 16vh; right: 34vw; width: 4.5rem; aspect-ratio: 1"></span>
   <span class="deco circle" style="bottom: 12vh; right: 16vw; width: 8rem; aspect-ratio: 1"></span>
   <span class="kicker rise">A project writeup</span>
-  <h1 class="title rise">Every PR gets a thorough first pass</h1>
-  <p class="dek rise">How I built the AI code reviewer Khan Academy turned on for every pull request, what the first week of real use changed, and what I decided not to build.</p>
+  <h1 class="title rise">Attention is all you need (to protect)</h1>
+  <p class="dek rise">Reducing cognitive burden on developers with a custom AI review system.</p>
   <p class="byline rise">James Wiesebron <span>Founding engineer, AI Developer Experience, Khan Academy · October 2026</span></p>
 </header>
 
@@ -819,7 +819,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 <section class="chapter">
   <div class="prose-only">
     <p class="rise">By the end of this project, every pull request in Khan Academy's frontend and backend monorepos got a thorough first pass from an AI reviewer, on every push, before a human approved it. About 120 engineers worked in those repos, opening dozens to low hundreds of PRs a day.</p>
-    <p class="rise">The review quality was good early. Most of the work went into three other things: keeping cost low enough to run on every push, cutting the comment volume until engineers wanted it on, and checking that the system actually did what it said it did.</p>
+    <p class="rise">The review quality was good early. Most of the work went into three other things: keeping cost low enough to run on every push, cutting the comment volume until engineers wanted it on, and checking that the system actually did what it said it did. All three came down to one goal, which was taking load off the developers using it.</p>
   </div>
 </section>
 
@@ -830,7 +830,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
       <p data-step="1">AI made code cheaper to write. Khan had encouraged every engineer to try AI tools, they did, and the number of pull requests went up.</p>
       <p data-step="2">Review didn't keep up. Reviewers got tired, and quality got uneven, since AI use was uneven on both sides of a review. The worst case was a reviewer who wasn't using AI much, reading a PR from an author who wasn't using it well either.</p>
       <p data-step="3">Compliance still requires a human approval on every merge, so replacing the human reviewer was never an option. The goal was for every PR to already have a thorough review by the time a person opened it.</p>
-      <p data-step="4">We set four goals for the reviewer, all about the people using it: less fatigue for reviewers, a higher quality bar for PRs, reviews that were consistent no matter who wrote or reviewed the code, and a team that could ship faster without worrying about what slipped through.</p>
+      <p data-step="4">We set four goals for the reviewer, all about the people using it: less cognitive burden on developers, a higher quality bar for PRs, reviews that were consistent no matter who wrote or reviewed the code, and a team that could ship faster without worrying about what slipped through.</p>
     </div>
     <div class="visual">
       <div class="chain">
@@ -844,7 +844,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
       </div>
       <p class="pill">Every merge still needs a human approval</p>
       <div class="goals goals-sm">
-        <div>Less fatigue for reviewers</div>
+        <div>Less cognitive burden on developers</div>
         <div>A higher quality bar</div>
         <div>Consistent reviews</div>
         <div>Shipping faster, safely</div>
@@ -1000,7 +1000,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
     <div class="prose">
       <p data-step="1">The reviewer caught real problems in its first week with real users, including a cross-package compile break. The volume was the problem. One PR got seven non-blocking comments on a single push and five more two days later, and the recap re-listed every open thread each time.</p>
       <p data-step="2">Engineers said the nits and questions were the main issue, and the frontend infra team (the chief architect's own team) turned auto-review off.</p>
-      <p data-step="3">Reviewer attention was the thing to protect. Once a review has six comments in it, people start skimming, and they skim past the blocking one too.</p>
+      <p data-step="3">Attention was the thing to protect. Once a review has six comments in it, people start skimming, and they skim past the blocking one too.</p>
       <p data-step="4">The fixes shipped within about a day. Blocking findings always post. Non-blocking ones are ranked and capped at three, nitpicks never post inline, and the rest go into a collapsed section, so nothing is lost and the notification stays short. Re-reviews only look at what changed.</p>
       <p data-step="5">The comments themselves changed too. Each one became two layers: a short comment written for a person, with the model's fuller reasoning collapsed underneath for agents. Scripts enforce that format, and a separate model grades the writing.</p>
       <p data-step="6">Fixes only run when the author asks, by replying "ship" on the comment. Nobody had to install anything or change how they worked.</p>
@@ -1164,7 +1164,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 <section class="chapter">
   <h2>Impact</h2>
   <div class="figure goals rise">
-    <div>Less fatigue<br><span class="small" style="color: inherit">Less time per review <span class="reported">reported</span></span></div>
+    <div>Less cognitive burden<br><span class="small" style="color: inherit">Less time per review <span class="reported">reported</span></span></div>
     <div>Higher bar<br><span class="small" style="color: inherit">Cleaner PRs, fewer human rounds <span class="reported">reported</span></span></div>
     <div>Consistent<br><span class="small" style="color: inherit">Every PR, every push</span></div>
     <div>Faster<br><span class="small" style="color: inherit">Time to merge dropped <span class="reported">reported</span></span></div>
@@ -1189,7 +1189,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 
 <section class="chapter">
   <div class="prose-only closing">
-    <p class="rise">A few rules came out of this that I still use. Anything that has to happen goes in code, and the model gets the judgment calls. Agents don't hold credentials, the pipeline does. The tools you measure with need checking too, since a broken scorer looks exactly like a weak model. And the people using a tool decide whether it works, so build it around how they already work.</p>
+    <p class="rise">A few rules came out of this that I still use. Anything that has to happen goes in code, and the model gets the judgment calls. Agents don't hold credentials, the pipeline does. The tools you measure with need checking too, since a broken scorer looks exactly like a weak model. And protect people's attention. The people using a tool decide whether it works, so build it around how they already work and keep it quiet unless it has something worth saying.</p>
   </div>
 </section>
 
