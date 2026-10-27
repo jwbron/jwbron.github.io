@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Slop River</title>
+  <meta name="description" content="A short, quiet walk across a river of AI output, with helpers who set the stones.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <style>
+    /* Same tokens as the main site's style.css. */
+    :root {
+      --bg: #f1ecf7;
+      --card: #fcf9ff;
+      --ink: #261d38;
+      --ink-2: #5d5373;
+      --line-c: #261d38;
+      --coral: #f2a28c;
+      --peri: #93a6ee;
+      --butter: #f2d58c;
+      --mint: #9fd6c0;
+      --sakura: #efb0c7;
+      --cobalt: #3a52e6;
+      --on: #261d38;
+      --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+      --text: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+      --line: 2.5px solid var(--line-c);
+      --sky-top: #e6dcf5;
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #251e37;
+        --card: #322a4b;
+        --ink: #ece4cd;
+        --ink-2: #b9afcb;
+        --line-c: #ece4cd;
+        --cobalt: #6f86ff;
+        --sky-top: #1c162c;
+        color-scheme: dark;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body { height: 100%; margin: 0; }
+
+    body {
+      overflow: hidden;
+      color: var(--ink);
+      background: linear-gradient(180deg, var(--sky-top) 0%, var(--bg) 75%) fixed;
+      font-family: var(--text);
+      line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* The homepage hero's cobalt arc and coral disc, behind the scene. */
+    .sky { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .sky .arc {
+      position: absolute;
+      bottom: 8vh;
+      left: 6vw;
+      width: clamp(7rem, 16vw, 12rem);
+      aspect-ratio: 1;
+      border: clamp(0.9rem, 1.8vw, 1.5rem) solid var(--cobalt);
+      border-left-color: transparent;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      rotate: -45deg;
+      opacity: 0.9;
+    }
+    .sky .disc {
+      position: absolute;
+      top: 22vh;
+      right: 10vw;
+      width: clamp(3.5rem, 7vw, 5.5rem);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--coral);
+      border: var(--line);
+      transition: translate 4s ease;
+    }
+
+    #scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    .bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: max(0.8rem, env(safe-area-inset-top)) 0.9rem 0;
+      pointer-events: none;
+    }
+
+    .bar > * { pointer-events: auto; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--ink);
+      background: var(--card);
+      border: var(--line);
+      border-radius: 999px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+
+    /* Story lines, quiet and centered near the top. */
+    .lines {
+      position: fixed;
+      left: 50%;
+      top: max(4.2rem, calc(env(safe-area-inset-top) + 3.6rem));
+      translate: -50% 0;
+      width: min(30rem, calc(100% - 2.4rem));
+      margin: 0;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .line {
+      margin: 0;
+      font-size: clamp(1rem, 2.4vw, 1.2rem);
+      font-weight: 500;
+      text-wrap: balance;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+
+    .line.on { opacity: 1; }
+
+    .title {
+      position: fixed;
+      left: 50%;
+      top: 40%;
+      translate: -50% -50%;
+      width: calc(100% - 2rem);
+      margin: 0;
+      text-align: center;
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(1.5rem, 6vw, 2.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    .title.on { opacity: 1; }
+    .title small {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.4em;
+      letter-spacing: 0.1em;
+      color: var(--ink-2);
+    }
+
+    .float {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .float > * { translate: -50% -100%; }
+
+    .bubble {
+      display: inline-block;
+      max-width: 13rem;
+      padding: 0.3rem 0.7rem;
+      font-weight: 600;
+      font-size: 0.82rem;
+      white-space: normal;
+      text-align: center;
+      background: var(--card);
+      border: 2px solid var(--line-c);
+      border-radius: 0.8rem;
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop { from { scale: 0.6; opacity: 0; } }
+
+    .cover, .end {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 1.2rem;
+      text-align: center;
+    }
+
+    .cover { cursor: pointer; }
+    .cover[hidden], .end[hidden] { display: none; }
+
+    .cover h1, .end h2 {
+      margin: 0 0 0.6rem;
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.2rem, 10vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    .cover h1 span {
+      color: transparent;
+      -webkit-text-stroke: 2.5px var(--ink);
+    }
+
+    .cover p { margin: 0; color: var(--ink-2); font-weight: 500; }
+    .cover .tap { margin-top: 1.6rem; font-family: var(--display); font-weight: 600; font-size: 0.85rem; color: var(--ink); animation: breathe 2.4s ease-in-out infinite; }
+
+    @keyframes breathe { 50% { opacity: 0.4; } }
+
+    .end .card {
+      width: min(28rem, 100%);
+      padding: 1.6rem 1.5rem 1.4rem;
+      background: var(--card);
+      border: var(--line);
+      border-radius: 0.8rem 1.8rem 0.8rem 1.8rem;
+      box-shadow: 6px 6px 0 var(--line-c);
+      animation: pop 0.5s ease;
+    }
+
+    .end h2 { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+    .end p { margin: 0 0 0.8rem; text-wrap: balance; }
+    .end .note { font-size: 0.9rem; color: var(--ink-2); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem 1.1rem;
+      margin-top: 1.1rem;
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .actions a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 0.22em; text-decoration-color: var(--cobalt); }
+
+    button.go {
+      font: inherit;
+      color: var(--on);
+      padding: 0.5rem 1.2rem;
+      background: var(--butter);
+      border: var(--line);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .fallback { position: fixed; inset: 0; display: grid; place-items: center; padding: 1rem; text-align: center; }
+
+    /* Embedded in the homepage hero: transparent, no cover, and the page's own text sits beside it. */
+    .embed, .embed body { background: transparent; }
+    .embed .sky, .embed .home, .embed .cover, .embed .home-link { display: none; }
+    .embed #scene { touch-action: pan-y; }
+    .embed .bar { left: auto; padding: 0; }
+    .embed .lines { translate: -50% 0; }
+    .embed .end { inset: auto; }
+    .embed .end .card { width: min(24rem, 100%); padding: 1.2rem 1.2rem 1.1rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01s !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><span class="arc"></span><span class="disc" id="disc"></span></div>
+  <canvas id="scene" aria-label="A river with small islands, stepping stones and a traveler in a straw hat"></canvas>
+
+  <header class="bar">
+    <a class="pill home" href="../">← home</a>
+    <button class="pill" id="mute" type="button" aria-pressed="false">sound on</button>
+  </header>
+
+  <div class="lines" id="lines" aria-live="polite"></div>
+  <p class="title" id="title" aria-hidden="true"></p>
+  <div id="floats" aria-hidden="true"></div>
+
+  <div class="cover" id="cover" role="button" tabindex="0" aria-label="Begin">
+    <div>
+      <h1><span>Slop</span><br>River</h1>
+      <p id="cover-sub"></p>
+      <p class="tap" id="cover-tap"></p>
+    </div>
+  </div>
+
+  <div class="end" id="end" hidden>
+    <div class="card" role="dialog" aria-labelledby="end-title">
+      <h2 id="end-title"></h2>
+      <div id="end-body"></div>
+      <div class="actions">
+        <button class="go" id="again" type="button"></button>
+        <a class="home-link" href="../">jameswiesebron.com</a>
+        <a href="../writing/intentional-agentic-work.html" target="_top">The essays</a>
+      </div>
+    </div>
+  </div>
+
+  <noscript>
+    <div class="fallback"><p>Slop River needs JavaScript. The rest of the site doesn't.<br><a href="../">Back to jameswiesebron.com</a></p></div>
+  </noscript>
+
+  <script type="module">
+    import * as THREE from "../vendor/three.module.min.js";
+
+    // ---------- words ----------
+    // All player-facing text lives here so it's easy to rewrite.
+
+    const COPY = {
+      coverSub: "Your garden is on the other side.",
+      coverTap: "Tap to begin",
+      ch1: { num: "One", name: "The bank" },
+      ch1Lines: [
+        "The river carries everything anyone made today.",
+        "Some of it holds. Some of it is slop. From here it all looks the same.",
+      ],
+      ch1Hint: "The crank by the water turns.",
+      ch2: { num: "Two", name: "Where to" },
+      wrenAsk: "I can set stones for you! Where are we headed?",
+      pickGoal: "Tap where you're going.",
+      wrenGot: "Your garden! I'll find a way.",
+      ch2Lines: [
+        "You said where. Wren works out how.",
+        "Every stone looks the same from here, so you test each one.",
+      ],
+      wrenOops: "Oops. That one looked fine to me too.",
+      ch2Done: "Testing every stone got you here. It was slow.",
+      ch3: { num: "Three", name: "The rapids" },
+      mossHello: "Leave it to me! Fastest way across.",
+      mossPlan: "Moss's way goes straight through the rapids.",
+      pointHint: "You don't have to plan every stone. Tap the water to point Moss around.",
+      notThere: "That's still in the rapids. Did you mean around?",
+      mossOk: "Around it is!",
+      mistBlocked: "Too misty out here to test anything.",
+      mistNudge: "The lantern back on the island could light the way.",
+      litLine: "The light checks every stone, whoever set it.",
+      fizzLit: "Oh! Now we can all see which ones won't hold.",
+      wrenEnd: "Same time tomorrow?",
+      endTitle: "The far shore",
+      endBody: [
+        "You said where you were going, and pointed once when it mattered. They found the way, and the light checked everyone's work.",
+      ],
+      endNote: "This little walk is the idea behind my writing on runtime alignment.",
+      again: "Walk it again",
+      soundOn: "sound on",
+      soundOff: "sound off",
+    };
+
+    // ---------- palette ----------
+
+    const PALETTES = {
+      light: {
+        top: "#e4f2e8", top2: "#d7ecdf", side: "#b8a1e0", side2: "#a993d4",
+        water: "#93a6ee", waterSide: "#7d92e4", rapids: "#7b8fe2", foam: "#c4cff7", mist: "#f1ecf7", ripple: "#fcf9ff", float: "#e4eaff",
+        stone: "#f6f1fb", stoneSide: "#d6cbe8", sound: "#9fd6c0", slop: "#a99dba",
+        plank: "#f2d58c", plankSide: "#d9b46a", trunk: "#c9a37f",
+        treeA: "#9fd6c0", treeB: "#efb0c7", treeC: "#b8a1e0",
+        traveler: "#f2a28c", hat: "#f2d58c", eye: "#261d38", cheek: "#efb0c7",
+        wren: "#93a6ee", moss: "#efb0c7", fizz: "#f2d58c",
+        lamp: "#f2d58c", lampOff: "#e6def2", post: "#b8a1e0", house: "#fcf9ff", roof: "#efb0c7",
+        petal0: "#f2d58c", petal1: "#efb0c7", petal2: "#f2a28c", petal3: "#b8a1e0", stem: "#7fbf9f", spark: "#f2d58c",
+        hemiSky: "#ffffff", hemiGround: "#d9cfe8", hemi: 2.2, dir: 2.0,
+      },
+      dark: {
+        top: "#5a4f86", top2: "#544a7e", side: "#3d3361", side2: "#362d58",
+        water: "#5d6fd6", waterSide: "#4858b4", rapids: "#4b5bbd", foam: "#8090e6", mist: "#2b2340", ripple: "#ece4cd", float: "#dfe4ff",
+        stone: "#ece4cd", stoneSide: "#b9afcb", sound: "#9fd6c0", slop: "#8a7da3",
+        plank: "#f2d58c", plankSide: "#c9a35a", trunk: "#a5866b",
+        treeA: "#86c7ae", treeB: "#e3a0ba", treeC: "#a993da",
+        traveler: "#f2a28c", hat: "#f2d58c", eye: "#261d38", cheek: "#efb0c7",
+        wren: "#93a6ee", moss: "#efb0c7", fizz: "#f2d58c",
+        lamp: "#f2d58c", lampOff: "#6e6290", post: "#a993da", house: "#ece4cd", roof: "#e3a0ba",
+        petal0: "#f2d58c", petal1: "#efb0c7", petal2: "#f2a28c", petal3: "#b8a1e0", stem: "#86c7ae", spark: "#f2d58c",
+        hemiSky: "#e2dcff", hemiGround: "#3a3058", hemi: 1.9, dir: 1.6,
+      },
+    };
+
+    // ?embed means we're the background of the homepage hero.
+    const EMBED = new URLSearchParams(location.search).has("embed");
+    if (EMBED) document.documentElement.classList.add("embed");
+
+    const darkQuery = matchMedia("(prefers-color-scheme: dark)");
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let pal = darkQuery.matches ? PALETTES.dark : PALETTES.light;
+    const rand = Math.random;
+    let seed = 3;
+    const srand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    const $ = (id) => document.getElementById(id);
+    const canvas = $("scene");
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    } catch (err) {
+      document.body.insertAdjacentHTML("beforeend", '<div class="fallback"><p>Slop River needs WebGL, and this browser has it turned off.<br><a href="../">Back to jameswiesebron.com</a></p></div>');
+      $("cover").hidden = true;
+      throw err;
+    }
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = false;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 200);
+    const V3 = THREE.Vector3;
+
+    const M = {};
+    // Every solid uses flat tones by face direction: tops lightest, then the two visible sides.
+    function facet(m) {
+      m.onBeforeCompile = (sh) => {
+        sh.vertexShader = sh.vertexShader
+          .replace("#include <common>", "#include <common>\nvarying vec3 vWN;")
+          .replace("#include <begin_vertex>", "#include <begin_vertex>\nvWN = normalize(mat3(modelMatrix) * normal);");
+        sh.fragmentShader = sh.fragmentShader
+          .replace("#include <common>", "#include <common>\nvarying vec3 vWN;")
+          .replace("#include <color_fragment>", "#include <color_fragment>\nfloat faceTone = vWN.y > 0.6 ? 1.0 : (vWN.y < -0.6 ? 0.6 : (abs(vWN.x) > abs(vWN.z) ? 0.74 : 0.87));\ndiffuseColor.rgb *= faceTone;");
+      };
+      return m;
+    }
+    const mat = (key) => (M[key] ||= facet(new THREE.MeshBasicMaterial({ color: pal[key] })));
+    const flat = (key, opts = {}) => (M["flat:" + key + JSON.stringify(opts)] ||= Object.assign(new THREE.MeshBasicMaterial({ color: pal[key], ...opts }), { userData: { key } }));
+    const own = (key) => facet(new THREE.MeshBasicMaterial({ color: pal[key] }));
+    function mesh(geo, material, { cast = true, receive = false } = {}) {
+      const m = new THREE.Mesh(geo, material);
+      m.castShadow = cast;
+      m.receiveShadow = receive;
+      return m;
+    }
+
+    const hemi = new THREE.HemisphereLight(pal.hemiSky, pal.hemiGround, pal.hemi);
+    scene.add(hemi);
+    const sunLight = new THREE.DirectionalLight("#fff6e8", pal.dir);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(1024, 1024);
+    Object.assign(sunLight.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 60 });
+    sunLight.shadow.bias = -0.0008;
+    scene.add(sunLight, sunLight.target);
+
+    // ---------- the world, on a grid ----------
+    // x runs along the river, z runs across it. You start at z = 0 and the far shore is at z = 23.
+
+    const LAND_TOP = 0.4;
+    const STONE_TOP = 0.26;
+    const tiles = new Map();
+    const key = (x, z) => `${x},${z}`;
+    const pickables = [];
+
+    const landGeo = new THREE.BoxGeometry(1, 1.8, 1);
+    function addLand(x0, x1, z0, z1, region) {
+      for (let x = x0; x <= x1; x++) {
+        for (let z = z0; z <= z1; z++) {
+          const alt = (x + z) % 2 === 0;
+          const m = mesh(landGeo, [
+            mat(alt ? "side" : "side2"), mat(alt ? "side" : "side2"), mat(alt ? "top" : "top2"),
+            mat("side"), mat(alt ? "side" : "side2"), mat(alt ? "side" : "side2"),
+          ], { receive: true });
+          m.position.set(x, LAND_TOP - 0.9, z);
+          scene.add(m);
+          const t = { x, z, kind: "land", region, top: LAND_TOP, blocked: false, mesh: m };
+          m.userData.tile = t;
+          tiles.set(key(x, z), t);
+          pickables.push(m);
+        }
+      }
+    }
+    addLand(0, 4, 0, 2, "bank");
+    addLand(1, 3, 6, 7, "isle1");
+    addLand(1, 4, 13, 14, "isle2");
+    addLand(1, 6, 23, 25, "far");
+
+    // Water, a slab with depth so the diorama floats. The top is a gentle flowing shader.
+    const WATER = { x0: -3.5, x1: 9.5, z0: 2.5, z1: 22.5 };
+    const waterTop = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uBase: { value: new THREE.Color(pal.water) },
+        uDeep: { value: new THREE.Color(pal.waterSide) },
+        uLight: { value: new THREE.Color(pal.ripple) },
+      },
+      vertexShader: `
+        varying vec3 vW;
+        void main() {
+          vec4 w = modelMatrix * vec4(position, 1.0);
+          vW = w.xyz;
+          gl_Position = projectionMatrix * viewMatrix * w;
+        }`,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uBase;
+        uniform vec3 uDeep;
+        uniform vec3 uLight;
+        varying vec3 vW;
+        void main() {
+          float row = floor(vW.z * 0.62);
+          float wave = vW.z * 0.62 + 0.1 * sin(vW.x * 1.1 - uTime * 0.9 + row * 1.7);
+          float line = 1.0 - smoothstep(0.0, 0.05, abs(fract(wave) - 0.5));
+          float dash = step(0.58, fract(vW.x * 0.16 - uTime * 0.12 + row * 0.37));
+          vec3 col = mix(uBase, uLight, line * dash * 0.32);
+          gl_FragColor = vec4(col, 1.0);
+          #include <colorspace_fragment>
+        }`,
+    });
+    const waterBox = mesh(new THREE.BoxGeometry(WATER.x1 - WATER.x0, 0.7, WATER.z1 - WATER.z0), [
+      mat("waterSide"), mat("waterSide"), waterTop, mat("waterSide"), mat("waterSide"), mat("waterSide"),
+    ], { cast: false, receive: false });
+    waterBox.position.set((WATER.x0 + WATER.x1) / 2, -0.35, (WATER.z0 + WATER.z1) / 2);
+    waterBox.userData.water = true;
+    pickables.push(waterBox);
+    scene.add(waterBox);
+
+    // A soft line of foam where the land meets the water.
+    const foams = [];
+    for (const [x0, x1, z0, z1] of [[0, 4, 0, 2], [1, 3, 6, 7], [1, 4, 13, 14], [1, 6, 23, 25]]) {
+      const f = new THREE.Mesh(
+        new THREE.PlaneGeometry(x1 - x0 + 1.24, z1 - z0 + 1.24),
+        flat("foam"),
+      );
+      f.rotation.x = -Math.PI / 2;
+      f.position.set((x0 + x1) / 2, 0.01, (z0 + z1) / 2);
+      scene.add(f);
+      foams.push(f);
+    }
+
+    // Output drifting by. Sound and slop look the same from the bank.
+    const floaters = [];
+    const floatGeo = new THREE.PlaneGeometry(0.17, 0.17);
+    for (let i = 0; i < 14; i++) {
+      const f = new THREE.Mesh(floatGeo, flat("float"));
+      f.rotation.set(-Math.PI / 2, 0, Math.PI / 4);
+      f.position.set(WATER.x0 + srand() * (WATER.x1 - WATER.x0), 0.05, WATER.z0 + 0.5 + srand() * (WATER.z1 - WATER.z0 - 1));
+      f.userData = { speed: 0.45 + srand() * 0.35, phase: srand() * 6 };
+      scene.add(f);
+      floaters.push(f);
+    }
+
+    // Decor that also blocks its tile.
+    const trunkGeo = new THREE.CylinderGeometry(0.07, 0.1, 0.4, 5);
+    function tree(x, z, kind, s = 1) {
+      const g = new THREE.Group();
+      const trunk = mesh(trunkGeo, mat("trunk"));
+      trunk.position.y = 0.2;
+      g.add(trunk);
+      const crown = kind === "cone"
+        ? mesh(new THREE.ConeGeometry(0.34, 0.9, 6), mat(["treeA", "treeB", "treeC"][Math.floor(srand() * 3)]))
+        : mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.42, 6), mat(["treeA", "treeB", "treeC"][Math.floor(srand() * 3)]));
+      crown.position.y = kind === "cone" ? 0.75 : 0.56;
+      g.add(crown);
+      g.scale.setScalar(s);
+      g.position.set(x, LAND_TOP, z);
+      g.rotation.y = srand() * Math.PI;
+      scene.add(g);
+      const t = tiles.get(key(x, z));
+      if (t) t.blocked = true;
+    }
+    tree(0, 0, "cone", 1.1);
+    tree(0, 2, "ball");
+    tree(1, 0, "ball", 0.9);
+    tree(3, 6, "cone", 0.9);
+    tree(1, 13, "cone");
+    tree(6, 25, "cone", 1.2);
+    tree(1, 25, "ball", 1.1);
+    tree(6, 23, "ball");
+
+    // A little house on the far shore, with a garden.
+    const house = new THREE.Group();
+    house.position.set(5, LAND_TOP, 24.6);
+    const walls = mesh(new THREE.BoxGeometry(0.9, 0.7, 0.8), mat("house"));
+    walls.position.y = 0.35;
+    house.add(walls);
+    const roof = mesh(new THREE.ConeGeometry(0.75, 0.55, 4), mat("roof"));
+    roof.position.y = 0.97;
+    roof.rotation.y = Math.PI / 4;
+    house.add(roof);
+    scene.add(house);
+    tiles.get(key(5, 24)).blocked = true;
+    tiles.get(key(5, 25)).blocked = true;
+    const flowers = [];
+    for (const [x, z] of [[2, 24], [3, 25], [2, 25], [4, 25]]) {
+      for (let k = 0; k < 3; k++) {
+        const g = new THREE.Group();
+        const stem = mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 4), mat("stem"));
+        stem.position.y = 0.15;
+        g.add(stem);
+        const head = mesh(new THREE.SphereGeometry(0.08, 6, 4), mat("petal" + Math.floor(srand() * 4)));
+        head.position.y = 0.32;
+        g.add(head);
+        g.position.set(x + (srand() - 0.5) * 0.6, LAND_TOP, z + (srand() - 0.5) * 0.6);
+        g.scale.setScalar(0.001);
+        scene.add(g);
+        flowers.push(g);
+      }
+    }
+
+    // ---------- the bridge and its crank ----------
+
+    const BRIDGE_PIVOT = new V3(2, 0, 3);
+    const bridge = new THREE.Group();
+    bridge.position.set(BRIDGE_PIVOT.x, 0, BRIDGE_PIVOT.z);
+    scene.add(bridge);
+    const plankGeo = new THREE.BoxGeometry(0.96, 0.16, 0.8);
+    for (let i = 0; i < 3; i++) {
+      const p = mesh(plankGeo, [mat("plankSide"), mat("plankSide"), mat("plank"), mat("plankSide"), mat("plankSide"), mat("plankSide")], { receive: true });
+      p.position.set(i, 0.22, 0);
+      bridge.add(p);
+    }
+    for (const side of [-0.42, 0.42]) {
+      const rail = mesh(new THREE.BoxGeometry(2.9, 0.05, 0.05), mat("plankSide"));
+      rail.position.set(1, 0.45, side);
+      bridge.add(rail);
+    }
+    const bridgeState = { turned: false, t: 0, turning: false };
+    const bridgeTiles = [0, 1, 2].map((i) => ({ x: 2, z: 3 + i, kind: "bridge", top: 0.3, blocked: false }));
+
+    const crank = new THREE.Group();
+    crank.position.set(4, LAND_TOP, 2);
+    scene.add(crank);
+    const crankPost = mesh(new THREE.BoxGeometry(0.16, 0.6, 0.16), mat("post"));
+    crankPost.position.y = 0.3;
+    crank.add(crankPost);
+    const wheel = new THREE.Group();
+    wheel.position.y = 0.62;
+    crank.add(wheel);
+    wheel.add(mesh(new THREE.TorusGeometry(0.24, 0.045, 6, 18), mat("lamp")));
+    for (let i = 0; i < 3; i++) {
+      const spoke = mesh(new THREE.BoxGeometry(0.46, 0.04, 0.04), mat("lamp"));
+      spoke.rotation.z = (i / 3) * Math.PI;
+      wheel.add(spoke);
+    }
+    wheel.rotation.y = Math.PI / 4;
+    tiles.get(key(4, 2)).blocked = true;
+    crank.traverse((o) => o.isMesh && (o.userData.action = "crank", pickables.push(o)));
+
+    // ---------- the lantern ----------
+
+    const lantern = new THREE.Group();
+    lantern.position.set(4, LAND_TOP, 14);
+    scene.add(lantern);
+    const lpost = mesh(new THREE.BoxGeometry(0.14, 1.1, 0.14), mat("post"));
+    lpost.position.y = 0.55;
+    lantern.add(lpost);
+    const lampMat = new THREE.MeshBasicMaterial({ color: pal.lampOff });
+    const lamp = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), lampMat);
+    lamp.position.y = 1.25;
+    lantern.add(lamp);
+    const lampCap = mesh(new THREE.ConeGeometry(0.2, 0.18, 4), mat("post"));
+    lampCap.position.y = 1.5;
+    lampCap.rotation.y = Math.PI / 4;
+    lantern.add(lampCap);
+    const lampLight = new THREE.PointLight("#ffe7a8", 0, 14, 1.4);
+    lampLight.position.y = 1.3;
+    lantern.add(lampLight);
+    tiles.get(key(4, 14)).blocked = true;
+    lantern.traverse((o) => o.isMesh && (o.userData.action = "lantern", pickables.push(o)));
+    // The light's reach across the long stretch, drawn as a soft glow on the water.
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: pal.lamp, transparent: true, opacity: 0, depthWrite: false }));
+    glow.rotation.x = -Math.PI / 2;
+    glow.position.set(3, 0.03, 19.2);
+    scene.add(glow);
+
+    // ---------- stepping stones ----------
+
+    // Nobody lays these out ahead of time. Helpers plan a route toward the goal you give them.
+    const stoneGeo = new THREE.CylinderGeometry(0.4, 0.45, 0.5, 9);
+    const stones = [];
+    function makeLane(cells, lane) {
+      cells.forEach(([x, z], i) => {
+        const sideMat = own("stoneSide");
+        const topMat = own("stone");
+        const m = mesh(stoneGeo, [sideMat, topMat, sideMat], { receive: true });
+        m.position.set(x, -0.6, z);
+        m.visible = false;
+        scene.add(m);
+        const s = { x, z, kind: "stone", lane, i, top: STONE_TOP, state: "none", slop: false, by: null, mesh: m, topMat, sideMat, t: 0, wobble: 0 };
+        m.userData.tile = s;
+        pickables.push(m);
+        stones.push(s);
+      });
+    }
+    const stoneAt = (x, z) => stones.find((s) => s.x === x && s.z === z);
+
+    // The rapids: a stretch any sensible route goes around.
+    const RAPIDS = { x0: 0, x1: 5, z0: 16, z1: 17 };
+    // Past this line the river is misty, and nobody can test a stone by eye.
+    const MIST_Z = 19;
+    const inRapids = (x, z) => x >= RAPIDS.x0 && x <= RAPIDS.x1 && z >= RAPIDS.z0 && z <= RAPIDS.z1;
+    const rapids = new THREE.Mesh(
+      new THREE.PlaneGeometry(RAPIDS.x1 - RAPIDS.x0 + 1, RAPIDS.z1 - RAPIDS.z0 + 1),
+      flat("rapids"),
+    );
+    rapids.rotation.x = -Math.PI / 2;
+    rapids.position.set((RAPIDS.x0 + RAPIDS.x1) / 2, 0.012, (RAPIDS.z0 + RAPIDS.z1) / 2);
+    scene.add(rapids);
+    const swirls = [];
+    for (let i = 0; i < 6; i++) {
+      const sw = new THREE.Mesh(new THREE.TorusGeometry(0.22 + srand() * 0.1, 0.022, 3, 20, Math.PI * 1.2), flat("foam"));
+      sw.rotation.x = -Math.PI / 2;
+      sw.position.set(RAPIDS.x0 + srand() * (RAPIDS.x1 - RAPIDS.x0), 0.03, RAPIDS.z0 + srand() * (RAPIDS.z1 - RAPIDS.z0));
+      sw.userData.speed = (srand() < 0.5 ? -1 : 1) * (2 + srand() * 2);
+      scene.add(sw);
+      swirls.push(sw);
+    }
+
+    const mists = [];
+    for (const [z0, z1, op] of [[MIST_Z - 0.9, MIST_Z - 0.6, 0.3], [MIST_Z - 0.6, MIST_Z - 0.3, 0.6], [MIST_Z - 0.3, WATER.z1 + 0.05, 0.9]]) {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(WATER.x1 - WATER.x0 + 0.1, z1 - z0),
+        new THREE.MeshBasicMaterial({ color: pal.mist, transparent: true, opacity: op, depthWrite: false }),
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.set((WATER.x0 + WATER.x1) / 2, 0.75, (z0 + z1) / 2);
+      m.userData.full = op;
+      m.renderOrder = 2;
+      scene.add(m);
+      mists.push(m);
+    }
+    let mistSaidAt = -99;
+    function mistBlocked() {
+      if (time - mistSaidAt < 7) return;
+      mistSaidAt = time;
+      lines([COPY.mistBlocked, COPY.mistNudge], 3.6);
+      lanternHint = 9;
+    }
+
+    const DIRS = [[0, 1], [1, 0], [-1, 0], [0, -1]];
+    const isWater = (x, z) => x >= -3 && x <= 9 && z >= 3 && z <= 22 && !tiles.has(key(x, z)) && !(x === 2 && z <= 5) && !stoneAt(x, z);
+
+    function bfs(starts, isGoal, ok) {
+      const prev = new Map();
+      const q = [];
+      for (const [x, z] of starts) {
+        if (!prev.has(key(x, z))) { prev.set(key(x, z), null); q.push([x, z]); }
+      }
+      while (q.length) {
+        const [x, z] = q.shift();
+        if (isGoal(x, z)) {
+          const out = [];
+          for (let k = key(x, z); k; k = prev.get(k)) out.unshift(k.split(",").map(Number));
+          return out;
+        }
+        for (const [dx, dz] of DIRS) {
+          const nx = x + dx;
+          const nz = z + dz;
+          if (prev.has(key(nx, nz)) || !ok(nx, nz)) continue;
+          prev.set(key(nx, nz), key(x, z));
+          q.push([nx, nz]);
+        }
+      }
+      return null;
+    }
+
+    // A helper's route from an island to a goal, optionally through a point you gave it.
+    function planRoute(fromRegion, goalPred, { avoid = false, via = null } = {}) {
+      const ok = (x, z) => isWater(x, z) && !(avoid && inRapids(x, z));
+      const starts = [];
+      for (const t of tiles.values()) {
+        if (t.region !== fromRegion || t.blocked) continue;
+        for (const [dx, dz] of DIRS) if (ok(t.x + dx, t.z + dz)) starts.push([t.x + dx, t.z + dz]);
+      }
+      const d = (c) => Math.abs(c[0] - traveler.x) + Math.abs(c[1] - traveler.z);
+      starts.sort((a, b) => d(a) - d(b) || b[1] - a[1]);
+      if (!via) return bfs(starts, goalPred, ok);
+      const first = bfs(starts, (x, z) => x === via[0] && z === via[1], ok);
+      const rest = first && bfs([via], goalPred, ok);
+      return rest ? first.concat(rest.slice(1)) : null;
+    }
+    const nextTo = (region) => (x, z) => DIRS.some(([dx, dz]) => tiles.get(key(x + dx, z + dz))?.region === region);
+
+    // The route you're shown before any stones go down.
+    const dotGeo = new THREE.CircleGeometry(0.1, 10);
+    let dots = [];
+    function showPlan(cells) {
+      clearPlan();
+      for (const [x, z] of cells) {
+        const d = new THREE.Mesh(dotGeo, flat(inRapids(x, z) ? "slop" : "ripple"));
+        d.rotation.x = -Math.PI / 2;
+        d.position.set(x, 0.05, z);
+        d.userData.phase = x + z;
+        scene.add(d);
+        dots.push(d);
+      }
+    }
+    function clearPlan() {
+      for (const d of dots) scene.remove(d);
+      dots = [];
+    }
+
+    function tileAt(x, z) {
+      const land = tiles.get(key(x, z));
+      if (land) return land;
+      if (bridgeState.turned) {
+        const b = bridgeTiles.find((t) => t.x === x && t.z === z);
+        if (b) return b;
+      }
+      return stoneAt(x, z) || null;
+    }
+    function walkable(t) {
+      if (!t) return false;
+      if (t.kind === "land") return !t.blocked;
+      if (t.kind === "bridge") return bridgeState.turned;
+      return t.state === "placed" || t.state === "sound";
+    }
+
+    // ---------- characters ----------
+
+    function makeBody(colorKey, height, r = 0.26) {
+      const g = new THREE.Group();
+      const inner = new THREE.Group();
+      g.add(inner);
+      const body = mesh(new THREE.CapsuleGeometry(r, height, 4, 12), mat(colorKey));
+      body.position.y = r + height / 2;
+      inner.add(body);
+      scene.add(g);
+      return { g, inner };
+    }
+
+    function makeWalker(body, x, z) {
+      const t = tileAt(x, z);
+      return {
+        ...body, x, z, pos: new V3(x, t.top, z), path: [], step: null, face: 0, busy: null, onArrive: null, hop: 0,
+      };
+    }
+
+    const traveler = makeWalker(makeBody("traveler", 0.34, 0.24), 2, 0);
+    const brim = mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.035, 14), mat("hat"));
+    brim.position.y = 0.9;
+    traveler.inner.add(brim);
+    const hatTop = mesh(new THREE.CylinderGeometry(0.17, 0.2, 0.17, 12), mat("hat"));
+    hatTop.position.y = 1.0;
+    traveler.inner.add(hatTop);
+    traveler.face = Math.PI / 4;
+    traveler.allowPartial = true;
+
+    const helperDefs = {
+      wren: { name: "Wren", start: [1, 7], interval: 1.5, slop: 0.2 },
+      moss: { name: "Moss", start: [3, 13], interval: 0.75, slop: 0.45 },
+      fizz: { name: "Fizz", start: [3, 14], interval: 1.05, slop: 0.3 },
+    };
+    const helpers = {};
+    for (const [id, d] of Object.entries(helperDefs)) {
+      const w = makeWalker(makeBody(id, 0.22, 0.22), d.start[0], d.start[1]);
+      const topper = id === "wren"
+        ? mesh(new THREE.ConeGeometry(0.12, 0.22, 4), mat(id))
+        : id === "moss" ? mesh(new THREE.BoxGeometry(0.17, 0.17, 0.17), mat(id)) : mesh(new THREE.OctahedronGeometry(0.12, 0), mat(id));
+      topper.position.y = 0.78;
+      topper.rotation.y = Math.PI / 4;
+      w.inner.add(topper);
+      w.g.visible = id === "wren";
+      helpers[id] = Object.assign(w, d, { id, lane: null, timer: 0.8, throwing: null, bubbleEl: null });
+    }
+
+    // ---------- sound ----------
+
+    let audio = null;
+    let muted = false;
+    let master = null;
+    let echo = null;
+    function wakeAudio() {
+      if (!audio) {
+        try { audio = new AudioContext(); } catch { return; }
+        master = audio.createGain();
+        master.gain.value = muted ? 0 : 1;
+        master.connect(audio.destination);
+        // A short, soft echo so single notes have some room around them.
+        echo = audio.createDelay(1);
+        echo.delayTime.value = 0.38;
+        const fb = audio.createGain();
+        fb.gain.value = 0.32;
+        const tone = audio.createBiquadFilter();
+        tone.type = "lowpass";
+        tone.frequency.value = 1800;
+        const wet = audio.createGain();
+        wet.gain.value = 0.45;
+        echo.connect(tone).connect(fb).connect(echo);
+        tone.connect(wet).connect(master);
+      }
+      audio.resume?.();
+    }
+
+    // Music: a slow progression, with a few soft notes picked from each chord.
+    const CHORDS = [[60, 64, 67, 71], [65, 69, 72, 76], [62, 65, 69, 72], [67, 71, 74, 79]];
+    const midi = (n) => 440 * 2 ** ((n - 69) / 12);
+    let musicOn = false;
+    function pluck(freq, when, dur = 2.2, gain = 0.028) {
+      const g = audio.createGain();
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.exponentialRampToValueAtTime(gain, when + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+      for (const [mult, type, level] of [[1, "sine", 1], [2, "triangle", 0.18], [3, "sine", 0.06]]) {
+        const o = audio.createOscillator();
+        const og = audio.createGain();
+        o.type = type;
+        o.frequency.value = freq * mult;
+        og.gain.value = level;
+        o.connect(og).connect(g);
+        o.start(when);
+        o.stop(when + dur + 0.05);
+      }
+      g.connect(master);
+      g.connect(echo);
+    }
+    function startMusic() {
+      if (!audio || musicOn) return;
+      musicOn = true;
+      // The river, as a very quiet filtered murmur that swells and settles.
+      const len = audio.sampleRate * 3;
+      const buf = audio.createBuffer(1, len, audio.sampleRate);
+      const data = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+        data[i] = last * 3.2;
+      }
+      const src = audio.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const band = audio.createBiquadFilter();
+      band.type = "bandpass";
+      band.frequency.value = 420;
+      band.Q.value = 0.5;
+      const river = audio.createGain();
+      river.gain.value = 0.05;
+      const lfo = audio.createOscillator();
+      const lfoGain = audio.createGain();
+      lfo.frequency.value = 0.07;
+      lfoGain.gain.value = 0.025;
+      lfo.connect(lfoGain).connect(river.gain);
+      src.connect(band).connect(river).connect(master);
+      src.start();
+      lfo.start();
+
+      let chord = 0;
+      let beat = 0;
+      const tick = () => {
+        const now = audio.currentTime + 0.05;
+        if (beat % 8 === 0) {
+          chord = (chord + (beat ? 1 : 0)) % CHORDS.length;
+          pluck(midi(CHORDS[chord][0] - 24), now, 4.5, 0.03);
+        }
+        if (Math.random() < (beat % 2 ? 0.3 : 0.55)) {
+          const notes = CHORDS[chord];
+          const n = notes[Math.floor(Math.random() * notes.length)] + (Math.random() < 0.6 ? 12 : 0);
+          pluck(midi(n), now + Math.random() * 0.08);
+        }
+        beat++;
+      };
+      tick();
+      setInterval(tick, 800);
+    }
+    function note(freq, dur = 0.3, type = "sine", gain = 0.04, delay = 0) {
+      if (muted || !audio) return;
+      const t = audio.currentTime + delay;
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(gain, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(master);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    }
+    const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
+    const sfx = {
+      step: () => note(SCALE[Math.floor(rand() * 5)], 0.25, "sine", 0.018),
+      test: () => note(392, 0.5, "triangle", 0.03),
+      sound: () => { note(784, 0.6, "sine", 0.035); note(1174.7, 0.8, "sine", 0.02, 0.08); },
+      slop: () => note(196, 0.7, "triangle", 0.04),
+      place: () => note(SCALE[2 + Math.floor(rand() * 3)] / 2, 0.3, "sine", 0.02),
+      crank: () => SCALE.slice(0, 4).forEach((f, i) => note(f / 2, 0.5, "triangle", 0.025, i * 0.12)),
+      lantern: () => [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => note(f, 1.6, "sine", 0.03, i * 0.1)),
+      end: () => [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => note(f, 2.2, "sine", 0.03, i * 0.18)),
+    };
+    $("mute").addEventListener("click", () => {
+      muted = !muted;
+      $("mute").textContent = muted ? COPY.soundOff : COPY.soundOn;
+      $("mute").setAttribute("aria-pressed", String(muted));
+      wakeAudio();
+      startMusic();
+      if (master) master.gain.value = muted ? 0 : 1;
+    });
+
+    // ---------- words on screen ----------
+
+    const linesEl = $("lines");
+    const lineQueue = [];
+    let lineBusy = false;
+    function lines(list, gap = 3.4) {
+      for (const t of list) lineQueue.push({ t, gap });
+      if (!lineBusy) nextLine();
+    }
+    function nextLine() {
+      const item = lineQueue.shift();
+      if (!item) { lineBusy = false; return; }
+      lineBusy = true;
+      const p = document.createElement("p");
+      p.className = "line";
+      p.textContent = item.t;
+      linesEl.replaceChildren(p);
+      requestAnimationFrame(() => p.classList.add("on"));
+      setTimeout(() => {
+        p.classList.remove("on");
+        setTimeout(nextLine, 900);
+      }, item.gap * 1000);
+    }
+
+    const titleEl = $("title");
+    function title(ch) {
+      titleEl.innerHTML = `<small>${ch.num}</small>${ch.name}`;
+      titleEl.classList.add("on");
+      setTimeout(() => titleEl.classList.remove("on"), 2600);
+    }
+
+    const floatsEl = $("floats");
+    const tmp = new V3();
+    function toScreen(v) {
+      tmp.copy(v).project(camera);
+      return { x: (tmp.x * 0.5 + 0.5) * innerWidth, y: (-tmp.y * 0.5 + 0.5) * innerHeight };
+    }
+    const bubbles = [];
+    function clearBubbles() {
+      for (const b of bubbles) b.el.remove();
+      bubbles.length = 0;
+    }
+    function speak(w, text, life = 3.2) {
+      const el = document.createElement("div");
+      el.className = "float";
+      el.innerHTML = `<span class="bubble">${text}</span>`;
+      floatsEl.append(el);
+      bubbles.push({ el, w, life });
+    }
+
+    // ---------- particles ----------
+
+    const parts = [];
+    const partGeo = new THREE.BoxGeometry(1, 1, 1);
+    function burst(at, keys, n, { speed = 1.4, up = 2, life = 0.8, size = 0.05, gravity = 4 } = {}) {
+      if (reduceMotion) n = Math.min(n, 3);
+      for (let i = 0; i < n; i++) {
+        const p = new THREE.Mesh(partGeo, flat(keys[i % keys.length]));
+        p.position.copy(at);
+        p.scale.setScalar(size);
+        const a = rand() * Math.PI * 2;
+        p.userData = { v: new V3(Math.cos(a) * speed * (0.4 + rand()), up * (0.6 + rand() * 0.6), Math.sin(a) * speed * (0.4 + rand())), life, max: life, size, gravity };
+        scene.add(p);
+        parts.push(p);
+      }
+    }
+    const rings = [];
+    const ringGeo = new THREE.RingGeometry(0.42, 0.5, 24);
+    function ring(at, key) {
+      const r = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: pal[key], transparent: true, opacity: 0.9, depthWrite: false }));
+      r.rotation.x = -Math.PI / 2;
+      r.position.copy(at);
+      scene.add(r);
+      rings.push({ r, life: 0.9 });
+    }
+
+    // ---------- walking ----------
+
+    function findPath(w, tx, tz) {
+      const start = key(w.x, w.z);
+      const goal = key(tx, tz);
+      if (start === goal) return [];
+      const prev = new Map([[start, null]]);
+      const q = [[w.x, w.z]];
+      while (q.length) {
+        const [x, z] = q.shift();
+        if (key(x, z) === goal) break;
+        for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = x + dx;
+          const nz = z + dz;
+          const k = key(nx, nz);
+          if (prev.has(k)) continue;
+          if (!walkable(tileAt(nx, nz))) continue;
+          prev.set(k, key(x, z));
+          q.push([nx, nz]);
+        }
+      }
+      if (!prev.has(goal)) {
+        if (!w.allowPartial) return null;
+        // Not reachable yet, so head for the reachable tile closest to where they tapped.
+        let best = null;
+        let bestD = Infinity;
+        for (const k of prev.keys()) {
+          const [x, z] = k.split(",").map(Number);
+          const d = Math.abs(x - tx) + Math.abs(z - tz);
+          if (d < bestD) { best = k; bestD = d; }
+        }
+        if (!best || best === start) return [];
+        return findPathKey(w, start, best, prev);
+      }
+      return findPathKey(w, start, goal, prev);
+    }
+
+    function findPathKey(w, start, goal, prev) {
+      const out = [];
+      for (let k = goal; k !== start; k = prev.get(k)) out.unshift(k.split(",").map(Number));
+      return out;
+    }
+
+    function walkTo(w, tx, tz, onArrive) {
+      const path = findPath(w, tx, tz);
+      if (!path) return false;
+      w.path = path;
+      w.onArrive = onArrive || null;
+      if (!path.length && onArrive) { w.onArrive = null; onArrive(); }
+      return true;
+    }
+
+    function updateWalker(w, dt, isTraveler) {
+      if (w.busy) {
+        w.busy.t += dt;
+        if (w.busy.anim) w.busy.anim(w.busy.t / w.busy.dur);
+        if (w.busy.t >= w.busy.dur) {
+          const done = w.busy.done;
+          w.busy = null;
+          done?.();
+        }
+        return;
+      }
+      if (w.step) {
+        w.step.t += dt / w.step.dur;
+        const k = Math.min(1, w.step.t);
+        w.pos.lerpVectors(w.step.from, w.step.to, k);
+        w.pos.y += Math.sin(k * Math.PI) * 0.2;
+        if (k >= 1) {
+          w.x = w.step.x;
+          w.z = w.step.z;
+          w.step = null;
+          if (isTraveler) { sfx.step(); arrived(); }
+        }
+        return;
+      }
+      if (!w.path.length) {
+        if (w.onArrive) { const f = w.onArrive; w.onArrive = null; f(); }
+        return;
+      }
+      const [nx, nz] = w.path[0];
+      const t = tileAt(nx, nz);
+      if (!walkable(t)) { w.path = []; return; }
+      // You test any stone you haven't seen tested, unless the lantern already has.
+      if (isTraveler && t.kind === "stone" && t.state === "placed") {
+        // Out in the mist you can't test anything by hand.
+        if (t.z >= MIST_Z && !game.lit) { w.path = []; mistBlocked(); return; }
+        w.face = Math.atan2(nx - w.x, nz - w.z);
+        w.busy = {
+          t: 0, dur: 1.05,
+          anim: (k) => { w.inner.rotation.x = Math.sin(Math.min(1, k) * Math.PI) * 0.45; },
+          done: () => { w.inner.rotation.x = 0; reveal(t); },
+        };
+        sfx.test();
+        ring(new V3(t.x, STONE_TOP + 0.02, t.z), "spark");
+        return;
+      }
+      w.path.shift();
+      w.face = Math.atan2(nx - w.x, nz - w.z);
+      w.step = { from: w.pos.clone(), to: new V3(nx, t.top, nz), t: 0, dur: 0.3, x: nx, z: nz };
+    }
+
+    function drawWalker(w, dt, time) {
+      w.g.position.copy(w.pos);
+      let diff = w.face - w.g.rotation.y;
+      diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+      w.g.rotation.y += diff * Math.min(1, dt * 10);
+      if (!w.step && !w.busy && !reduceMotion) w.inner.scale.y = 1 + Math.sin(time * 2.2 + w.x) * 0.02;
+    }
+
+    // ---------- stones ----------
+
+    function reveal(s, byLight = false) {
+      if (s.slop) {
+        s.state = "sinking";
+        s.t = 0;
+        s.topMat.color.set(pal.slop);
+        s.sideMat.color.set(pal.slop);
+        sfx.slop();
+        burst(new V3(s.x, STONE_TOP, s.z), ["slop"], 8, { speed: 0.9, up: 1.2, life: 0.7 });
+        if (!byLight && !game.saidSlop) {
+          game.saidSlop = true;
+          setTimeout(() => speak(s.by || helpers.wren, COPY.wrenOops, 3), 400);
+        }
+      } else {
+        s.state = "sound";
+        s.topMat.color.set(pal.sound);
+        s.wobble = 1;
+        sfx.sound();
+        burst(new V3(s.x, STONE_TOP + 0.1, s.z), ["sound", "spark"], 6, { speed: 0.8, up: 1.4, life: 0.6, size: 0.04 });
+      }
+      if (!byLight && s.lane === 3) {
+        game.tests3 = (game.tests3 || 0) + 1;
+      }
+    }
+
+    function updateStones(dt) {
+      for (const s of stones) {
+        const m = s.mesh;
+        if (s.state === "rising") {
+          s.t += dt / 0.6;
+          const k = Math.min(1, s.t);
+          m.position.y = -0.6 + (STONE_TOP - 0.25 + 0.6) * (1 - Math.pow(1 - k, 3));
+          if (k >= 1) {
+            s.state = "placed";
+            sfx.place();
+            ring(new V3(s.x, 0.03, s.z), "ripple");
+            if (game.lit && s.lane === 3) reveal(s, true);
+          }
+        } else if (s.state === "sinking") {
+          s.t += dt / 0.9;
+          m.position.y = STONE_TOP - 0.25 - s.t * 0.9;
+          m.rotation.z = s.t * 0.3;
+          if (s.t >= 1) {
+            s.state = "none";
+            m.visible = false;
+            m.rotation.z = 0;
+          }
+        } else if (s.state === "placed" || s.state === "sound") {
+          m.position.y = STONE_TOP - 0.25 + Math.sin(performance.now() / 700 + s.i) * 0.012;
+        }
+        if (s.wobble > 0) {
+          s.wobble = Math.max(0, s.wobble - dt * 2.5);
+          m.scale.setScalar(1 + Math.sin(s.wobble * Math.PI) * 0.12);
+        }
+      }
+    }
+
+    // Helpers throw stones into empty spots on their lane.
+    const throws = [];
+    const flyGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.25, 8);
+    function updateHelper(h, dt) {
+      if (!h.lane || !h.g.visible) return;
+      h.timer -= dt;
+      if (h.timer > 0) return;
+      const open = stones.filter((s) => s.lane === h.lane && s.state === "none");
+      if (!open.length) { h.timer = 0.4; return; }
+      const s = open[0];
+      h.timer = h.interval * (0.8 + rand() * 0.4);
+      s.state = "flying";
+      s.by = h;
+      s.slop = h.lane === 2 && s.i === 2 && !game.forcedSlop ? (game.forcedSlop = true) : rand() < h.slop;
+      s.topMat.color.set(pal.stone);
+      s.sideMat.color.set(pal.stoneSide);
+      h.face = Math.atan2(s.x - h.x, s.z - h.z);
+      h.hop = 1;
+      const fly = mesh(flyGeo, mat("stone"));
+      const from = h.pos.clone().add(new V3(0, 0.7, 0));
+      fly.position.copy(from);
+      scene.add(fly);
+      throws.push({ fly, from, to: new V3(s.x, 0.1, s.z), t: 0, s });
+    }
+    function updateThrows(dt) {
+      for (const th of throws.slice()) {
+        th.t += dt / 0.55;
+        const k = Math.min(1, th.t);
+        th.fly.position.lerpVectors(th.from, th.to, k);
+        th.fly.position.y += Math.sin(k * Math.PI) * 1.2;
+        th.fly.rotation.x += dt * 8;
+        if (k >= 1) {
+          scene.remove(th.fly);
+          throws.splice(throws.indexOf(th), 1);
+          const s = th.s;
+          s.state = "rising";
+          s.t = 0;
+          s.mesh.visible = true;
+          s.mesh.position.y = -0.6;
+        }
+      }
+    }
+
+    // ---------- the story ----------
+
+    const game = { ch: 0, lit: false, started: false, ended: false, phase: null, goal: null };
+
+    // A soft highlight over the far shore while you choose where you're going.
+    const farGlow = new THREE.Mesh(new THREE.PlaneGeometry(6, 3), new THREE.MeshBasicMaterial({ color: pal.lamp, transparent: true, opacity: 0, depthWrite: false }));
+    farGlow.rotation.x = -Math.PI / 2;
+    farGlow.position.set(3.5, LAND_TOP + 0.02, 24);
+    scene.add(farGlow);
+
+    function arrived() {
+      const t = tiles.get(key(traveler.x, traveler.z));
+      const region = t && t.region;
+      if (game.ch === 1 && region === "isle1") enterCh2();
+      else if (game.ch === 2 && region === "isle2" && !game.phase) enterCh3();
+      else if (game.ch === 3 && region === "far") finale();
+    }
+
+    function begin() {
+      if (game.started) return;
+      game.started = true;
+      wakeAudio();
+      startMusic();
+      if (EMBED) clearBubbles();
+      $("cover").hidden = true;
+      game.ch = 1;
+      title(COPY.ch1);
+      setTimeout(() => lines(COPY.ch1Lines, 4), 2600);
+      setTimeout(() => { if (!bridgeState.turned && !bridgeState.turning) lines([COPY.ch1Hint], 5); }, 15000);
+    }
+
+    function turnCrank() {
+      if (bridgeState.turned || bridgeState.turning) return;
+      bridgeState.turning = true;
+      sfx.crank();
+    }
+
+    // Two: you say where you're going, and Wren works out the way.
+    function enterCh2() {
+      game.ch = 2;
+      game.phase = "ask";
+      speak(helpers.wren, COPY.wrenAsk, 3.6);
+      setTimeout(() => title(COPY.ch2), 1300);
+      setTimeout(() => { game.phase = "goal"; lines([COPY.pickGoal], 6); }, 3600);
+    }
+
+    function setGoal(t) {
+      game.goal = t;
+      game.phase = "planning";
+      ring(new V3(t.x, LAND_TOP + 0.03, t.z), "lamp");
+      sfx.place();
+      setTimeout(() => {
+        game.phase = null;
+        speak(helpers.wren, COPY.wrenGot, 2.8);
+        // Wren's first leg gets you to the middle island, on the way to your garden.
+        const route = planRoute("isle1", nextTo("isle2"));
+        makeLane(route, 2);
+        showPlan(route);
+        lines(COPY.ch2Lines, 4);
+        setTimeout(() => { clearPlan(); helpers.wren.lane = 2; }, 1800);
+      }, 1500);
+    }
+
+    // Three: Moss plans the fastest way, which isn't what you meant. You point once.
+    function enterCh3() {
+      game.ch = 3;
+      lines([COPY.ch2Done], 3);
+      walkTo(helpers.wren, 1, 14);
+      for (const id of ["moss", "fizz"]) {
+        const h = helpers[id];
+        h.g.visible = true;
+        h.g.scale.setScalar(0.001);
+        h.appear = 0;
+      }
+      setTimeout(() => speak(helpers.moss, COPY.mossHello, 3), 600);
+      setTimeout(() => title(COPY.ch3), 1800);
+      setTimeout(() => {
+        const plan = planRoute("isle2", shoreCell());
+        if (!plan.some(([x, z]) => inRapids(x, z))) return acceptRoute(plan);
+        showPlan(plan);
+        game.phase = "point";
+        lines([COPY.mossPlan, COPY.pointHint], 5);
+      }, 4200);
+    }
+
+    // The water cell by the far shore closest to where you said you were going.
+    function shoreCell() {
+      const gx = Math.min(5, Math.max(1, game.goal ? game.goal.x : 3));
+      return (x, z) => z === 22 && x === gx;
+    }
+
+    function setWaypoint(x, z) {
+      if (inRapids(x, z)) return speak(helpers.moss, COPY.notThere, 3);
+      const plan = planRoute("isle2", shoreCell(), { avoid: true, via: [x, z] });
+      if (!plan) return;
+      game.phase = null;
+      ring(new V3(x, 0.05, z), "lamp");
+      speak(helpers.moss, COPY.mossOk, 2.4);
+      acceptRoute(plan);
+    }
+
+    function acceptRoute(plan) {
+      showPlan(plan);
+      makeLane(plan, 3);
+      setTimeout(() => {
+        clearPlan();
+        for (const h of Object.values(helpers)) h.lane = 3;
+        helpers.wren.interval = 1.2;
+        lanternHint = 0;
+      }, 1500);
+    }
+    let lanternHint = -1;
+
+    function lightLantern() {
+      if (game.lit || game.ch !== 3 || game.phase) return;
+      game.lit = true;
+      sfx.lantern();
+      lampMat.color.set(pal.lamp);
+      burst(lantern.position.clone().setY(1.6), ["lamp", "spark"], 22, { speed: 1.6, up: 2.4, life: 1.1 });
+      // The light reaches the whole route.
+      const lane = stones.filter((s) => s.lane === 3);
+      const xs = lane.map((s) => s.x);
+      const zs = lane.map((s) => s.z);
+      glow.scale.set(Math.max(...xs) - Math.min(...xs) + 1.6, Math.max(...zs) - Math.min(...zs) + 1.6, 1);
+      glow.position.set((Math.max(...xs) + Math.min(...xs)) / 2, 0.03, (Math.max(...zs) + Math.min(...zs)) / 2);
+      lines([COPY.litLine], 4);
+      setTimeout(() => speak(helpers.fizz, COPY.fizzLit, 3), 900);
+      lane.filter((s) => s.state === "placed").forEach((s, i) => setTimeout(() => reveal(s, true), 300 + i * 160));
+      for (const h of Object.values(helpers)) h.interval *= 0.7;
+    }
+
+    function finale() {
+      if (game.ended) return;
+      game.ended = true;
+      game.ch = 4;
+      sfx.end();
+      for (const h of Object.values(helpers)) h.lane = null;
+      const spots = [[2, 23], [3, 24], [4, 24]];
+      Object.values(helpers).forEach((h, i) => setTimeout(() => walkTo(h, spots[i][0], spots[i][1]), 600 + i * 500));
+      flowers.forEach((f, i) => setTimeout(() => { f.userData.grow = 1; }, 400 + i * 120));
+      setTimeout(() => speak(helpers.wren, COPY.wrenEnd, 3.4), 4200);
+      setTimeout(() => {
+        $("end-title").textContent = COPY.endTitle;
+        $("end-body").innerHTML = COPY.endBody.map((t) => `<p>${t}</p>`).join("") + `<p class="note">${COPY.endNote}</p>`;
+        $("again").textContent = COPY.again;
+        $("end").hidden = false;
+        $("again").focus({ preventScroll: true });
+      }, 8000);
+    }
+
+    // ---------- input ----------
+
+    const raycaster = new THREE.Raycaster();
+    function neighborOf(x, z) {
+      let best = null;
+      let bestD = Infinity;
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const t = tileAt(x + dx, z + dz);
+        if (!walkable(t)) continue;
+        const p = findPath(traveler, t.x, t.z);
+        if (p && p.length < bestD) { best = t; bestD = p.length; }
+      }
+      return best;
+    }
+    let downAt = null;
+    canvas.addEventListener("pointerdown", (e) => { downAt = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+    canvas.addEventListener("pointerup", (e) => {
+      if (!downAt || Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 12 || performance.now() - downAt.t > 600) return;
+      downAt = null;
+      onTap(e);
+    });
+    function onTap(e) {
+      if (EMBED && !game.started) return begin();
+      if (!game.started || game.ended || traveler.busy) return;
+      wakeAudio();
+      const ndc = new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      const hit = raycaster.intersectObjects(pickables, false).find((h) => h.object.visible);
+      if (!hit) return;
+      const o = hit.object;
+      if (game.phase === "goal") {
+        const t = o.userData.tile;
+        if (t && t.region === "far") setGoal(t);
+        return;
+      }
+      if (game.phase === "point") {
+        if (o.userData.water) setWaypoint(Math.round(hit.point.x), Math.round(hit.point.z));
+        return;
+      }
+      if (game.phase) return;
+      if (o.userData.action === "crank") {
+        const n = neighborOf(4, 2);
+        if (n) walkTo(traveler, n.x, n.z, () => {
+          if (Math.abs(traveler.x - 4) + Math.abs(traveler.z - 2) !== 1) return;
+          traveler.face = Math.atan2(4 - traveler.x, 2 - traveler.z);
+          turnCrank();
+        });
+        return;
+      }
+      if (o.userData.action === "lantern") {
+        const n = neighborOf(4, 14);
+        if (n) walkTo(traveler, n.x, n.z, () => {
+          if (Math.abs(traveler.x - 4) + Math.abs(traveler.z - 14) !== 1) return;
+          traveler.face = Math.atan2(4 - traveler.x, 14 - traveler.z);
+          lightLantern();
+        });
+        return;
+      }
+      const t = o.userData.tile;
+      if (!t) return;
+      if (walkTo(traveler, t.x, t.z)) ring(new V3(t.x, (t.top ?? 0) + 0.02, t.z), "ripple");
+    }
+    // The bridge planks become pickable once they're in place.
+    function pickBridge() {
+      bridge.children.forEach((m, i) => {
+        if (i < 3) { m.userData.tile = bridgeTiles[i]; pickables.push(m); }
+      });
+    }
+
+    $("cover-sub").textContent = COPY.coverSub;
+    $("cover-tap").textContent = COPY.coverTap;
+    $("cover").addEventListener("click", begin);
+    $("cover").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); begin(); } });
+    if (!EMBED) $("cover").focus();
+    $("again").addEventListener("click", () => location.reload());
+
+    // ---------- theme and camera ----------
+
+    function applyPalette() {
+      pal = darkQuery.matches ? PALETTES.dark : PALETTES.light;
+      for (const [k, m] of Object.entries(M)) m.color.set(pal[m.userData?.key || k]);
+      hemi.color.set(pal.hemiSky);
+      hemi.groundColor.set(pal.hemiGround);
+      hemi.intensity = pal.hemi;
+      sunLight.intensity = pal.dir;
+      lampMat.color.set(game.lit ? pal.lamp : pal.lampOff);
+      glow.material.color.set(pal.lamp);
+      farGlow.material.color.set(pal.lamp);
+      for (const m of mists) m.material.color.set(pal.mist);
+      waterTop.uniforms.uBase.value.set(pal.water);
+      waterTop.uniforms.uDeep.value.set(pal.waterSide);
+      waterTop.uniforms.uLight.value.set(pal.ripple);
+      for (const s of stones) {
+        s.topMat.color.set(s.state === "sound" ? pal.sound : s.state === "sinking" ? pal.slop : pal.stone);
+        s.sideMat.color.set(s.state === "sinking" ? pal.slop : pal.stoneSide);
+      }
+    }
+    darkQuery.addEventListener("change", applyPalette);
+
+    // An isometric view looking up the river crossing, so the way forward runs up and to the right.
+    const ISO = new V3(-1, 1.15, -1).normalize();
+    const view = { target: new V3(2, 0, 1.5), halfH: 5, ahead: 2.2 };
+    // The part of the screen the scene should sit in. Embedded, that's the space beside the hero text.
+    function focusRect() {
+      const W = innerWidth;
+      const H = innerHeight;
+      if (!EMBED) return { x: 0, y: 0, w: W, h: H };
+      const wide = W >= 760;
+      try {
+        const body = parent.document.querySelector(".hero-body");
+        const fr = frameElement.getBoundingClientRect();
+        const br = body.getBoundingClientRect();
+        if (wide) {
+          const left = Math.min(W * 0.62, Math.max(W * 0.48, br.right - fr.left - 140));
+          return { x: left, y: 0, w: W - left, h: H };
+        }
+        const top = Math.min(H * 0.7, Math.max(H * 0.35, br.bottom - fr.top + 12));
+        return { x: 0, y: top, w: W, h: H - top };
+      } catch {
+        return wide ? { x: W * 0.55, y: 0, w: W * 0.45, h: H } : { x: 0, y: H * 0.55, w: W, h: H * 0.45 };
+      }
+    }
+    let focus = focusRect();
+    function resize() {
+      const W = innerWidth;
+      const H = innerHeight;
+      renderer.setSize(W, H, false);
+      focus = focusRect();
+      const aspect = W / H;
+      // On tall views, turn so the crossing runs up the screen, and look further ahead.
+      const tall = focus.w / focus.h < 1;
+      ISO.set(tall ? -0.42 : -1, tall ? 1.25 : 1.15, -1).normalize();
+      view.ahead = tall ? 3.4 : 2.2;
+      if (EMBED) {
+        // World units per pixel, so the free area shows about nine tiles across.
+        const s = Math.max(9 / focus.w, 7 / focus.h);
+        view.halfH = (s * H) / 2;
+      } else {
+        view.halfH = tall ? Math.max(5.4, 3.9 / aspect) : 7;
+      }
+      camera.left = -view.halfH * aspect;
+      camera.right = view.halfH * aspect;
+      camera.top = view.halfH;
+      camera.bottom = -view.halfH;
+      const cx = focus.x + focus.w / 2;
+      const cy = focus.y + focus.h / 2;
+      if (EMBED) camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H);
+      else camera.clearViewOffset();
+      camera.updateProjectionMatrix();
+      // Keep the words and the ending inside that area too.
+      const linesEl2 = $("lines");
+      if (EMBED) {
+        linesEl2.style.left = `${cx}px`;
+        linesEl2.style.top = `${focus.y + 52}px`;
+        linesEl2.style.width = `${Math.min(focus.w - 32, 420)}px`;
+        Object.assign($("end").style, { left: `${focus.x}px`, top: `${focus.y}px`, width: `${focus.w}px`, height: `${focus.h}px` });
+        Object.assign($("title").style, { left: `${cx}px`, top: `${focus.y + focus.h * 0.4}px`, width: `${focus.w - 24}px` });
+        Object.assign(document.querySelector(".bar").style, { top: `${focus.y + 10}px`, right: "10px" });
+      }
+    }
+    addEventListener("resize", resize);
+    resize();
+
+    // ---------- loop ----------
+
+    const clock = new THREE.Clock();
+    let time = 0;
+    let paused = false;
+    function frame() {
+      if (paused) {
+        clock.getDelta();
+        requestAnimationFrame(frame);
+        return;
+      }
+      const dt = Math.min(clock.getDelta(), 0.05);
+      time += dt;
+
+      waterTop.uniforms.uTime.value = time;
+      for (const f of floaters) {
+        f.position.x += f.userData.speed * dt;
+        f.position.y = 0.02;
+        if (f.position.x > WATER.x1 - 0.3) f.position.x = WATER.x0 + 0.3;
+      }
+
+      // The bridge swings across when the crank turns.
+      if (bridgeState.turning) {
+        bridgeState.t = Math.min(1, bridgeState.t + dt / 1.8);
+        const k = bridgeState.t < 0.5 ? 2 * bridgeState.t ** 2 : 1 - (-2 * bridgeState.t + 2) ** 2 / 2;
+        bridge.rotation.y = -k * Math.PI / 2;
+        wheel.rotation.z = -k * Math.PI * 4;
+        if (bridgeState.t >= 1) {
+          bridgeState.turning = false;
+          bridgeState.turned = true;
+          pickBridge();
+          burst(new V3(2, 0.4, 5), ["plank", "spark"], 10, { speed: 1, up: 1.6 });
+        }
+      }
+
+      updateWalker(traveler, dt, true);
+      for (const h of Object.values(helpers)) {
+        if (h.appear !== undefined && h.appear < 1) {
+          h.appear = Math.min(1, h.appear + dt * 2.2);
+          h.g.scale.setScalar(Math.max(0.001, 1 - Math.pow(1 - h.appear, 3)));
+        }
+        updateWalker(h, dt, false);
+        updateHelper(h, dt);
+        if (h.hop > 0) {
+          h.hop = Math.max(0, h.hop - dt * 3);
+          h.inner.position.y = Math.sin(h.hop * Math.PI) * 0.18;
+        }
+      }
+      updateThrows(dt);
+      updateStones(dt);
+
+      for (const sw of swirls) sw.rotation.z += sw.userData.speed * dt;
+      farGlow.material.opacity += ((game.phase === "goal" ? 0.18 + Math.sin(time * 3) * 0.1 : 0) - farGlow.material.opacity) * Math.min(1, dt * 4);
+      for (const d of dots) d.scale.setScalar(1 + Math.max(0, Math.sin(time * 4 - d.userData.phase * 0.6)) * 0.5);
+
+      // A nudge toward the lantern if the long stretch is dragging.
+      if (lanternHint >= 0 && !game.lit) {
+        lanternHint += dt;
+        lamp.scale.setScalar(1 + Math.max(0, Math.sin(time * 3)) * (lanternHint > 8 ? 0.25 : 0.08));
+      } else {
+        lamp.scale.setScalar(1);
+      }
+      for (const m of mists) {
+        const want = game.lit ? 0 : m.userData.full;
+        m.material.opacity += (want - m.material.opacity) * Math.min(1, dt * 1.5);
+        m.visible = m.material.opacity > 0.01;
+      }
+      if (game.lit) {
+        glow.material.opacity = Math.min(0.22, glow.material.opacity + dt * 0.2);
+        lampLight.intensity = Math.min(6, lampLight.intensity + dt * 5);
+        lamp.rotation.y += dt;
+      }
+      if (!bridgeState.turned && !bridgeState.turning && game.started) {
+        wheel.scale.setScalar(1 + Math.max(0, Math.sin(time * 2.5)) * 0.08);
+      }
+
+      for (const f of flowers) {
+        if (f.userData.grow) f.scale.setScalar(Math.min(1, f.scale.x + dt * 2));
+      }
+
+      drawWalker(traveler, dt, time);
+      for (const h of Object.values(helpers)) drawWalker(h, dt, time);
+
+      // Camera follows the traveler, a little ahead.
+      const want = new V3(traveler.pos.x + 0.4, 0, traveler.pos.z + view.ahead);
+      if (game.ch === 4) want.set(3.5, 0, 22.5);
+      else if (game.phase === "goal" || game.phase === "planning") want.set(3.5, 0, 22);
+      else if (game.phase === "point") want.set(3, 0, 18);
+      view.target.lerp(want, Math.min(1, dt * (game.ch === 4 ? 0.8 : 1.8)));
+      camera.position.copy(view.target).addScaledVector(ISO, 30);
+      camera.lookAt(view.target);
+      camera.updateMatrixWorld();
+      sunLight.position.copy(view.target).add(new V3(6, 14, 4));
+      sunLight.target.position.copy(view.target);
+
+
+      for (const p of parts.slice()) {
+        const u = p.userData;
+        u.life -= dt;
+        u.v.y -= u.gravity * dt;
+        p.position.addScaledVector(u.v, dt);
+        p.scale.setScalar(Math.max(0.001, u.size * (u.life / u.max)));
+        if (u.life <= 0) { scene.remove(p); parts.splice(parts.indexOf(p), 1); }
+      }
+      for (const r of rings.slice()) {
+        r.life -= dt;
+        r.r.scale.setScalar(1 + (0.9 - r.life) * 1.2);
+        r.r.material.opacity = Math.max(0, r.life);
+        if (r.life <= 0) { scene.remove(r.r); r.r.material.dispose(); rings.splice(rings.indexOf(r), 1); }
+      }
+
+      renderer.render(scene, camera);
+
+      for (const b of bubbles.slice()) {
+        b.life -= dt;
+        const s = toScreen(b.w.pos.clone().add(new V3(0, 1.05, 0)));
+        b.el.style.transform = `translate(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px)`;
+        if (b.life <= 0) { b.el.remove(); bubbles.splice(bubbles.indexOf(b), 1); }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    applyPalette();
+    requestAnimationFrame(frame);
+    if (EMBED) {
+      speak(traveler, COPY.coverTap, Infinity);
+      // Stop drawing while the hero is off screen.
+      setInterval(() => {
+        try {
+          const r = frameElement.getBoundingClientRect();
+          paused = r.bottom < 0 || r.top > parent.innerHeight;
+        } catch { paused = false; }
+      }, 500);
+      addEventListener("resize", () => setTimeout(resize, 50));
+      setTimeout(resize, 300);
+    }
+
+    // Hooks for automated checks of the page.
+    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, bridgeState, begin };
+  </script>
+</body>
+</html>

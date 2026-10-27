@@ -202,6 +202,30 @@ p {
   }
 }
 
+/* the river game, playable behind the hero; it frames itself beside the text */
+.river {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  /* fade the river out under the text, so it stays a background */
+  -webkit-mask-image: linear-gradient(to right, transparent 40%, #000 58%);
+  mask-image: linear-gradient(to right, transparent 40%, #000 58%);
+}
+
+/* taps on the hero's empty space reach the river; its links still work */
+.hero .spine,
+.hero-body {
+  pointer-events: none;
+}
+
+.hero-body a {
+  pointer-events: auto;
+}
+
 /* a half ring capping the top of the name */
 .arc {
   top: clamp(0.5rem, 2vw, 1.5rem);
@@ -296,6 +320,7 @@ p {
 
   & .m2 { background: var(--mint); }
 }
+
 
 .lede {
   max-width: 38rem;
@@ -849,6 +874,13 @@ p {
     grid-template-columns: 1fr;
     align-items: start;
     padding-top: 1.5rem;
+    /* room below the text for the river */
+    padding-bottom: min(125vw, 36rem);
+  }
+
+  .river {
+    -webkit-mask-image: linear-gradient(to top, #000 calc(min(125vw, 36rem) - 4rem), transparent calc(min(125vw, 36rem) + 1rem));
+    mask-image: linear-gradient(to top, #000 calc(min(125vw, 36rem) - 4rem), transparent calc(min(125vw, 36rem) + 1rem));
   }
 
   .spine {
