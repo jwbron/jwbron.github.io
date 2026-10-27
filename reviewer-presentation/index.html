@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Review Deep Dive</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="description" content="Project deep dive: the AI code reviewer I built at Khan Academy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+<style>
+/* Tokens match jameswiesebron.com: kanagawa-inspired pastels, violet ink dark mode. */
+:root {
+  --bg: #f1ecf7;
+  --bg-2: #e6def2;
+  --card: #fcf9ff;
+  --ink: #261d38;
+  --ink-2: #5d5373;
+  --line-c: #261d38;
+
+  --coral: #f2a28c;
+  --peri: #93a6ee;
+  --butter: #f2d58c;
+  --mint: #9fd6c0;
+  --sakura: #efb0c7;
+  --violet: #b8a1e0;
+  --cobalt: #3a52e6;
+  --on: #261d38;
+
+  --contrast-bg: #2f2546;
+  --contrast-fg: #efe7d2;
+  --contrast-accent: #f2d58c;
+
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --text: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --gutter: clamp(1rem, 4.5vw, 5.5rem);
+  --line: 3px solid var(--line-c);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #251e37;
+    --bg-2: #2d2542;
+    --card: #322a4b;
+    --ink: #ece4cd;
+    --ink-2: #b9afcb;
+    --line-c: #ece4cd;
+    --cobalt: #6f86ff;
+    --contrast-bg: #b8a1e0;
+    --contrast-fg: #261d38;
+    --contrast-accent: #261d38;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #251e37;
+  --bg-2: #2d2542;
+  --card: #322a4b;
+  --ink: #ece4cd;
+  --ink-2: #b9afcb;
+  --line-c: #ece4cd;
+  --cobalt: #6f86ff;
+  --contrast-bg: #b8a1e0;
+  --contrast-fg: #261d38;
+  --contrast-accent: #261d38;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  /* sized for a 1080p screen share: about 30px body text at 1920 wide */
+  font-size: clamp(15px, 1.45vw + 0.3vh, 36px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--text);
+  line-height: 1.4;
+  counter-reset: slide;
+}
+
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { text-wrap: pretty; margin: 0; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em; }
+
+/* ---------- progress and chrome ---------- */
+
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: 6px;
+  background: var(--cobalt);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+.mark {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--line-c);
+  &.d1 { background: var(--coral); border-radius: 50%; }
+  &.d2 { background: var(--butter); rotate: 45deg; scale: 0.85; }
+  &.d3 { background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); border: 0; }
+}
+
+/* ---------- slides ---------- */
+
+.slide {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  border-bottom: var(--line);
+  counter-increment: slide;
+}
+
+.slide:nth-of-type(even) { background: var(--bg-2); }
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.4rem;
+  padding: clamp(2.5rem, 7vh, 5rem) var(--gutter) clamp(3rem, 8vh, 5.5rem);
+  overflow: clip;
+}
+
+.num {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 1.4rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--ink-2);
+  &::before { content: counter(slide, decimal-leading-zero); }
+}
+
+.backup .num::before { content: "backup"; }
+
+
+.kicker {
+  align-self: flex-start;
+  padding: 0.15rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 999px;
+}
+
+.title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5.6vw, 5.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  max-width: 17ch;
+}
+
+h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.3vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  max-width: 24ch;
+}
+
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  max-width: 40ch;
+  font-size: 1.1rem;
+  color: var(--ink-2);
+}
+
+mark {
+  color: var(--on);
+  padding: 0 0.15em;
+  background: var(--butter);
+  border-radius: 0.2em 0.6em 0.2em 0.6em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  &.m2 { background: var(--mint); }
+  &.m3 { background: var(--sakura); }
+}
+
+.small { font-size: 0.8rem; color: var(--ink-2); }
+
+.card {
+  padding: 1rem 1.2rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px 22px 4px 4px;
+  & h3 { margin-bottom: 0.35rem; }
+  & p { font-size: 0.9rem; color: var(--ink-2); }
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+
+.ticks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  & li {
+    position: relative;
+    padding-left: 1.5rem;
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.42em;
+      width: 0.6rem;
+      height: 0.6rem;
+      background: var(--coral);
+      border: 2px solid var(--line-c);
+      rotate: 45deg;
+    }
+  }
+}
+
+.pill {
+  align-self: flex-start;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 999px;
+}
+
+.quote {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.6vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 28ch;
+}
+
+.ph {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ink);
+  border: 2.5px dashed var(--coral);
+  border-radius: 6px;
+}
+
+/* decorative shapes, never data */
+.deco {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: var(--line);
+  &.circle { border-radius: 50%; background: var(--coral); }
+  &.diamond { background: var(--butter); rotate: 45deg; }
+  &.tri { border: 0; background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  &.ring { background: none; border: clamp(0.8rem, 1.4vw, 1.4rem) solid var(--cobalt); border-left-color: transparent; border-bottom-color: transparent; border-radius: 50%; rotate: -45deg; }
+  &.stripe { border: 0; background: repeating-linear-gradient(-45deg, var(--mint) 0 10px, transparent 10px 20px); }
+}
+
+/* ---------- title slide ---------- */
+
+.cover .stage { gap: 1.8rem; }
+.cover .byline { font-weight: 700; font-size: 1rem; }
+.cover .byline span { display: block; font-weight: 400; color: var(--ink-2); }
+
+/* ---------- chain (why now) ---------- */
+
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  & .link {
+    padding: 0.9rem 1.2rem;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 999px;
+  }
+  & .link:nth-of-type(2) { background: var(--butter); color: var(--on); }
+  & .link:nth-of-type(3) { background: var(--sakura); color: var(--on); }
+  & .link:nth-of-type(4) { background: var(--coral); color: var(--on); }
+  & .arrow { font-family: var(--display); font-size: 1.4rem; }
+}
+
+/* ---------- goals ---------- */
+
+.goals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+  & div {
+    min-height: 8rem;
+    padding: 1.2rem;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.15;
+    color: var(--on);
+    border: var(--line);
+    border-radius: 4px;
+  }
+  & div:nth-child(1) { background: var(--mint); }
+  & div:nth-child(2) { background: var(--butter); border-radius: 50% 50% 4px 4px / 30% 30% 4px 4px; }
+  & div:nth-child(3) { background: var(--peri); }
+  & div:nth-child(4) { background: var(--sakura); border-radius: 4px 40px 4px 4px; }
+}
+
+/* ---------- two tools ---------- */
+
+.versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.2rem;
+  align-items: stretch;
+  & .plus { align-self: center; font-family: var(--display); font-weight: 800; font-size: 1.6rem; }
+}
+
+.gap {
+  align-self: flex-start;
+  padding: 0.8rem 1.2rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--on);
+  background: var(--butter);
+  border: var(--line);
+  border-radius: 4px 30px 4px 30px;
+}
+
+/* ---------- diagrams ---------- */
+
+.diagram { width: 100%; height: auto; max-height: 62vh; overflow: visible; }
+.build .stage { gap: 1rem; }
+h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
+.diagram text { fill: var(--ink); font-family: var(--text); font-size: 32px; }
+.diagram .t-b { font-weight: 700; }
+.diagram .t-s { font-size: 25px; fill: var(--ink-2); }
+.diagram .box { stroke: var(--line-c); stroke-width: 3; }
+.diagram .code { fill: var(--butter); }
+.diagram .model { fill: var(--peri); }
+.diagram .event { fill: var(--coral); }
+.diagram .on-pastel { fill: #261d38; }
+.diagram .wire { fill: none; stroke: var(--line-c); stroke-width: 3; }
+.diagram .loop { fill: none; stroke: var(--cobalt); stroke-width: 4; }
+.diagram .fence { fill: none; stroke: var(--cobalt); stroke-width: 4; stroke-dasharray: 14 10; }
+.diagram .fence-label { fill: var(--cobalt); font-weight: 700; }
+.diagram .track { fill: none; stroke: var(--cobalt); stroke-width: 8; stroke-linecap: round; }
+.diagram .node { fill: var(--card); stroke: var(--line-c); stroke-width: 4; }
+.diagram .node.hot { fill: var(--coral); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  & span { display: inline-flex; gap: 0.4rem; align-items: center; }
+  & i { width: 1.1rem; height: 1.1rem; border: 2.5px solid var(--line-c); border-radius: 4px; }
+}
+
+/* ---------- bars (single hue, direct labels) ---------- */
+
+.bars {
+  display: grid;
+  gap: 1rem;
+  max-width: 62rem;
+  & .row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 16rem) 1fr;
+    gap: 0.4rem 1.2rem;
+    align-items: center;
+  }
+  & .label { font-weight: 700; font-size: 0.85rem; line-height: 1.2; }
+  & .label span { display: block; font-weight: 400; color: var(--ink-2); }
+  & .lane {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: calc(100% - 7rem);
+  }
+  & .bar {
+    flex: none;
+    height: 2.4rem;
+    width: var(--w);
+    min-width: 0.6rem;
+    background: var(--cobalt);
+    border-radius: 0 6px 6px 0;
+    transform-origin: 0 50%;
+  }
+  & .bar.muted { background: var(--ink-2); }
+  & .val {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+}
+
+.stamp {
+  align-self: flex-start;
+  padding: 0.5rem 1.1rem;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--on);
+  background: var(--mint);
+  border: var(--line);
+  rotate: -3deg;
+}
+
+/* ---------- comment wall ---------- */
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 0.6rem;
+  max-width: 64rem;
+  & div {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    background: var(--card);
+    border: 2.5px solid var(--line-c);
+    border-radius: 4px 14px 4px 4px;
+  }
+  & b { display: block; font-size: 0.9rem; }
+}
+
+.off {
+  align-self: flex-start;
+  padding: 0.6rem 1.1rem;
+  font-weight: 800;
+  color: var(--on);
+  background: var(--coral);
+  border: var(--line);
+  rotate: 2deg;
+}
+
+/* ---------- quieter surface ---------- */
+
+.mock {
+  padding: 0.9rem 1.1rem;
+  font-size: 0.8rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px;
+  & .who { font-weight: 800; font-size: 0.7rem; color: var(--ink-2); margin-bottom: 0.3rem; }
+  & details { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px dashed var(--ink-2); color: var(--ink-2); }
+  & summary { font-weight: 700; cursor: pointer; }
+}
+
+/* ---------- dispatch trial ---------- */
+
+.runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  & div {
+    display: grid;
+    place-items: center;
+    width: 6.5rem;
+    height: 6.5rem;
+    padding: 0.4rem;
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 800;
+    border: var(--line);
+    border-radius: 50%;
+  }
+  & .ok { background: var(--mint); color: var(--on); }
+}
+
+/* ---------- flow chips ---------- */
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  & b {
+    padding: 0.5rem 1rem;
+    font-family: var(--display);
+    font-weight: 600;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 4px;
+  }
+  & span { font-size: 0.7rem; font-weight: 700; color: var(--ink-2); }
+}
+
+.roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.8rem;
+  & div { padding: 0.8rem 1rem; background: var(--card); border: var(--line); border-radius: 4px; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.85rem; }
+  & span { font-size: 0.8rem; color: var(--ink-2); }
+}
+
+.reported {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.45rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  vertical-align: 0.2em;
+  border: 2px solid var(--line-c);
+  border-radius: 999px;
+}
+
+.beliefs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+  counter-reset: belief;
+  & li {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2.1vw, 2rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+}
+
+
+/* ---------- quieter surface visual ---------- */
+
+.quiet-visual { display: grid; gap: 0.8rem; align-content: start; }
+.mini-wall {
+  display: flex;
+  flex-direction: column;
+  & div {
+    margin-bottom: 0.4rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--card);
+    border: 2.5px solid var(--line-c);
+    border-radius: 4px 12px 4px 4px;
+  }
+  & .extra { display: none; }
+  & .fold { color: var(--on); background: var(--butter); border-style: dashed; }
+}
+.reply p { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+
+/* ---------- dispatch trial flip ---------- */
+
+.runs .skip { position: relative; overflow: hidden; background: var(--card); }
+.runs .skip span { position: relative; }
+.runs .hatch {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, var(--coral) 0 8px, var(--card) 8px 16px);
+}
+.runs .look { display: none; }
+.runs .truth { color: var(--ink); }
+
+
+/* ---------- buy-in, phases, proof ---------- */
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: 1.2rem 2.4rem;
+  align-items: start;
+}
+.yes { display: grid; gap: 0.7rem; }
+.yes .card b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.85rem; }
+.yes .card span { font-size: 0.8rem; color: var(--ink-2); }
+.goals-sm div { min-height: 4.6rem; padding: 0.8rem 1rem; font-size: 0.85rem; }
+.goals-label { margin-bottom: -0.6rem; }
+.diagram.tl { max-height: 40vh; }
+.diagram.arch { max-height: 54vh; }
+.phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.7rem;
+  & div { padding: 0.6rem 0.9rem; background: var(--card); border: var(--line); border-radius: 4px 18px 4px 4px; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.75rem; color: var(--cobalt); }
+  & span { font-size: 0.8rem; }
+}
+.deferred { font-size: 0.8rem; color: var(--ink-2); }
+.deferred b { color: var(--ink); }
+.proof {
+  padding: 1rem 1.2rem;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 4px 26px 4px 4px;
+  & h3 { margin-bottom: 0.35rem; }
+  & p { font-size: 0.85rem; }
+}
+.grid.next { grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+.grid.next .card { padding: 0.7rem 0.9rem; }
+
+/* ---------- notes ---------- */
+
+.notes { display: none; }
+
+.notes-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 1rem 1.2rem;
+  font-size: 0.7rem;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+}
+
+.notes-panel[hidden] { display: none; }
+
+.help {
+  position: fixed;
+  left: 1rem;
+  bottom: 0.8rem;
+  z-index: 5;
+  font-size: 0.55rem;
+  color: var(--ink-2);
+  opacity: 0.8;
+}
+
+@media (max-width: 760px) {
+  .versus { grid-template-columns: 1fr; }
+  .versus .plus { justify-self: center; }
+  .bars .row { grid-template-columns: 1fr; }
+  .help { display: none; }
+}
+
+/* ---------- motion ----------
+   GSAP drives every animation from the natural (final) layout, so reduced
+   motion or a missing script leaves a complete static deck. */
+
+.pin-spacer { background: inherit; }
+.runner { fill: var(--coral); stroke: var(--line-c); stroke-width: 4; }
+.progress { display: none; }
+html.motion .progress { display: block; }
+.runner { display: none; }
+html.motion .runner { display: inline; }
+html.motion .mini-wall .extra { display: block; }
+html.motion .runs .look { display: block; }
+html.motion .runs .skip { background: var(--mint); color: var(--on); }
+.runs div > span { grid-area: 1 / 1; }
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<p class="help" aria-hidden="true">← → space: next · t: theme</p>
+
+<main>
+<section class="slide cover" data-title="Title" data-time="30">
+  <div class="stage">
+    <span class="deco ring" style="top: 8vh; right: 10vw; width: 16rem; aspect-ratio: 1"></span>
+    <span class="deco circle" style="bottom: 9vh; right: 22vw; width: 7rem; aspect-ratio: 1"></span>
+    <span class="deco tri" style="top: 20vh; right: 34vw; width: 4rem; aspect-ratio: 1"></span>
+    <span class="mark rise" aria-hidden="true"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></span>
+    <span class="kicker rise">Project deep dive</span>
+    <h1 class="title rise">Every PR gets a thorough first pass</h1>
+    <p class="sub rise">An AI code reviewer at Khan Academy, and what it took for engineers to want it.</p>
+    <p class="byline rise">James Wiesebron <span>Founding engineer, AI Developer Experience</span></p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="My role" data-time="60">
+  <div class="stage">
+    <span class="deco diamond" style="top: 12vh; right: 12vw; width: 5rem; aspect-ratio: 1"></span>
+    <span class="kicker rise">Context</span>
+    <h2 class="rise">First the software factory, then its AI layer</h2>
+    <div class="grid two rise">
+      <div class="card"><h3>Infrastructure first</h3><p>CI runners, deploys, terraform, reliability</p></div>
+      <div class="card"><h3>Then the AI portion</h3><p>Agent harnesses, guardrails, evals, the reviewer</p></div>
+    </div>
+    <p class="rise late">Founding engineer on Khan's AI Developer Experience team. <mark>I wrote its charter</mark>, set norms for AI tooling, and taught engineers and designers.</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 5" data-steps="5" data-title="Why now" data-time="150">
+  <div class="stage">
+    <span class="deco circle" style="top: 10vh; right: 8vw; width: 6rem; aspect-ratio: 1"></span>
+    <span class="kicker">Why now</span>
+    <h2>Review became the bottleneck</h2>
+    <div class="chain">
+      <span class="link">AI made code cheaper to write</span>
+      <span class="arrow step r4-1" aria-hidden="true">→</span>
+      <span class="link step r4-1">More PRs</span>
+      <span class="arrow step r4-2" aria-hidden="true">→</span>
+      <span class="link step r4-2">Tired reviewers</span>
+      <span class="arrow step r4-2" aria-hidden="true">→</span>
+      <span class="link step r4-2">Uneven quality</span>
+    </div>
+    <p class="pill step r4-3">And every merge still needed a human approval</p>
+    <p class="small goals-label">What the reviewer was for</p>
+    <div class="goals goals-sm">
+      <div>Less fatigue and cognitive load</div>
+      <div>A higher quality bar</div>
+      <div>Consistent reviews</div>
+      <div>Moving faster, with confidence</div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Two tools, one gap" data-time="105">
+  <div class="stage">
+    <span class="kicker rise">Where it started</span>
+    <h2 class="rise">Two tools, one gap</h2>
+    <div class="versus rise">
+      <div class="card">
+        <h3>claude code review (managed)</h3>
+        <ul class="ticks">
+          <li>Ran only when someone asked</li>
+          <li>Too costly for every PR and push</li>
+          <li>Prose engineers found hard to read</li>
+        </ul>
+      </div>
+      <span class="plus" aria-hidden="true">+</span>
+      <div class="card">
+        <h3>The chief architect's triage bot</h3>
+        <ul class="ticks">
+          <li>Cheap by design</li>
+          <li>Pointed reviewers at what to check</li>
+          <li>Never meant to be thorough</li>
+        </ul>
+      </div>
+    </div>
+    <p class="gap rise late">Missing: a thorough first pass on every PR, to Khan's standards</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Proposal and buy-in" data-time="150">
+  <div class="stage">
+    <span class="kicker rise">Shaping it</span>
+    <div class="split">
+      <div>
+        <p class="quote rise">“More depth, less noise.”</p>
+        <p class="small rise">My written proposal</p>
+        <ul class="ticks rise late">
+          <li>Keep what worked, and name the gap: a High-risk auth question went unasked</li>
+          <li>Four phases, cheapest value first</li>
+          <li>Evals gate anything that can regress</li>
+          <li>Ask who owns it as a product. I did.</li>
+        </ul>
+      </div>
+      <div class="yes">
+        <h3 class="rise">Who had to say yes</h3>
+        <div class="card rise"><b>The chief architect</b><span>Technical direction. Convinced by the proposal, the evals, and reviewing every change I made.</span></div>
+        <div class="card rise"><b>Every engineer</b><span>Whether it ran on their PRs. Convinced by a trial beside the managed review, and fixes within a day.</span></div>
+        <div class="card rise late"><b>The budget</b><span>I owned AI spend, and my manager approved increases. Convinced by a cost per PR low enough to run on everything.</span></div>
+      </div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 6" data-steps="6" data-title="Architecture" data-time="180">
+  <div class="stage">
+    <span class="kicker">How it works</span>
+    <h2 class="wide">Code does the mechanics, models do the judgment</h2>
+    <div class="legend">
+      <span><i style="background: var(--butter)"></i>Code</span>
+      <span><i style="background: var(--peri)"></i>Model sub-agents</span>
+      <span><i style="background: var(--coral)"></i>GitHub event</span>
+    </div>
+    <svg class="diagram arch" viewBox="0 0 1600 780" role="img" aria-labelledby="arch-t arch-d">
+      <title id="arch-t">Reviewer architecture</title>
+      <desc id="arch-d">A PR event goes to a code router, which picks specialist model sub-agents: correctness, tests, docs, security where configured, a holistic pass and Khan best-practice skills. Their claims are validated and deduplicated in code, then code computes the verdict and posts. On each push, the reviewer reconciles open threads and re-arms a full review if the diff shifts a lot. The sub-agents sit inside a boundary with no credentials and no permissions.</desc>
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g style="color: var(--line-c)">
+        <g class="fence-g">
+          <rect class="fence" x="535" y="20" width="490" height="640" rx="28"/>
+          <text class="fence-label" x="780" y="68" text-anchor="middle">No credentials · no permissions</text>
+        </g>
+        <g class="pr">
+          <rect class="box event" x="10" y="280" width="200" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="110" y="332" text-anchor="middle">PR opened</text>
+          <text class="t-s on-pastel" x="110" y="368" text-anchor="middle">or pushed</text>
+        </g>
+        <path class="wire w0" pathLength="1" d="M210 340 H242" marker-end="url(#ah)"/>
+        <g class="router code-node">
+          <rect class="box code" x="250" y="280" width="230" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="365" y="332" text-anchor="middle">Route</text>
+          <text class="t-s on-pastel" x="365" y="368" text-anchor="middle">pick specialists</text>
+        </g>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 135" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 220" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 305" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 390" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 475" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 560" marker-end="url(#ah)"/>
+          <g class="rv"><title>Correctness: Logic errors and broken behavior in the change</title>
+            <rect class="box model" x="560" y="100" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="146" text-anchor="middle">Correctness</text>
+          </g>
+          <g class="rv"><title>Tests: Whether the tests actually cover what changed</title>
+            <rect class="box model" x="560" y="185" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="231" text-anchor="middle">Tests</text>
+          </g>
+          <g class="rv"><title>Docs: Comments and docs that no longer match the code</title>
+            <rect class="box model" x="560" y="270" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="316" text-anchor="middle">Docs</text>
+          </g>
+          <g class="rv"><title>Security, where configured: Auth, injection and data exposure, on repos that opt in</title>
+            <rect class="box model" x="560" y="355" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="401" text-anchor="middle">Security, where configured</text>
+          </g>
+          <g class="rv"><title>Holistic pass: Reads the whole change, not one concern</title>
+            <rect class="box model" x="560" y="440" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="486" text-anchor="middle">Holistic pass</text>
+          </g>
+          <g class="rv"><title>Khan best-practice skills: Audits against Khan's own written conventions</title>
+            <rect class="box model" x="560" y="525" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="571" text-anchor="middle">Khan best-practice skills</text>
+          </g>
+        <text class="t-s rv-note" x="780" y="635" text-anchor="middle">about 12 sub-agents on a full review</text>
+          <path class="wire into" pathLength="1" d="M1000 135 L1072 328" marker-end="url(#ah)"/>
+          <path class="wire into" pathLength="1" d="M1000 305 L1072 336" marker-end="url(#ah)"/>
+          <path class="wire into" pathLength="1" d="M1000 390 L1072 344" marker-end="url(#ah)"/>
+          <path class="wire into" pathLength="1" d="M1000 560 L1072 352" marker-end="url(#ah)"/>
+        <g class="validate code-node">
+          <rect class="box code" x="1080" y="280" width="220" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="1190" y="332" text-anchor="middle">Validate</text>
+          <text class="t-s on-pastel" x="1190" y="368" text-anchor="middle">and dedupe</text>
+        </g>
+        <path class="wire w-post" pathLength="1" d="M1300 340 H1342" marker-end="url(#ah)"/>
+        <g class="post code-node">
+          <rect class="box code" x="1350" y="280" width="240" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="1470" y="332" text-anchor="middle">Verdict</text>
+          <text class="t-s on-pastel" x="1470" y="368" text-anchor="middle">and post</text>
+          <text class="t-s" x="1470" y="440" text-anchor="middle">advisory: a human</text>
+          <text class="t-s" x="1470" y="470" text-anchor="middle">always approves</text>
+        </g>
+        <path class="loop" pathLength="1" d="M1470 490 V720 H365 V410" marker-end="url(#ah)" style="color: var(--cobalt)"/>
+        <g class="loop-label">
+          <text x="900" y="705" text-anchor="middle" class="t-b">On each push: reconcile open threads</text>
+          <text x="900" y="760" text-anchor="middle" class="t-s">full re-review only if the diff shifts a lot</text>
+        </g>
+        <circle class="runner pr-dot" cx="110" cy="340" r="16"/>
+      </g>
+    </svg>
+    <p class="small arch-note">Agents saw only code, tickets, PR descriptions and comments. Security reviewed it before launch.</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Evals" data-time="90">
+  <div class="stage">
+    <span class="deco tri" style="bottom: 12vh; right: 10vw; width: 6rem; aspect-ratio: 1"></span>
+    <span class="kicker rise">Evaluating changes</span>
+    <h2 class="rise">Measured before shipped</h2>
+    <div class="grid rise">
+      <div class="card"><h3>Real and seeded cases</h3><p>Real PRs plus planted defects the reviewer must catch</p></div>
+      <div class="card"><h3>A/B with a known noise floor</h3><p>Identical arms run side by side to measure variation</p></div>
+      <div class="card"><h3>Releases gated</h3><p>Nothing that could regress shipped without the bench</p></div>
+    </div>
+    <div class="grid two rise late">
+      <p><mark>Khan's own skills</mark> were the margin over a generic reviewer.</p>
+      <p><mark class="m2">Check the checker:</mark> in 28 runs the reviewer found the defect every time. The scorer was wrong.</p>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 4" data-steps="4" data-title="Field week" data-time="150">
+  <div class="stage">
+    <span class="kicker">The first week with real users</span>
+    <h2>The findings held up. The volume didn't.</h2>
+    <div class="wall" aria-label="Illustration: seven non-blocking comments on one push">
+      <div><b>suggestion</b>test coverage</div>
+      <div><b>question</b>non-blocking</div>
+      <div><b>suggestion</b>test coverage</div>
+      <div><b>nitpick</b>naming</div>
+      <div><b>suggestion</b>test coverage</div>
+      <div><b>note</b>non-blocking</div>
+      <div><b>question</b>non-blocking</div>
+      <div style="border-style: dashed"><b>+5 more</b>two days later</div>
+    </div>
+    <p class="small">Illustration of one PR's first push. Real catches that week included a cross-package compile break.</p>
+    <p class="off step r3-1">The chief architect's team switched auto-review off</p>
+    <p class="quote step r3-2">“Comment six teaches people to skim, and they skim past the blocking finding too.”</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 4" data-steps="4" data-title="Quiet the human surface" data-time="90">
+  <div class="stage">
+    <span class="kicker">What changed</span>
+    <h2>Meet engineers where they are</h2>
+    <div class="grid two">
+      <ul class="ticks quiet-list">
+        <li>A comment budget: 3 inline, nitpicks never, the rest collapsed</li>
+        <li>Re-reviews look at what changed</li>
+        <li>Two layers in every comment, enforced by scripts and checked by a prose judge</li>
+        <li>Fixes only when the author replies <code>ship</code></li>
+      </ul>
+      <div class="quiet-visual">
+        <div class="mini-wall" aria-label="Illustration: seven comments become three inline plus a collapsed fold">
+          <div>suggestion · test coverage</div>
+          <div>question · non-blocking</div>
+          <div>nitpick · naming</div>
+          <div class="extra">suggestion · test coverage</div>
+          <div class="extra">note · non-blocking</div>
+          <div class="extra">question · non-blocking</div>
+          <div class="extra">suggestion · test coverage</div>
+          <div class="fold">▸ 4 more, collapsed</div>
+        </div>
+        <div class="mock layer">
+          <div class="who">review bot · illustration</div>
+          <p><b>issue (blocking):</b> the retry counter resets inside the loop, so this job never stops retrying.</p>
+          <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
+        </div>
+        <div class="mock reply">
+          <div class="who">author reply</div>
+          <p><code>ship</code> <span class="small">→ a fix commit lands on the branch</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 4" data-steps="4" data-title="Cost ladder" data-time="105">
+  <div class="stage">
+    <span class="kicker">Cost</span>
+    <h2>Thoroughness bought with engineering, not spend</h2>
+    <div class="bars" role="table" aria-label="Relative cost for the same PR volume">
+      <div class="row step r4-1" role="row">
+        <div class="label" role="rowheader">Triage bot <span>points reviewers at what to check</span></div>
+        <div class="track" role="cell"><div class="lane"><div class="bar muted grow r4-1" style="--w: 9%"></div><span class="val">1×</span></div></div>
+      </div>
+      <div class="row step r4-2" role="row">
+        <div class="label" role="rowheader">Full first-pass review <span>what I built</span></div>
+        <div class="track" role="cell"><div class="lane"><div class="bar grow r4-2" style="--w: 20%"></div><span class="val">≈2.2×</span></div></div>
+      </div>
+      <div class="row step r4-3" role="row">
+        <div class="label" role="rowheader">Managed review on every PR and push <span>estimate, it only ran on request</span></div>
+        <div class="track" role="cell"><div class="lane"><div class="bar muted grow r4-3" style="--w: 100%"></div><span class="val">≈11×</span></div></div>
+      </div>
+    </div>
+    <p class="pill step r4-3">Same models. It replaced the managed review on every PR, at about a fifth of its estimated cost.</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Directions not taken" data-time="120">
+  <div class="stage">
+    <span class="kicker rise">Directions not taken</span>
+    <h2 class="rise">What the evidence said no to</h2>
+    <div class="grid rise">
+      <div class="card"><h3>A panel of skeptic agents</h3><p>Built, then removed. 12 false blocks in 90 PRs, only 2 it could catch.</p></div>
+      <div class="card"><h3>A stronger model everywhere</h3><p>One role instead of five. Recall 82% → 89%, cost +35%.</p></div>
+      <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving. One full repeat.</p></div>
+      <div class="card"><h3>Blocking merges</h3><p>Compliance keeps a human approval, so I built for the human.</p></div>
+      <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
+      <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Required steps in code" data-time="60">
+  <div class="stage">
+    <span class="kicker">Failure modes</span>
+    <h2>A fluent result isn't proof the steps ran</h2>
+    <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+    </div>
+    <div class="after-row">
+      <p><mark>Dispatch and submission checks moved into code.</mark> Judgment stayed with the models. The orchestrator went from about 80% of a review's cost to about a quarter.</p>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 5" data-steps="5" data-title="Rollout" data-time="150">
+  <div class="stage">
+    <span class="kicker">Rollout</span>
+    <h2 class="wide">Earned one step at a time</h2>
+    <svg class="diagram tl" viewBox="0 0 1600 540" role="img" aria-labelledby="tl-t tl-d">
+      <title id="tl-t">Rollout timeline</title>
+      <desc id="tl-d">Triage bot in frontend. Written proposal. A trial of a few weeks on my team's PRs beside the managed review. A field week with too many comments. A quieter surface ships. The launch brief is approved. Default-on in the backend monorepo, then frontend. The main reviewer for a couple of months.</desc>
+      <line class="track tl-track" x1="150" y1="280" x2="1450" y2="280"/>
+      <g class="tl-node" data-x="150">
+        <circle class="node" cx="150" cy="280" r="20"/>
+        <text x="150" y="200" text-anchor="middle" class="t-b">Triage bot</text>
+        <text x="150" y="232" text-anchor="middle" class="t-s">in frontend</text>
+      </g>
+      <g class="tl-node" data-x="336">
+        <circle class="node" cx="336" cy="280" r="20"/>
+        <text x="336" y="350" text-anchor="middle" class="t-b">Proposal</text>
+        <text x="336" y="382" text-anchor="middle" class="t-s">more depth, less noise</text>
+      </g>
+      <g class="tl-node" data-x="521">
+        <circle class="node" cx="521" cy="280" r="20"/>
+        <text x="521" y="168" text-anchor="middle" class="t-b">Trial beside</text>
+        <text x="521" y="200" text-anchor="middle" class="t-b">the managed review</text>
+        <text x="521" y="232" text-anchor="middle" class="t-s">my team's PRs, a few weeks</text>
+      </g>
+      <g class="tl-node" data-x="707">
+        <circle class="node hot" cx="707" cy="280" r="20"/>
+        <text x="707" y="350" text-anchor="middle" class="t-b">Field week</text>
+        <text x="707" y="382" text-anchor="middle" class="t-s">right findings, too many</text>
+      </g>
+      <g class="tl-node" data-x="893">
+        <circle class="node" cx="893" cy="280" r="20"/>
+        <text x="893" y="200" text-anchor="middle" class="t-b">Quieter surface</text>
+        <text x="893" y="232" text-anchor="middle" class="t-s">ships within a day</text>
+      </g>
+      <g class="tl-node" data-x="1079">
+        <circle class="node" cx="1079" cy="280" r="20"/>
+        <text x="1079" y="350" text-anchor="middle" class="t-b">Launch brief</text>
+        <text x="1079" y="382" text-anchor="middle" class="t-s">approved</text>
+      </g>
+      <g class="tl-node" data-x="1264">
+        <circle class="node" cx="1264" cy="280" r="20"/>
+        <text x="1264" y="200" text-anchor="middle" class="t-b">Default-on</text>
+        <text x="1264" y="232" text-anchor="middle" class="t-s">backend, then frontend</text>
+      </g>
+      <g class="tl-node" data-x="1450">
+        <circle class="node" cx="1450" cy="280" r="20"/>
+        <text x="1450" y="350" text-anchor="middle" class="t-b">Main reviewer</text>
+        <text x="1450" y="382" text-anchor="middle" class="t-s">for a couple of months</text>
+      </g>
+      <text class="tl-coda" x="800" y="500" text-anchor="middle" font-weight="700">And the chief architect's team turned auto-review back on.</text>
+      <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
+    </svg>
+    <div class="phases">
+      <div><b>Phase 1</b><span>Zero-regret fixes and a feedback loop</span></div>
+      <div><b>Phase 2</b><span>A smoke benchmark, then noise controls</span></div>
+      <div><b>Phase 3</b><span>The full eval suite and more depth</span></div>
+      <div><b>Phase 4</b><span>Make it durable, then decide on default-on</span></div>
+    </div>
+    <p class="deferred"><b>Deferred to hold scope:</b> a weekly feedback report, cross-repo context, unattended fixes, leaving gh-aw</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Launch plan" data-time="75">
+  <div class="stage">
+    <span class="deco circle" style="top: 9vh; right: 7vw; width: 5rem; aspect-ratio: 1"></span>
+    <span class="kicker rise">Launching to every author</span>
+    <h2 class="rise">The bar was set before launch</h2>
+    <div class="grid rise">
+      <div class="card"><h3>Success</h3><p>No author-facing incident. Noise reports hold at trial levels.</p></div>
+      <div class="card"><h3>Rollback</h3><p>A label per PR, a kill switch, or one revert.</p></div>
+      <div class="card"><h3>Opt-out</h3><p>It existed. We didn't promote it.</p></div>
+      <div class="card"><h3>Comms</h3><p>Announcement, a support channel, me as the owner.</p></div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Who was involved" data-time="60">
+  <div class="stage">
+    <span class="kicker rise">People</span>
+    <h2 class="rise">A small core, a whole org of users</h2>
+    <div class="roles rise">
+      <div><b>Me</b><span>Architecture, specs, validation, rollout, on call</span></div>
+      <div><b>Chief architect</b><span>Built the first version, reviewed my changes, approved go-live</span></div>
+      <div><b>My manager</b><span>Budget and priorities from leadership</span></div>
+      <div><b>A teammate</b><span>The security-focused reviewer</span></div>
+      <div><b>Security</b><span>Reviewed it before launch</span></div>
+      <div><b>About 120 engineers</b><span>The users, and the bar</span></div>
+    </div>
+    <p class="small rise late">Kept in sync with guild demos and talks, the support channel, and release notes.</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Impact" data-time="120">
+  <div class="stage">
+    <span class="kicker rise">Impact, against the goals</span>
+    <div class="goals rise">
+      <div>Less fatigue<br><span class="small" style="color: inherit">Less time per review <span class="reported">reported</span></span></div>
+      <div>Higher bar<br><span class="small" style="color: inherit">Cleaner PRs, fewer human rounds <span class="reported">reported</span></span></div>
+      <div>Consistent<br><span class="small" style="color: inherit">Every PR, every push</span></div>
+      <div>Faster<br><span class="small" style="color: inherit">Time to merge dropped <span class="reported">reported</span></span></div>
+    </div>
+    <div class="grid two">
+      <div class="proof rise late">
+        <h3>The blind rerun</h3>
+        <p>While review was opt-in, a PR that skipped it caused a production incident. Run blind on that PR afterward, the reviewer caught the problem.</p>
+      </div>
+      <ul class="ticks rise late">
+        <li>Replaced the managed review on every PR, at about a fifth of its estimated cost</li>
+        <li>Noise held at trial levels after default-on</li>
+        <li>Engineers who used both preferred it</li>
+      </ul>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Differently, and next" data-time="75">
+  <div class="stage">
+    <span class="deco tri" style="top: 12vh; right: 10vw; width: 6rem; aspect-ratio: 1"></span>
+    <span class="kicker rise">What I'd do differently</span>
+    <p class="quote rise">Get off gh-aw sooner.</p>
+    <p class="sub rise">GitHub Agentic Workflows got us running fast. Then every change needed a workaround, and the reviewer couldn't run locally.</p>
+    <p class="small rise late">What's next</p>
+    <div class="grid next rise late">
+      <div class="card"><h3>Own the runtime</h3><p>Our own harness, off gh-aw</p></div>
+      <div class="card"><h3>Model out of orchestration</h3><p>Prompt assembly and posting in code</p></div>
+      <div class="card"><h3>One engine</h3><p>CI, a local CLI, a pi plugin</p></div>
+      <div class="card"><h3>Measure outcomes</h3><p>Time to merge before and after</p></div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide cover" data-title="What I believe" data-time="30">
+  <div class="stage">
+    <span class="deco circle" style="top: 8vh; right: 9vw; width: 8rem; aspect-ratio: 1"></span>
+    <span class="deco diamond" style="bottom: 12vh; right: 20vw; width: 4rem; aspect-ratio: 1"></span>
+    <span class="mark rise" aria-hidden="true"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></span>
+    <ul class="beliefs rise">
+      <li>Required steps go in code. Judgment goes to models.</li>
+      <li>Agents get no credentials. The pipeline does.</li>
+      <li>Measure the whole system, including your measurements.</li>
+      <li>Meet people where they are.</li>
+    </ul>
+    <p class="sub rise late">Thanks. Questions?</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: model comparison" data-time="0">
+  <div class="stage">
+    <span class="kicker">Evaluating options</span>
+    <h2>Could a different model do it for less?</h2>
+    <div class="bars step r3-1" role="table" aria-label="Required findings caught, out of 36">
+      <div class="row" role="row"><div class="label" role="rowheader">Current model</div><div class="track" role="cell"><div class="lane"><div class="bar grow r3-1" style="--w: 100%"></div><span class="val">36 / 36</span></div></div></div>
+      <div class="row" role="row"><div class="label" role="rowheader">Proposed replacement</div><div class="track" role="cell"><div class="lane"><div class="bar muted grow r3-1" style="--w: 89%"></div><span class="val">32 / 36</span></div></div></div>
+    </div>
+    <p class="small step r3-1">Required findings caught. One full repeat.</p>
+    <p class="stamp step r3-2">We didn't switch</p>
+    <ul class="ticks step r3-2">
+      <li>No saving at our actual rates</li>
+      <li>Some “model failures” were test setup problems</li>
+    </ul>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: where the money went" data-time="0">
+  <div class="stage">
+    <span class="kicker rise">Cost</span>
+    <h2 class="rise">Where a full review's cost went</h2>
+    <div class="bars rise" role="table" aria-label="Share of one full review's cost">
+      <div class="row" role="row"><div class="label" role="rowheader">Always-on reviewers</div><div class="track" role="cell"><div class="lane"><div class="bar" style="--w: 65%"></div><span class="val">65%</span></div></div></div>
+      <div class="row" role="row"><div class="label" role="rowheader">The orchestrating model's loop</div><div class="track" role="cell"><div class="lane"><div class="bar" style="--w: 24%"></div><span class="val">24%</span></div></div></div>
+      <div class="row" role="row"><div class="label" role="rowheader">Utilities and conditional reviewers</div><div class="track" role="cell"><div class="lane"><div class="bar" style="--w: 11%"></div><span class="val">11%</span></div></div></div>
+    </div>
+    <ul class="ticks rise late">
+      <li>Re-reviews drove per-PR cost. Reconcile-only rounds cost <mark>82% less</mark>.</li>
+      <li>A 20× larger PR cost only about 1.5× more</li>
+      <li>Guardrails: a per-run spend cap, an invocation cap, a timeout</li>
+    </ul>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: how the work ran" data-time="0">
+  <div class="stage">
+    <span class="kicker rise">How the work ran</span>
+    <h2 class="rise">Agents wrote the code. I owned the decisions.</h2>
+    <div class="flow rise">
+      <b>Spec</b><span>checked against</span><b>Plan</b><span>checked against</span><b>Code</b><span>checked against</span><b>Docs</b>
+    </div>
+    <ul class="ticks rise late">
+      <li>Review agents post, my agents fix, back to review until clean</li>
+      <li>Evals and about 2,000 unit tests on the orchestration code</li>
+      <li>I read the sensitive paths myself: verification logic, cost caps</li>
+      <li>The reviewer reviewed its own changes</li>
+    </ul>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: operating it" data-time="0">
+  <div class="stage">
+    <span class="deco diamond" style="bottom: 10vh; right: 10vw; width: 5rem; aspect-ratio: 1"></span>
+    <span class="kicker rise">Operating it</span>
+    <h2 class="rise">Feedback without filing tickets</h2>
+    <div class="flow rise">
+      <b>Engineer replies</b><span>read by a pipeline</span><b>Ticket opened or updated</b><span>then</span><b>I'm alerted</b>
+    </div>
+    <div class="card rise late">
+      <h3>A silent failure</h3>
+      <p>Re-reviews quietly ran at full depth. Output sanitizing deleted the state marker. Fix: the marker survives publishing.</p>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: security" data-time="0">
+  <div class="stage">
+    <span class="kicker rise">Security</span>
+    <h2 class="rise">Agents held no credentials</h2>
+    <div class="flow rise">
+      <b>Context in</b><span>→</span><b style="background: var(--peri); color: var(--on)">Agents read, judge, write results</b><span>→</span><b style="background: var(--butter); color: var(--on)">Pipeline posts</b>
+    </div>
+    <ul class="ticks rise late">
+      <li>Models saw source code, tickets, PR descriptions and comments only</li>
+      <li>Security reviewed it before launch</li>
+      <li>Advisory by design: a human always approves</li>
+    </ul>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: eval method" data-time="0">
+  <div class="stage">
+    <span class="kicker">Backup</span>
+    <h2>Eval method</h2>
+    <ul class="ticks">
+      <li>Repeated A/B runs with 95% Wilson intervals per case</li>
+      <li>A weekly drift run on identical arms to measure variation</li>
+      <li>Reports stamped with the corpus and matching rules, so a test change can't pass as a model gain</li>
+      <li>A judge pass over 3,204 findings in 203 runs</li>
+      <li>An audit separating real engineer feedback from bot-generated reactions</li>
+      <li>Transcripts captured per attempt, eval access limited to the staged case</li>
+    </ul>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: the broader program" data-time="0">
+  <div class="stage">
+    <span class="kicker">Backup</span>
+    <h2>The broader AI tooling program</h2>
+    <div class="grid two">
+      <div class="card"><h3>Why a dedicated team</h3><p>Proven tools, no owner. Maintenance on spare time, five separate fixes for the same prose problem, requests nobody was resourced to take.</p></div>
+      <div class="card"><h3>Principles</h3><p>Support and enable, don't prescribe. Meet people where they are. Everyone should lean on AI, and the bar is using it well.</p></div>
+    </div>
+    <p class="small">Talk: multi-agent pipelines and agent coordination, at the AI coding tools guild.</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+</main>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/ScrollToPlugin.min.js"></script>
+<script>
+// Scroll-scrubbed motion (GSAP), keyboard stepping, theme toggle and speaker notes.
+// Every animation starts from a hidden state and ends at the natural layout, so
+// reduced motion, or a failed script load, leaves the complete static deck.
+(() => {
+  const root = document.documentElement;
+  const params = new URLSearchParams(location.search);
+  if (params.get("theme")) root.dataset.theme = params.get("theme");
+
+  const slides = [...document.querySelectorAll(".slide")];
+  const only = Number(params.get("only"));
+  if (only) slides.forEach((s, i) => { if (i !== only - 1) s.style.display = "none"; });
+
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = !reduce && window.gsap && window.ScrollTrigger && window.ScrollToPlugin;
+  const pins = new Map();
+
+  // a step k transition occupies [k - 0.85, k - 0.15] on its section's timeline
+  const at = (k) => k - 0.85;
+
+  const builders = {
+    "Why now"(tl, q) {
+      const links = q(".chain .link"), arrows = q(".chain .arrow");
+      tl.from([arrows[0], links[1]], { x: 120, opacity: 0, stagger: 0.12 }, at(1));
+      tl.from([arrows[1], links[2], arrows[2], links[3]], { x: 120, opacity: 0, stagger: 0.1 }, at(2));
+      tl.from(q(".pill"), { scale: 0.6, rotation: -4, opacity: 0, ease: "back.out(2)" }, at(3));
+      tl.from(q(".goals-label"), { opacity: 0, duration: 0.2 }, at(4));
+      tl.from(q(".goals-sm > div"), { y: 60, opacity: 0, rotation: (i) => [-4, 3, -2, 4][i], stagger: 0.08, ease: "back.out(1.6)", duration: 0.4 }, at(4) + 0.1);
+    },
+
+    "Architecture"(tl, q) {
+      const ys = [100, 185, 270, 355, 440, 525];
+      gsap.set(q(".wire, .loop"), { strokeDasharray: 1 });
+      tl.fromTo(q(".pr-dot"), { opacity: 0, x: 0 }, { opacity: 1, x: 255, duration: 0.3 }, at(1));
+      tl.to(q(".pr-dot"), { opacity: 0, scale: 0.2, svgOrigin: "365 340", duration: 0.2 }, at(1) + 0.3);
+      tl.from(q(".fan"), { strokeDashoffset: 1, opacity: 0, stagger: 0.04, duration: 0.3 }, at(1) + 0.2);
+      tl.from(q(".rv"), {
+        x: -415, y: (i) => 340 - (ys[i] + 35), scale: 0.25, opacity: 0,
+        transformOrigin: "50% 50%", stagger: 0.04, duration: 0.4,
+      }, at(1) + 0.2);
+      tl.from(q(".rv-note"), { opacity: 0, duration: 0.2 }, at(1) + 0.5);
+      tl.from(q(".into"), { strokeDashoffset: 1, opacity: 0, stagger: 0.05, duration: 0.35 }, at(2));
+      tl.from(q(".validate"), { scale: 0.3, opacity: 0, transformOrigin: "50% 50%", ease: "back.out(1.6)", duration: 0.4 }, at(2) + 0.3);
+      tl.from(q(".w-post"), { strokeDashoffset: 1, opacity: 0, duration: 0.25 }, at(3));
+      tl.from(q(".post"), { x: -90, opacity: 0, duration: 0.45 }, at(3) + 0.2);
+      tl.from(q(".loop"), { strokeDashoffset: 1, opacity: 0, duration: 0.6 }, at(4));
+      tl.from(q(".loop-label"), { y: 25, opacity: 0, duration: 0.3 }, at(4) + 0.35);
+      tl.from(q(".arch-note"), { opacity: 0, y: 15, duration: 0.2 }, at(5) + 0.4);
+      tl.from(q(".fence-g"), { scale: 1.12, opacity: 0, transformOrigin: "50% 50%", duration: 0.5 }, at(5));
+      tl.to(q(".pr, .code-node, .w0, .w-post, .loop, .loop-label, .fan, .into"), { opacity: 0.3, duration: 0.4 }, at(5) + 0.1);
+    },
+
+    "Field week"(tl, q) {
+      tl.from(q(".wall > div"), {
+        y: -140, rotation: (i) => [-7, 5, -3, 8, -6, 4, -5, 6][i % 8], opacity: 0,
+        stagger: 0.06, ease: "bounce.out", duration: 0.35,
+      }, at(1));
+      tl.from(q(".stage > .small"), { opacity: 0, duration: 0.2 }, at(1) + 0.5);
+      tl.from(q(".off"), { scale: 2.4, rotation: -14, opacity: 0, ease: "back.out(1.8)", duration: 0.4 }, at(2));
+      tl.to(q(".wall"), { opacity: 0.35, duration: 0.3 }, at(3));
+      tl.from(q(".quote"), { y: 50, opacity: 0, duration: 0.45 }, at(3) + 0.1);
+    },
+
+    "Quiet the human surface"(tl, q) {
+      const items = q(".quiet-list li");
+      gsap.set(items, { opacity: 0.25 });
+      tl.to([items[0], items[1]], { opacity: 1, stagger: 0.15, duration: 0.3 }, at(1));
+      tl.to(q(".mini-wall .extra"), {
+        opacity: 0, scale: 0.4, height: 0, paddingTop: 0, paddingBottom: 0, marginBottom: 0, borderWidth: 0,
+        stagger: 0.05, duration: 0.45,
+      }, at(1) + 0.1);
+      tl.from(q(".fold"), { opacity: 0, scale: 0.5, duration: 0.3 }, at(1) + 0.4);
+      tl.to(items[2], { opacity: 1, duration: 0.3 }, at(2));
+      tl.to(q(".mini-wall"), { opacity: 0.4, duration: 0.3 }, at(2));
+      tl.from(q(".layer"), { y: 50, opacity: 0, duration: 0.45 }, at(2) + 0.15);
+      tl.to(items[3], { opacity: 1, duration: 0.3 }, at(3));
+      tl.from(q(".reply"), { x: 80, opacity: 0, duration: 0.45 }, at(3) + 0.1);
+    },
+
+    "Cost ladder"(tl, q) {
+      const rows = q(".row"), bars = q(".bar");
+      tl.from(rows[0], { opacity: 0, y: 20, duration: 0.2 }, at(1));
+      tl.fromTo(bars[0], { width: "0%" }, { width: "45%", duration: 0.5 }, at(1) + 0.1);
+      tl.from(rows[1], { opacity: 0, y: 20, duration: 0.2 }, at(2));
+      tl.to(bars[0], { width: "20%", duration: 0.5 }, at(2) + 0.1);
+      tl.fromTo(bars[1], { width: "0%" }, { width: "45%", duration: 0.5 }, at(2) + 0.1);
+      tl.from(rows[2], { opacity: 0, y: 20, duration: 0.2 }, at(3));
+      tl.to(bars[0], { width: "9%", duration: 0.55 }, at(3) + 0.1);
+      tl.to(bars[1], { width: "20%", duration: 0.55 }, at(3) + 0.1);
+      tl.fromTo(bars[2], { width: "0%" }, { width: "100%", duration: 0.55 }, at(3) + 0.1);
+      tl.from(q(".pill"), { opacity: 0, y: 20, duration: 0.25 }, at(3) + 0.45);
+    },
+
+    "Model comparison"(tl, q) {
+      const bars = q(".bar");
+      tl.from(q(".bars"), { opacity: 0, duration: 0.2 }, at(1));
+      tl.fromTo(bars[0], { width: "0%" }, { width: "100%", duration: 0.5 }, at(1) + 0.1);
+      tl.fromTo(bars[1], { width: "0%" }, { width: "89%", duration: 0.5 }, at(1) + 0.1);
+      tl.from(q(".stage > .small"), { opacity: 0, duration: 0.2 }, at(1) + 0.5);
+      tl.from(q(".stamp"), { scale: 2.4, rotation: -16, opacity: 0, ease: "back.out(1.8)", duration: 0.4 }, at(2));
+      tl.from(q(".ticks li"), { opacity: 0, x: -30, stagger: 0.1, duration: 0.3 }, at(2) + 0.3);
+    },
+
+    "Required steps in code"(tl, q) {
+      gsap.set(q(".truth"), { opacity: 0 });
+      gsap.set(q(".hatch"), { opacity: 0 });
+      tl.to(q(".look"), { opacity: 0, duration: 0.25 }, at(1));
+      tl.to(q(".truth"), { opacity: 1, duration: 0.25 }, at(1) + 0.2);
+      tl.to(q(".hatch"), { opacity: 1, duration: 0.35 }, at(1) + 0.2);
+      tl.fromTo(q(".skip"), { scale: 1 }, { scale: 1.12, duration: 0.15, yoyo: true, repeat: 1, immediateRender: false }, at(1) + 0.2);
+      tl.from(q(".after-row"), { y: 40, opacity: 0, duration: 0.45 }, at(2));
+    },
+
+    "Rollout"(tl, q) {
+      const track = q(".tl-track")[0], runner = q(".tl-runner")[0];
+      const segs = [[150, 521], [521, 893], [893, 1450]];
+      segs.forEach(([x0, x1], i) => {
+        tl.fromTo(runner, { attr: { cx: x0 } }, { attr: { cx: x1 }, ease: "none", duration: 0.7, immediateRender: i === 0 }, at(i + 1));
+        tl.fromTo(track, { attr: { x2: x0 } }, { attr: { x2: x1 }, ease: "none", duration: 0.7, immediateRender: i === 0 }, at(i + 1));
+      });
+      q(".tl-node").forEach((node) => {
+        const x = Number(node.dataset.x);
+        if (x === 150) return;
+        const i = segs.findIndex(([x0, x1]) => x > x0 && x <= x1);
+        const [x0, x1] = segs[i];
+        tl.from(node, { opacity: 0, scale: 0.4, transformOrigin: "50% 50%", ease: "back.out(2)", duration: 0.18 }, at(i + 1) + 0.7 * (x - x0) / (x1 - x0) - 0.1);
+      });
+      tl.from(q(".tl-coda"), { opacity: 0, y: 20, duration: 0.2 }, at(3) + 0.55);
+      tl.to(q(".diagram"), { opacity: 0.5, duration: 0.25 }, at(4));
+      tl.from(q(".phases > div"), { y: 50, opacity: 0, stagger: 0.08, duration: 0.35 }, at(4) + 0.05);
+      tl.from(q(".deferred"), { opacity: 0, x: -40, duration: 0.25 }, at(4) + 0.45);
+    },
+  };
+
+  if (motion) {
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+    root.classList.add("motion");
+
+    gsap.to(".progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
+
+    slides.forEach((s) => {
+      if (s.style.display === "none") return;
+      const q = (sel) => [...s.querySelectorAll(sel)];
+      const steps = Number(s.dataset.steps || 1);
+
+      if (steps > 1) {
+        const tl = gsap.timeline({
+          defaults: { ease: "power2.inOut", duration: 0.5 },
+          scrollTrigger: { trigger: s, start: "top top", end: `+=${(steps - 1) * 100}%`, pin: true, scrub: 0.6 },
+        });
+        builders[s.dataset.title]?.(tl, q);
+        tl.set({}, {}, steps - 1);
+        pins.set(s, tl.scrollTrigger);
+      } else {
+        const rise = q(".rise");
+        if (rise.length) {
+          gsap.from(rise, {
+            y: 60, opacity: 0, stagger: 0.07, ease: "power2.out",
+            scrollTrigger: { trigger: s, start: "top 85%", end: "top 15%", scrub: 0.6 },
+          });
+        }
+        const bars = q(".bars .bar");
+        if (bars.length) {
+          gsap.from(bars, { width: "0%", stagger: 0.12, ease: "power2.out", scrollTrigger: { trigger: s, start: "top 60%", end: "top 5%", scrub: 0.6 } });
+        }
+      }
+
+      const deco = q(".deco");
+      if (deco.length) {
+        const tilt = (el) => (el.classList.contains("diamond") ? 45 : el.classList.contains("ring") ? -45 : 0);
+        gsap.set(deco, { rotate: 0 });
+        gsap.fromTo(deco, { yPercent: 40, rotation: (i, el) => tilt(el) - 12 }, {
+          yPercent: -40, rotation: (i, el) => tilt(el) + 12, ease: "none",
+          scrollTrigger: { trigger: s, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      }
+    });
+
+    const cover = slides[0];
+    gsap.to(cover.querySelector(".title"), {
+      scale: 0.82, yPercent: -25, transformOrigin: "0% 0%", ease: "none",
+      scrollTrigger: { trigger: cover, start: "top top", end: "bottom top", scrub: true },
+    });
+
+    document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  }
+
+  // one stop per step: pinned sections get one per step, others one at their top
+  const stops = () => slides.filter((s) => s.style.display !== "none").flatMap((s) => {
+    const st = pins.get(s);
+    if (st) {
+      const n = Number(s.dataset.steps);
+      return Array.from({ length: n }, (_, k) => ({ top: st.start + (st.end - st.start) * k / (n - 1), slide: s }));
+    }
+    const n = motion ? 1 : Math.max(1, Math.round(s.offsetHeight / innerHeight));
+    const top = s.getBoundingClientRect().top + scrollY;
+    return Array.from({ length: n }, (_, k) => ({ top: top + k * innerHeight, slide: s }));
+  });
+
+  const currentIndex = (list) => {
+    const y = scrollY + innerHeight * 0.3;
+    let i = 0;
+    list.forEach((s, j) => { if (s.top <= y) i = j; });
+    return i;
+  };
+
+  let target = null;
+  const go = (delta) => {
+    const list = stops();
+    const from = target ?? currentIndex(list);
+    target = Math.max(0, Math.min(list.length - 1, from + delta));
+    const y = Math.round(list[target].top);
+    const done = () => { target = null; };
+    if (motion) gsap.to(window, { scrollTo: { y, autoKill: false }, duration: 1.1, ease: "power2.inOut", overwrite: true, onComplete: done });
+    else { scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" }); setTimeout(done, 700); }
+  };
+
+  // speaker notes
+  const panel = document.querySelector(".notes-panel");
+  let notesWin = null;
+  let started = null;
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  const notesHtml = () => {
+    const list = stops();
+    const slide = list[currentIndex(list)].slide;
+    const i = slides.indexOf(slide);
+    const planned = slides.slice(0, i + 1).reduce((t, s) => t + Number(s.dataset.time || 0), 0);
+    const elapsed = started ? (Date.now() - started) / 1000 : 0;
+    const over = started && elapsed > planned + 30;
+    const next = slides[i + 1];
+    return `<p style="font-weight:800;margin:0 0 .3rem">${i + 1}. ${slide.dataset.title} · ${fmt(Number(slide.dataset.time || 0))}</p>
+      <p style="margin:0 0 .8rem;opacity:.85;color:${over ? "#f2d58c" : "inherit"}">elapsed ${fmt(elapsed)} · plan by end of slide ${fmt(planned)}${next ? ` · next: ${next.dataset.title}` : ""}</p>
+      ${slide.querySelector(".notes")?.innerHTML ?? ""}`;
+  };
+
+  const renderNotes = () => {
+    if (notesWin && !notesWin.closed) notesWin.document.getElementById("n").innerHTML = notesHtml();
+    if (!panel.hidden) panel.innerHTML = notesHtml();
+  };
+
+  const openNotes = () => {
+    started ??= Date.now();
+    notesWin = window.open("", "deck-notes", "width=760,height=900");
+    if (!notesWin) { panel.hidden = !panel.hidden; renderNotes(); return; }
+    notesWin.document.title = "Speaker notes";
+    notesWin.document.body.innerHTML = '<div id="n"></div>';
+    notesWin.document.body.style.cssText = "font:22px/1.5 system-ui,sans-serif;padding:24px 32px;background:#251e37;color:#ece4cd";
+    renderNotes();
+  };
+
+  setInterval(renderNotes, 1000);
+  addEventListener("scroll", () => requestAnimationFrame(renderNotes), { passive: true });
+
+  addEventListener("keydown", (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key;
+    if (k === "ArrowDown" || k === "ArrowRight" || k === "PageDown" || (k === " " && !e.shiftKey)) { e.preventDefault(); go(1); }
+    else if (k === "ArrowUp" || k === "ArrowLeft" || k === "PageUp" || (k === " " && e.shiftKey)) { e.preventDefault(); go(-1); }
+    else if (k === "Home") { e.preventDefault(); go(-1e6); }
+    else if (k === "End") { e.preventDefault(); go(1e6); }
+    else if (k === "n") openNotes();
+    else if (k === "o") { panel.hidden = !panel.hidden; renderNotes(); }
+    else if (k === "t") {
+      const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
+    }
+  });
+
+  window.deck = { stops };
+
+  // ?stop=N jumps straight to a stop, used for screenshots
+  const stop = Number(params.get("stop"));
+  if (stop) {
+    const jump = () => { const list = stops(); scrollTo(0, list[Math.min(stop, list.length - 1)].top); };
+    if (motion) { ScrollTrigger.refresh(); jump(); ScrollTrigger.update(); } else jump();
+  }
+})();
+</script>
+</body>
+</html>
