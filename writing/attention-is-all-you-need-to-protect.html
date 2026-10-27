@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Attention is all you need (to protect) · James Wiesebron</title>
-<meta name="description" content="Developer attention is the scarcest thing in AI-assisted work. Every AI tool spends it or saves it, and people only stop spending it on supervision once they can trust what the agent did.">
+<meta name="description" content="Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did.">
 <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -891,7 +891,7 @@ html.motion .dots i { background: var(--coral); }
   <span class="deco circle" style="bottom: 12vh; right: 16vw; width: 8rem; aspect-ratio: 1"></span>
   <span class="kicker rise"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Attention</span>
   <h1 class="title rise">Attention is all you need (to protect)</h1>
-  <p class="dek rise">Developer attention is the scarcest thing in AI-assisted work. Every AI tool spends it or saves it, and people only stop spending it on supervision once they can trust what the agent did.</p>
+  <p class="dek rise">Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did.</p>
   <p class="byline rise">James Wiesebron <span>October 2026 · Examples from an AI code reviewer I built and ran in production, and from my personal research systems</span></p>
 </header>
 
@@ -901,7 +901,8 @@ html.motion .dots i { background: var(--coral); }
   <div class="prose-only">
     <p class="rise">The first week an AI code reviewer I built ran on real pull requests, it caught real problems, including a compile break across packages. It also left one PR seven non-blocking comments on a single push and five more two days later. The team that owned that repo turned it off.</p>
     <p class="rise">The findings held up. What the reviewer got wrong was how much of people's attention it spent.</p>
-    <p class="rise">Every AI tool for developers makes that trade. It can take load off people or add to it, and accuracy alone doesn't decide which. That depends on how carefully the tool spends attention, and on whether people trust its work enough to stop checking all of it. The second is what I mean by <a href="intentional-agentic-work.html">runtime alignment</a>, keeping an agent doing what you intended while it runs, with evidence you can check.</p>
+    <p class="rise">Every AI tool makes that trade. It can take load off people or add to it, and accuracy alone doesn't decide which. That depends on how carefully the tool spends attention, and on whether people trust its work enough to stop checking all of it. The second is what I mean by <a href="intentional-agentic-work.html">runtime alignment</a>, keeping an agent doing what you intended while it runs, with evidence you can check.</p>
+    <p class="rise">The same trade shows up whenever AI reviews or produces work for people. An assistant that flags every possible issue in a contract, drafts dozens of support replies, or summarizes a week of research can bury the one thing a person needed to see. I've seen it most clearly in developer tooling, so that's where the examples here come from.</p>
   </div>
 </section>
 
@@ -1029,7 +1030,7 @@ html.motion .dots i { background: var(--coral); }
 <section class="chapter">
   <h2>Give shared tools an owner</h2>
   <div class="prose-only">
-    <p class="rise">Most AI developer tooling starts as somebody's side project and ends up maintained in their spare time. Regressions sit, people stop trusting the tool, and they go back to checking everything themselves.</p>
+    <p class="rise">Most internal AI tooling starts as somebody's side project and ends up maintained in their spare time. Regressions sit, people stop trusting the tool, and they go back to checking everything themselves.</p>
     <p class="rise">Shared tools need an owner who keeps them working, tracks what they cost, and decides what to keep, change or stop based on feedback and evidence. That owner should also prefer existing tools when they meet the need, and accept that a fix without AI is sometimes the right answer. The evidence that counts comes from other teams.</p>
   </div>
 </section>
