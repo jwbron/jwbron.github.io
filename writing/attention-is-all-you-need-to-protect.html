@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attention is all you need (to protect) · James Wiesebron</title>
+<meta name="description" content="Developer attention is the scarcest thing in AI-assisted work. Every AI tool spends it or saves it, and people only stop spending it on supervision once they can trust what the agent did.">
+<meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://jameswiesebron.com/writing/attention-is-all-you-need-to-protect.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Attention is all you need (to protect) · James Wiesebron">
+<meta property="og:url" content="https://jameswiesebron.com/writing/attention-is-all-you-need-to-protect.html">
+<meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+<style>
+/* Tokens match jameswiesebron.com: kanagawa-inspired pastels, violet ink dark mode. */
+:root {
+  --bg: #f1ecf7;
+  --bg-2: #e6def2;
+  --card: #fcf9ff;
+  --ink: #261d38;
+  --ink-2: #5d5373;
+  --line-c: #261d38;
+
+  --coral: #f2a28c;
+  --peri: #93a6ee;
+  --butter: #f2d58c;
+  --mint: #9fd6c0;
+  --sakura: #efb0c7;
+  --violet: #b8a1e0;
+  --cobalt: #3a52e6;
+  --on: #261d38;
+
+  --contrast-bg: #2f2546;
+  --contrast-fg: #efe7d2;
+  --contrast-accent: #f2d58c;
+
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --text: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --gutter: clamp(1rem, 4.5vw, 5.5rem);
+  --line: 3px solid var(--line-c);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #251e37;
+    --bg-2: #2d2542;
+    --card: #322a4b;
+    --ink: #ece4cd;
+    --ink-2: #b9afcb;
+    --line-c: #ece4cd;
+    --cobalt: #6f86ff;
+    --contrast-bg: #b8a1e0;
+    --contrast-fg: #261d38;
+    --contrast-accent: #261d38;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #251e37;
+  --bg-2: #2d2542;
+  --card: #322a4b;
+  --ink: #ece4cd;
+  --ink-2: #b9afcb;
+  --line-c: #ece4cd;
+  --cobalt: #6f86ff;
+  --contrast-bg: #b8a1e0;
+  --contrast-fg: #261d38;
+  --contrast-accent: #261d38;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  /* sized for a 1080p screen share: about 30px body text at 1920 wide */
+  font-size: clamp(15px, 1.6vw + 0.35vh, 40px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--text);
+  line-height: 1.4;
+  counter-reset: slide;
+}
+
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { text-wrap: pretty; margin: 0; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em; }
+
+/* ---------- progress and chrome ---------- */
+
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: 6px;
+  background: var(--cobalt);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+.mark {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--line-c);
+  &.d1 { background: var(--coral); border-radius: 50%; }
+  &.d2 { background: var(--butter); rotate: 45deg; scale: 0.85; }
+  &.d3 { background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); border: 0; }
+}
+
+/* ---------- slides ---------- */
+
+.slide {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  border-bottom: var(--line);
+  counter-increment: slide;
+}
+
+.slide:nth-of-type(even) { background: var(--bg-2); }
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: clamp(2rem, 5.5vh, 4.5rem) var(--gutter) clamp(2.5rem, 6.5vh, 4.5rem);
+  overflow: clip;
+}
+
+.num {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 1.4rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--ink-2);
+  &::before { content: counter(slide, decimal-leading-zero); }
+}
+
+.backup .num::before { content: "backup"; }
+
+
+.kicker {
+  align-self: flex-start;
+  padding: 0.15rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 999px;
+}
+
+.title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5.6vw, 5.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  max-width: 17ch;
+}
+
+h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.3vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  max-width: 24ch;
+}
+
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  max-width: 40ch;
+  font-size: 1.1rem;
+  color: var(--ink-2);
+}
+
+mark {
+  color: var(--on);
+  padding: 0 0.15em;
+  background: var(--butter);
+  border-radius: 0.2em 0.6em 0.2em 0.6em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  &.m2 { background: var(--mint); }
+  &.m3 { background: var(--sakura); }
+}
+
+.small { font-size: 0.9rem; color: var(--ink-2); }
+
+.card {
+  padding: 1rem 1.2rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px 22px 4px 4px;
+  & h3 { margin-bottom: 0.35rem; }
+  & p { font-size: 1rem; color: var(--ink-2); }
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+
+.ticks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  & li {
+    position: relative;
+    padding-left: 1.5rem;
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.42em;
+      width: 0.6rem;
+      height: 0.6rem;
+      background: var(--coral);
+      border: 2px solid var(--line-c);
+      rotate: 45deg;
+    }
+  }
+}
+
+.pill {
+  align-self: flex-start;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 999px;
+}
+
+.quote {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.6vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 28ch;
+}
+
+.ph {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ink);
+  border: 2.5px dashed var(--coral);
+  border-radius: 6px;
+}
+
+/* decorative shapes, never data */
+.deco {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: var(--line);
+  &.circle { border-radius: 50%; background: var(--coral); }
+  &.diamond { background: var(--butter); rotate: 45deg; }
+  &.tri { border: 0; background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  &.ring { background: none; border: clamp(0.8rem, 1.4vw, 1.4rem) solid var(--cobalt); border-left-color: transparent; border-bottom-color: transparent; border-radius: 50%; rotate: -45deg; }
+  &.stripe { border: 0; background: repeating-linear-gradient(-45deg, var(--mint) 0 10px, transparent 10px 20px); }
+}
+
+/* ---------- title slide ---------- */
+
+.cover .stage { gap: 1.8rem; }
+.cover .byline { font-weight: 700; font-size: 1rem; }
+.cover .byline span { display: block; font-weight: 400; color: var(--ink-2); }
+
+/* ---------- chain (why now) ---------- */
+
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  & .link {
+    padding: 0.9rem 1.2rem;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 999px;
+  }
+  & .link:nth-of-type(2) { background: var(--butter); color: var(--on); }
+  & .link:nth-of-type(3) { background: var(--sakura); color: var(--on); }
+  & .link:nth-of-type(4) { background: var(--coral); color: var(--on); }
+  & .arrow { font-family: var(--display); font-size: 1.4rem; }
+}
+
+/* ---------- goals ---------- */
+
+.goals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  & div {
+    min-height: 6.5rem;
+    padding: 1.2rem;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.15;
+    color: var(--on);
+    border: var(--line);
+    border-radius: 4px;
+  }
+  & div:nth-child(1) { background: var(--mint); }
+  & div:nth-child(2) { background: var(--butter); border-radius: 50% 50% 4px 4px / 30% 30% 4px 4px; }
+  & div:nth-child(3) { background: var(--peri); }
+  & div:nth-child(4) { background: var(--sakura); border-radius: 4px 40px 4px 4px; }
+}
+
+/* ---------- two tools ---------- */
+
+.versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.2rem;
+  align-items: stretch;
+  & .plus { align-self: center; font-family: var(--display); font-weight: 800; font-size: 1.6rem; }
+}
+
+.gap {
+  align-self: flex-start;
+  padding: 0.8rem 1.2rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--on);
+  background: var(--butter);
+  border: var(--line);
+  border-radius: 4px 30px 4px 30px;
+}
+
+/* ---------- diagrams ---------- */
+
+.diagram { width: 100%; height: auto; max-height: 62vh; overflow: visible; }
+.build .stage { gap: 1rem; }
+h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
+.diagram text { fill: var(--ink); font-family: var(--text); font-size: 32px; }
+.diagram .t-b { font-weight: 700; }
+.diagram .t-s { font-size: 25px; fill: var(--ink-2); }
+.diagram .box { stroke: var(--line-c); stroke-width: 3; }
+.diagram .code { fill: var(--butter); }
+.diagram .model { fill: var(--peri); }
+.diagram .event { fill: var(--coral); }
+.diagram .on-pastel { fill: #261d38; }
+.diagram .wire { fill: none; stroke: var(--line-c); stroke-width: 3; }
+.diagram .loop { fill: none; stroke: var(--cobalt); stroke-width: 4; }
+.diagram .fence { fill: none; stroke: var(--cobalt); stroke-width: 4; stroke-dasharray: 14 10; }
+.diagram .fence-label { fill: var(--cobalt); font-weight: 700; }
+.diagram .fence-label.t-s { fill: var(--cobalt); }
+.diagram .track { fill: none; stroke: var(--cobalt); stroke-width: 8; stroke-linecap: round; }
+.diagram .node { fill: var(--card); stroke: var(--line-c); stroke-width: 4; }
+.diagram .node.hot { fill: var(--coral); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  & span { display: inline-flex; gap: 0.4rem; align-items: center; }
+  & i { width: 1.1rem; height: 1.1rem; border: 2.5px solid var(--line-c); border-radius: 4px; }
+}
+
+/* ---------- bars (single hue, direct labels) ---------- */
+
+.bars {
+  display: grid;
+  gap: 1rem;
+  max-width: 62rem;
+  & .row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 16rem) 1fr;
+    gap: 0.4rem 1.2rem;
+    align-items: center;
+  }
+  & .label { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+  & .label span { display: block; font-weight: 400; color: var(--ink-2); }
+  & .lane {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: calc(100% - 7rem);
+  }
+  & .bar {
+    flex: none;
+    height: 2.4rem;
+    width: var(--w);
+    min-width: 0.6rem;
+    background: var(--cobalt);
+    border-radius: 0 6px 6px 0;
+    transform-origin: 0 50%;
+  }
+  & .bar.muted { background: var(--ink-2); }
+  & .val {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+}
+
+.stamp {
+  align-self: flex-start;
+  padding: 0.5rem 1.1rem;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--on);
+  background: var(--mint);
+  border: var(--line);
+  rotate: -3deg;
+}
+
+/* ---------- comment wall ---------- */
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+  gap: 0.5rem;
+  max-width: none;
+  & div {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.95rem;
+    background: var(--card);
+    border: 2.5px solid var(--line-c);
+    border-radius: 4px 14px 4px 4px;
+  }
+  & b { display: block; font-size: 1rem; }
+}
+
+.off {
+  align-self: flex-start;
+  padding: 0.6rem 1.1rem;
+  font-weight: 800;
+  color: var(--on);
+  background: var(--coral);
+  border: var(--line);
+  rotate: 2deg;
+}
+
+/* ---------- quieter surface ---------- */
+
+.mock {
+  padding: 0.9rem 1.1rem;
+  font-size: 0.95rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px;
+  & .who { font-weight: 800; font-size: 0.8rem; color: var(--ink-2); margin-bottom: 0.3rem; }
+  & details { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px dashed var(--ink-2); color: var(--ink-2); }
+  & summary { font-weight: 700; cursor: pointer; }
+}
+
+/* ---------- dispatch trial ---------- */
+
+.runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  & div {
+    display: grid;
+    place-items: center;
+    width: 7.5rem;
+    height: 7.5rem;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border: var(--line);
+    border-radius: 50%;
+  }
+  & .ok { background: var(--mint); color: var(--on); }
+}
+
+/* ---------- flow chips ---------- */
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  & b {
+    padding: 0.5rem 1rem;
+    font-family: var(--display);
+    font-weight: 600;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 4px;
+  }
+  & span { font-size: 0.85rem; font-weight: 700; color: var(--ink-2); }
+}
+
+.roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.8rem;
+  & div { padding: 0.8rem 1rem; background: var(--card); border: var(--line); border-radius: 4px; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+  & span { font-size: 0.95rem; color: var(--ink-2); }
+}
+
+.reported {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  vertical-align: 0.2em;
+  border: 2px solid var(--line-c);
+  border-radius: 999px;
+}
+
+.beliefs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+  counter-reset: belief;
+  & li {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2.1vw, 2rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+}
+
+
+/* ---------- quieter surface visual ---------- */
+
+.quiet-visual { display: grid; gap: 0.8rem; align-content: start; }
+.ticks { align-content: start; align-self: start; }
+.mini-wall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  & div {
+    white-space: nowrap;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--card);
+    border: 2.5px solid var(--line-c);
+    border-radius: 4px 12px 4px 4px;
+  }
+  & .extra { display: none; }
+  & .fold { color: var(--on); background: var(--butter); border-style: dashed; }
+}
+.reply p { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+
+/* ---------- dispatch trial flip ---------- */
+
+.runs .skip { position: relative; overflow: hidden; background: var(--card); }
+.runs .skip span { position: relative; }
+.runs .hatch {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, var(--coral) 0 8px, var(--card) 8px 16px);
+}
+.runs .look { display: none; }
+.runs .truth { color: var(--ink); }
+
+
+/* ---------- buy-in, phases, proof ---------- */
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: 1.2rem 2.4rem;
+  align-items: start;
+}
+.yes { display: grid; gap: 0.6rem; }
+.yes .card { padding: 0.7rem 1rem; }
+.yes .card b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.yes .card span { font-size: 0.9rem; color: var(--ink-2); }
+.goals-sm div { min-height: 4.6rem; padding: 0.8rem 1rem; font-size: 0.95rem; }
+.goals-label { margin-bottom: -0.6rem; }
+.diagram.tl, .diagram.arch { flex: 1 1 0; min-height: 0; width: 100%; height: auto; max-height: none; }
+.diagram.tl text { font-size: 36px; }
+.diagram.tl .t-s { font-size: 29px; }
+.toprow { display: flex; flex-wrap: wrap; gap: 0.8rem 1.6rem; align-items: center; }
+.phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.7rem;
+  & div { padding: 0.6rem 0.9rem; background: var(--card); border: var(--line); border-radius: 4px 18px 4px 4px; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.9rem; color: var(--cobalt); }
+  & span { font-size: 0.95rem; }
+}
+.deferred { font-size: 0.95rem; color: var(--ink-2); }
+.deferred b { color: var(--ink); }
+.proof {
+  padding: 1rem 1.2rem;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 4px 26px 4px 4px;
+  & h3 { margin-bottom: 0.35rem; }
+  & p { font-size: 1rem; }
+}
+.grid.next { grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+.grid.next .card { padding: 0.7rem 0.9rem; }
+
+/* ---------- notes ---------- */
+
+.notes { display: none; }
+
+.notes-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 1rem 1.2rem;
+  font-size: 0.7rem;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+}
+
+.notes-panel[hidden] { display: none; }
+
+.help {
+  position: fixed;
+  left: 1rem;
+  bottom: 0.8rem;
+  z-index: 5;
+  font-size: 0.6rem;
+  color: var(--ink-2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.help.show { opacity: 0.85; }
+
+@media (max-width: 760px) {
+  .goals { grid-template-columns: 1fr 1fr; }
+  .versus { grid-template-columns: 1fr; }
+  .versus .plus { justify-self: center; }
+  .bars .row { grid-template-columns: 1fr; }
+  .help { display: none; }
+}
+
+/* ---------- motion ----------
+   GSAP drives every animation from the natural (final) layout, so reduced
+   motion or a missing script leaves a complete static deck. */
+
+.pin-spacer { background: inherit; }
+.runner { fill: var(--coral); stroke: var(--line-c); stroke-width: 4; }
+.progress { display: none; }
+html.motion .progress { display: block; }
+.runner { display: none; }
+html.motion .runner { display: inline; }
+html.motion .mini-wall .extra { display: block; }
+html.motion .runs .look { display: block; }
+html.motion .runs .skip { background: var(--mint); color: var(--on); }
+.runs div > span { grid-area: 1 / 1; }
+
+/* ---------- writeup ---------- */
+
+html { font-size: clamp(16px, 0.55vw + 0.62rem, 21px); }
+body { line-height: 1.65; }
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.4rem;
+  padding: 5rem var(--gutter) 4rem;
+  border-bottom: var(--line);
+  overflow: clip;
+}
+.hero .title { font-size: clamp(2.4rem, 6vw, 5.6rem); max-width: 17ch; }
+.dek { max-width: 36rem; font-size: 1.25rem; color: var(--ink-2); }
+.byline { font-weight: 700; }
+.byline span { display: block; font-weight: 400; color: var(--ink-2); }
+.home-link { position: absolute; top: 1.4rem; left: var(--gutter); display: inline-flex; gap: 0.4rem; align-items: center; font-family: var(--display); font-weight: 600; font-size: 0.85rem; text-decoration: none; }
+
+.chapter { padding: 5rem var(--gutter) 3rem; border-bottom: var(--line); }
+.chapter:nth-of-type(even) { background: var(--bg-2); }
+.chapter > h2, .chapter > .kicker, .prose-only {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+.chapter > .kicker { display: block; width: fit-content; margin-bottom: 1rem; }
+.chapter:has(.story) > h2, .chapter:has(.story) > .kicker { max-width: 92rem; }
+.chapter:has(.story) > .kicker { margin-left: max(0px, calc((100% - 92rem) / 2)); }
+.chapter > h2 { margin-bottom: 2rem; font-size: clamp(1.7rem, 3.4vw, 2.8rem); }
+.chapter p { margin: 0 0 1.15rem; font-size: 1.12rem; }
+
+.story {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.45fr);
+  gap: 3rem;
+  max-width: 92rem;
+  margin: 0 auto;
+}
+.story .prose { padding-bottom: 20vh; }
+.story .prose p { font-size: 1.12rem; }
+@media (min-width: 901px) {
+  html.motion .story .prose p[data-step] { padding-block: 26vh; margin: 0; }
+  html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
+}
+.story .visual {
+  position: sticky;
+  top: 8vh;
+  height: 84vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 6px 36px 6px 6px;
+  overflow: clip;
+}
+.visual .diagram { max-height: none; flex: 1 1 0; min-height: 0; }
+.visual .diagram text { font-size: 36px; }
+.visual .diagram .t-s { font-size: 28px; }
+.visual .diagram.tl text { font-size: 34px; }
+.visual .diagram.tl .t-s { font-size: 28px; }
+
+.figure {
+  max-width: 64rem;
+  margin: 2rem auto 2.4rem;
+}
+
+.pullquote {
+  max-width: 44rem;
+  margin: 2.6rem auto;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.pullquote::before { content: ""; display: block; width: 3rem; height: 6px; margin-bottom: 1rem; background: var(--coral); }
+
+.visual .chain .link { font-size: 1rem; }
+.visual .goals div { min-height: 5rem; font-size: 0.95rem; }
+.visual .mini-wall div { font-size: 0.95rem; }
+.visual .off { font-size: 1.05rem; }
+.visual .bars .row { grid-template-columns: minmax(8rem, 13rem) 1fr; }
+.visual .runs div { width: 6.5rem; height: 6.5rem; font-size: 0.75rem; }
+
+.closing { max-width: 44rem; margin: 0 auto; }
+.closing .beliefs li { font-size: clamp(1.2rem, 2.2vw, 1.8rem); }
+.closing .last-line { margin-top: 2rem; font-family: var(--display); font-weight: 600; font-size: clamp(1.3rem, 2.4vw, 2rem); line-height: 1.2; letter-spacing: -0.02em; }
+.figure.phases { max-width: 64rem; }
+.footer { padding: 3rem var(--gutter); text-align: center; color: var(--ink-2); font-size: 0.9rem; }
+
+@media (max-width: 900px) {
+  .story { grid-template-columns: 1fr; gap: 1rem; }
+  .story .visual { order: -1; position: static; height: auto; min-height: 0; }
+  .story .visual .diagram { flex: none; height: auto; }
+  .story .prose { padding-bottom: 0; }
+  .hero .deco { display: none; }
+  .goals { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- essay figures ---------- */
+
+.hero .kicker a { text-decoration: none; }
+.hero .byline { max-width: 34rem; }
+.meter { display: grid; grid-template-columns: auto 1fr; gap: 0.7rem; align-items: center; font-size: 0.8rem; font-weight: 800; }
+.meter-track { height: 1rem; background: var(--bg); border: 2.5px solid var(--line-c); border-radius: 999px; overflow: hidden; }
+.meter-fill { height: 100%; width: 85%; background: var(--mint); }
+.lane-a .meter-fill { width: 18%; background: var(--coral); }
+
+.inbox { display: none; flex-wrap: wrap; gap: 0.4rem; }
+html.motion .inbox { display: flex; }
+.inbox div, .bin span, .lane-flow span {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--card);
+  border: 2.5px solid var(--line-c);
+  border-radius: 4px 12px 4px 4px;
+}
+.bins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.bin { display: grid; gap: 0.4rem; align-content: start; padding: 0.7rem; border: var(--line); border-radius: 6px; }
+.bin b { font-family: var(--display); font-weight: 600; font-size: 0.9rem; }
+.bin.now { color: var(--on); background: var(--coral); }
+.bin.later { color: var(--on); background: var(--butter); }
+.bin.never { background: var(--card); border-style: dashed; }
+.bin span { font-size: 0.72rem; color: var(--ink); }
+
+.lane-row { display: grid; gap: 0.6rem; padding: 0.9rem 1rem; border: var(--line); border-radius: 6px; }
+.lane-title { font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.lane-flow { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.lane-flow i { font-style: normal; font-weight: 800; }
+.lane-b { background: color-mix(in srgb, var(--mint) 25%, transparent); }
+
+.align-chain { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.node-box { padding: 0.6rem 0.9rem; background: var(--card); border: var(--line); border-radius: 6px; }
+.node-box b { display: block; font-family: var(--display); font-weight: 600; }
+.node-box span { font-size: 0.75rem; color: var(--ink-2); }
+.node-box.intent { color: var(--on); background: var(--butter); }
+.node-box.intent span { color: var(--on); }
+.check { display: grid; justify-items: center; gap: 0.2rem; font-size: 0.65rem; font-weight: 700; color: var(--ink-2); }
+.check i { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; font-style: normal; font-weight: 800; color: var(--on); background: var(--mint); border: 2.5px solid var(--line-c); border-radius: 50%; }
+.fence-box { position: relative; display: flex; gap: 0.5rem; align-items: center; padding: 1.7rem 0.7rem 0.7rem; border: 3px dashed var(--cobalt); border-radius: 14px; }
+.fence-tag { position: absolute; top: 0.35rem; left: 0.8rem; font-size: 0.7rem; font-weight: 800; color: var(--cobalt); }
+
+.grid-label { font-family: var(--display); font-weight: 600; }
+.grid-label .before { display: none; }
+html.motion .grid-label .before { display: inline; }
+html.motion .grid-label .after { display: none; }
+.dots { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 0.45rem; }
+.dots i { aspect-ratio: 1; background: var(--mint); border: 2.5px solid var(--line-c); border-radius: 50%; }
+html.motion .dots i { background: var(--coral); }
+.footer p { margin: 0.4rem 0; }
+
+/* figures read at a larger size inside the sticky card */
+.visual .meter { font-size: 0.95rem; }
+.visual .meter-track { height: 1.3rem; }
+.visual .inbox div, .visual .lane-flow span { font-size: 0.95rem; }
+.visual .bin b { font-size: 1.1rem; }
+.visual .bin span { font-size: 0.85rem; }
+.visual .lane-title { font-size: 1.1rem; }
+.visual .node-box { padding: 0.7rem 0.9rem; }
+.visual .node-box b { font-size: 1.1rem; }
+.visual .check { font-size: 0.65rem; }
+.visual .align-chain { gap: 0.4rem; flex-wrap: nowrap; }
+@media (max-width: 900px) { .visual .align-chain { flex-wrap: wrap; } }
+.visual .check i { width: 2.1rem; height: 2.1rem; }
+.visual .fence-tag { font-size: 0.8rem; }
+.visual .grid-label { font-size: 1.25rem; }
+.visual .dots { gap: 0.6rem; }
+.visual .runs div { width: 7rem; height: 7rem; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"></div>
+
+<header class="hero">
+  <a class="home-link" href="../"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span> James Wiesebron</a>
+  <span class="deco ring" style="top: 10vh; right: 9vw; width: 16rem; aspect-ratio: 1"></span>
+  <span class="deco tri" style="top: 14vh; right: 34vw; width: 4.5rem; aspect-ratio: 1"></span>
+  <span class="deco circle" style="bottom: 12vh; right: 16vw; width: 8rem; aspect-ratio: 1"></span>
+  <span class="kicker rise"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Attention</span>
+  <h1 class="title rise">Attention is all you need (to protect)</h1>
+  <p class="dek rise">Developer attention is the scarcest thing in AI-assisted work. Every AI tool spends it or saves it, and people only stop spending it on supervision once they can trust what the agent did.</p>
+  <p class="byline rise">James Wiesebron <span>October 2026 · Examples from an AI code reviewer I built and ran in production, and from my personal research systems</span></p>
+</header>
+
+<main>
+
+<section class="chapter">
+  <div class="prose-only">
+    <p class="rise">The first week an AI code reviewer I built ran on real pull requests, it caught real problems, including a compile break across packages. It also left one PR seven non-blocking comments on a single push and five more two days later. The team that owned that repo turned it off.</p>
+    <p class="rise">The findings held up. What the reviewer got wrong was how much of people's attention it spent.</p>
+    <p class="rise">Every AI tool for developers makes that trade. It can take load off people or add to it, and accuracy alone doesn't decide which. That depends on how carefully the tool spends attention, and on whether people trust its work enough to stop checking all of it. The second is what I mean by <a href="intentional-agentic-work.html">runtime alignment</a>, keeping an agent doing what you intended while it runs, with evidence you can check.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Every output spends attention</h2>
+  <div class="story" data-story="triage">
+    <div class="prose">
+      <p data-step="1">A comment, a summary, a notification, a request for approval. Each one asks a person to read, decide and maybe act, and each one costs something even when it's right.</p>
+      <p data-step="2">The fix is attention triage. For every output, decide whether it needs a person now, later, or never, and route it there. In the reviewer, blocking findings always post. Other findings are ranked and capped at three, and the rest go into a collapsed section. Nitpicks never post inline, and fixes run only when the author asks for one.</p>
+      <p data-step="3">Whatever does reach a person should be short. Each comment became two layers: a sentence or two written for a person, with the model's full reasoning collapsed underneath for any agent that picks up the work. Those changes shipped in about a day. The team that had switched the reviewer off later turned it back on.</p>
+    </div>
+    <div class="visual">
+      <div class="meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div></div></div>
+      <div class="inbox" aria-hidden="true">
+        <div>blocking · auth check missing</div>
+        <div>suggestion · test coverage</div>
+        <div>question · naming</div>
+        <div>nitpick · comment wording</div>
+        <div>suggestion · test coverage</div>
+        <div>note · style</div>
+        <div>question · edge case</div>
+        <div>nitpick · import order</div>
+      </div>
+      <div class="bins">
+        <div class="bin now"><b>Now</b><span>blocking · auth check missing</span><span>question · edge case</span></div>
+        <div class="bin later"><b>Later</b><span>suggestion · test coverage</span><span>▸ 3 more, collapsed</span></div>
+        <div class="bin never"><b>Never</b><span>nitpicks dropped</span><span>fixes on request</span></div>
+      </div>
+      <div class="mock layer">
+        <div class="who">review comment · illustration</div>
+        <p><b>issue (blocking):</b> this endpoint skips the permission check the others run.</p>
+        <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
+      </div>
+      <p class="small">Illustration. The meter isn't a measurement.</p>
+    </div>
+  </div>
+  <p class="pullquote rise">Comment six teaches people to skim, and they skim past the blocking finding too.</p>
+</section>
+
+<section class="chapter">
+  <h2>Supervision is the hidden cost</h2>
+  <div class="story" data-story="lanes">
+    <div class="prose">
+      <p data-step="1">The other way AI spends attention is quieter. If you can't tell whether an agent stayed within what you asked, you check everything it did. At that point delegation saves you nothing, because you've traded doing the work for re-reading it.</p>
+      <p data-step="2">What changes that is evidence you can check quickly. The work arrives with what was done, how it was validated, anything that departs from what was agreed, and what's still uncertain. Decisions that belong to you arrive as decisions, with the options, a recommendation and the evidence, while everything else the agent is allowed to do keeps moving. Your attention goes to judgment instead of reconstruction.</p>
+      <p data-step="3">In my research systems, an agent that wants to report there's nothing for a person to decide has to list the questions it considered and say why each one isn't theirs. That list is what gets confirmed, so the person checks specific reasoning instead of waving through a paragraph. <a href="give-agents-a-contract.html">Give agents a contract</a> goes into how that works.</p>
+    </div>
+    <div class="visual">
+      <div class="lane-row lane-a">
+        <b class="lane-title">Output with no evidence</b>
+        <div class="lane-flow"><span>Agent output</span><i>→</i><span>Re-read everything</span><i>→</i><span>Re-run the checks</span><i>→</i><span>Decide</span></div>
+        <div class="meter small-meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div></div></div>
+      </div>
+      <div class="lane-row lane-b">
+        <b class="lane-title">Output with evidence attached</b>
+        <div class="lane-flow"><span>Agent output</span><i>→</i><span>What ran, what's uncertain</span><i>→</i><span>Decide what's yours</span></div>
+        <div class="meter small-meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div></div></div>
+      </div>
+      <p class="small">Illustration.</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Trust has to be earned while the agent runs</h2>
+  <div class="story" data-story="chain">
+    <div class="prose">
+      <p data-step="1">Trust that actually saves attention can't come from a good prompt or a good model alone. It comes from structure around the model, checked while the work happens. Start with intent written down somewhere the agent can't rewrite.</p>
+      <p data-step="2">Then check each handoff against it: the plan against the original request, the implementation against the plan with no unexpected additions, and the docs against the implementation. Agents wrote the reviewer's code, and checks like these ran at every handoff, with me reading the sensitive parts myself.</p>
+      <p data-step="3">Enforce limits outside the prompt. The reviewer's agents held no credentials. They read what the pipeline gave them and wrote results back, and the pipeline did the posting. Opening a PR, merging it and rolling it out are separate permissions, and handing work to another agent shouldn't widen them. <a href="stop-telling-agents.html">Stop telling agents what not to do</a> has more on this.</p>
+      <p data-step="4">And put required steps in code. The reviewer's orchestrating model was told to dispatch its specialist reviewers before posting. In a seeded trial, all five runs posted a review that looked fine, and two of them had skipped dispatch and written the review themselves. Dispatch moved into code, the model kept the judgment calls, and the orchestrator went from about 80 percent of a review's cost to about a quarter.</p>
+    </div>
+    <div class="visual">
+      <div class="align-chain">
+        <div class="node-box intent"><b>Intent</b><span>written down</span></div>
+        <div class="check"><i>✓</i><span>checked against</span></div>
+        <div class="fence-box">
+          <span class="fence-tag">agents · no credentials</span>
+          <div class="node-box"><b>Plan</b></div>
+          <div class="check"><i>✓</i><span>checked against</span></div>
+          <div class="node-box"><b>Code</b></div>
+        </div>
+        <div class="check"><i>✓</i><span>checked against</span></div>
+        <div class="node-box"><b>Docs</b></div>
+      </div>
+      <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Check the checkers</h2>
+  <div class="story" data-story="checker">
+    <div class="prose">
+      <p data-step="1">Trust in the measurements matters as much as trust in the agent. In one of the reviewer's evals, a case looked flaky, so I read all 28 runs.</p>
+      <p data-step="2">The reviewer had found the defect every time. The scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer. A broken scorer looks just like a weak model, and an evaluator you just changed can't be the only evidence that its change helped.</p>
+      <p data-step="3">Monitors need the same treatment. One of the first monitors in my research systems ran a model over everything it saw and produced a stream of false alarms that people learned to ignore. Once people learn to ignore a monitor, they ignore the real alarm too. <a href="measure-the-system.html">Measure the system, not just the model</a> covers how to test the watchers.</p>
+    </div>
+    <div class="visual">
+      <p class="grid-label"><span class="before">28 runs, scored as missed</span><span class="after">28 runs, defect found every time</span></p>
+      <div class="dots" aria-label="28 runs of one eval case">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p class="pill scorer">The scorer was wrong, not the reviewer</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Carry the follow-through</h2>
+  <div class="prose-only">
+    <p class="rise">A correct finding still leaves someone to interpret it, make the fix, and check that it worked. A tool that stops at the finding has handed most of the job back to a person.</p>
+    <p class="rise">The reviewer's first step was small. An author could reply "ship" on a comment, and an agent would make that one fix. The fuller version, which I'd build toward, routes findings to a fixing agent, sends the result to independent review so the fixer can't declare its own work done, and checks after deploy whether the fix actually worked. A result nobody could verify goes back to triage instead of counting as done because a PR merged.</p>
+    <p class="rise">Feedback deserves the same treatment. A pipeline read every reply to the reviewer's comments, decided whether it pointed at a real problem, and opened or updated a ticket, so engineers never had to file anything.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Give shared tools an owner</h2>
+  <div class="prose-only">
+    <p class="rise">Most AI developer tooling starts as somebody's side project and ends up maintained in their spare time. Regressions sit, people stop trusting the tool, and they go back to checking everything themselves.</p>
+    <p class="rise">Shared tools need an owner who keeps them working, tracks what they cost, and decides what to keep, change or stop based on feedback and evidence. That owner should also prefer existing tools when they meet the need, and accept that a fix without AI is sometimes the right answer. The evidence that counts comes from other teams. A tool that works for the people who built it hasn't really been tested yet.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Beyond code</h2>
+  <div class="prose-only closing">
+    <p class="rise">The same applies anywhere AI reviews or does people's work. An assistant that flags every possible issue in a contract or a support reply trains people to skim it. An agent drafting replies with no evidence attached gets every reply re-read. Triage what reaches people, attach the evidence, keep the limits outside the prompt, and carry the follow-through.</p>
+    <p class="rise last-line">Runtime alignment isn't about watching agents more closely. Done well, people spend their attention on fewer decisions, and better ones.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+  <p><a href="../#writing">← More writing</a></p>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+// Each step paragraph scrubs its own change to the sticky figure beside it.
+// Everything animates from a hidden state to the natural layout, so reduced motion
+// or a failed script load leaves the complete static page.
+(() => {
+  const root = document.documentElement;
+  const params = new URLSearchParams(location.search);
+  if (params.get("theme")) root.dataset.theme = params.get("theme");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !window.gsap || !window.ScrollTrigger) return;
+  // wide screens sync each figure step to its paragraph beside it. Phones show the figure
+  // inline above the text and play all its steps as the figure scrolls past.
+  const wide = matchMedia("(min-width: 901px)").matches;
+  gsap.registerPlugin(ScrollTrigger);
+  root.classList.add("motion");
+
+  gsap.to(".progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
+
+  const passes = new Map();
+  const step = (story, k, build) => {
+    if (wide) {
+      const para = story.querySelector(`[data-step="${k}"]`);
+      const tl = gsap.timeline({
+        defaults: { ease: "power2.inOut", duration: 0.5 },
+        scrollTrigger: { trigger: para, start: "top 72%", end: "top 38%", scrub: 0.6 },
+      });
+      build(tl);
+      return;
+    }
+    if (!passes.has(story)) {
+      passes.set(story, gsap.timeline({
+        scrollTrigger: { trigger: story.querySelector(".visual"), start: "top 75%", end: "top 8%", scrub: 0.6 },
+      }));
+    }
+    const tl = gsap.timeline({ defaults: { ease: "power2.inOut", duration: 0.5 } });
+    build(tl);
+    passes.get(story).add(tl).add(gsap.timeline().set({}, {}, 0.25));
+  };
+
+  const css = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+
+  const stories = {
+    triage(story, q) {
+      const chips = q(".inbox > div"), binItems = q(".bin span"), bins = q(".bin");
+      gsap.set(q(".meter-fill"), { width: "100%" });
+      gsap.set([...chips, ...binItems, ...q(".layer")], { opacity: 0 });
+      gsap.set(bins, { opacity: 0.35 });
+      step(story, 1, (tl) => {
+        tl.fromTo(chips, { y: -60, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.05, ease: "bounce.out", immediateRender: false });
+        tl.to(q(".meter-fill"), { width: "15%", backgroundColor: css("--coral") }, 0);
+      });
+      step(story, 2, (tl) => {
+        tl.to(chips, { y: 40, opacity: 0, stagger: 0.03, duration: 0.3 });
+        tl.to(q(".inbox"), { height: 0, marginBottom: 0, duration: 0.25 });
+        tl.to(bins, { opacity: 1, duration: 0.2 }, 0.3);
+        tl.fromTo(binItems, { y: -20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, immediateRender: false }, 0.35);
+        tl.to(q(".meter-fill"), { width: "85%", backgroundColor: css("--mint") }, 0.3);
+      });
+      step(story, 3, (tl) => tl.fromTo(q(".layer"), { y: 40, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false }));
+    },
+
+    lanes(story, q) {
+      const [a, b] = q(".lane-row");
+      gsap.set([a, b].map((l) => l.querySelector(".meter-fill")), { width: "100%", backgroundColor: css("--mint") });
+      gsap.set([...a.querySelectorAll(".lane-flow > *"), b], { opacity: 0 });
+      step(story, 1, (tl) => {
+        tl.fromTo(a.querySelectorAll(".lane-flow > *"), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.07, immediateRender: false });
+        tl.to(a.querySelector(".meter-fill"), { width: "18%", backgroundColor: css("--coral") }, 0.2);
+      });
+      step(story, 2, (tl) => {
+        tl.fromTo(b, { y: 30, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false });
+        tl.fromTo(b.querySelectorAll(".lane-flow > *"), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.07, immediateRender: false }, 0.1);
+        tl.to(b.querySelector(".meter-fill"), { width: "85%" }, 0.3);
+      });
+    },
+
+    chain(story, q) {
+      const intent = q(".intent"), rest = q(".align-chain > .check, .fence-box .node-box, .fence-box .check, .align-chain > .node-box:not(.intent)");
+      gsap.set([...intent, ...rest, ...q(".fence-tag"), ...q(".runs > div")], { opacity: 0 });
+      gsap.set(q(".fence-box"), { borderColor: "transparent" });
+      gsap.set(q(".truth, .hatch"), { opacity: 0 });
+      step(story, 1, (tl) => tl.fromTo(intent, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, ease: "back.out(2)", immediateRender: false }));
+      step(story, 2, (tl) => tl.fromTo(rest, { x: -20, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, immediateRender: false }));
+      step(story, 3, (tl) => {
+        tl.to(q(".fence-box"), { borderColor: css("--cobalt"), duration: 0.4 });
+        tl.to(q(".fence-tag"), { opacity: 1, duration: 0.3 }, 0.1);
+      });
+      step(story, 4, (tl) => {
+        tl.fromTo(q(".runs > div"), { y: 30, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, immediateRender: false });
+        tl.to(q(".look"), { opacity: 0, duration: 0.2 }, 0.55);
+        tl.to(q(".truth, .hatch"), { opacity: 1, duration: 0.3 }, 0.65);
+      });
+    },
+
+    checker(story, q) {
+      const dots = q(".dots i");
+      gsap.set([...dots, ...q(".scorer")], { opacity: 0 });
+      step(story, 1, (tl) => tl.fromTo(dots, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, stagger: 0.015, ease: "back.out(2)", immediateRender: false }));
+      step(story, 2, (tl) => {
+        tl.to(dots, { backgroundColor: css("--mint"), stagger: 0.015, duration: 0.2 });
+        tl.set(q(".grid-label .before"), { display: "none" }, 0.3);
+        tl.set(q(".grid-label .after"), { display: "inline" }, 0.3);
+        tl.fromTo(q(".scorer"), { y: 20, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false }, 0.4);
+      });
+    },
+  };
+
+  document.querySelectorAll(".story").forEach((story) => {
+    const q = (sel) => [...story.querySelector(".visual").querySelectorAll(sel)];
+    stories[story.dataset.story]?.(story, q);
+  });
+
+  gsap.utils.toArray(".rise").forEach((el) => {
+    gsap.from(el, { y: 50, opacity: 0, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 92%", end: "top 70%", scrub: 0.6 } });
+  });
+
+  gsap.utils.toArray(".deco").forEach((el) => {
+    const tilt = el.classList.contains("diamond") ? 45 : el.classList.contains("ring") ? -45 : 0;
+    gsap.set(el, { rotate: 0 });
+    gsap.fromTo(el, { yPercent: 0, rotation: tilt }, { yPercent: -60, rotation: tilt + 20, ease: "none", scrollTrigger: { trigger: el.parentElement, start: "top top", end: "bottom top", scrub: true } });
+  });
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "t" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
+    }
+  });
+  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+})();
+</script>
+</body>
+</html>
