@@ -38,7 +38,7 @@
       <header class="post-head">
         <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Measurement</p>
         <h1>Measure the system, not just the model</h1>
-        <p class="post-dek">Most agent evaluations test the model and trust everything around it. That's where the surprises are.</p>
+        <p class="post-dek">Most agent evaluations test the model and trust everything around it. The harness, the monitors and the cost numbers need testing too.</p>
         <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
@@ -46,25 +46,25 @@
 
       <h2>Your harness has opinions</h2>
 
-      <p>Agent harnesses are usually built around one model family, and they carry quiet assumptions about it. How big the context window is. What default reasoning settings to send. Which tools exist. Swap in a different model and the harness doesn't complain. It just keeps applying assumptions that no longer hold. In one of my research systems, a model name the harness didn't recognize was silently treated as having a particular window size, which changes when it summarizes and how much it can hold.</p>
+      <p>Agent harnesses are usually built around one model family, and they carry assumptions about it. How big the context window is. What default reasoning settings to send. Which tools exist. Swap in a different model and the harness doesn't complain. It just keeps applying assumptions that no longer hold. In one of my research systems, a model name the harness didn't recognize was silently treated as having a particular window size, which changes when it summarizes and how much it can hold.</p>
 
-      <p>Sometimes the assumption runs backward from what you'd expect. When I routed a non-Claude model through a translation layer, a setting requesting "high" reasoning effort actually cut that model's reasoning by close to a factor of ten compared with sending nothing at all, and the two distributions didn't even overlap.</p>
+      <p>Sometimes the assumption runs backward from what you'd expect. When I routed a non-Claude model through a translation layer, a setting requesting "high" reasoning effort cut that model's reasoning by close to a factor of ten compared with sending nothing at all, and the two distributions didn't even overlap.</p>
 
-      <p>Two rules follow. First, when you compare models, keep the surrounding settings as close to identical as you can, even when changing them would save money, or you're comparing harness configurations instead of models. Second, fail closed. If the route to a model is broken, the request should fail loudly instead of quietly falling back to a different model. Otherwise your evaluation is measuring a mix of two models and reporting it as one.</p>
+      <p>So when you compare models, keep the surrounding settings as close to identical as you can, even when changing them would save money, or you're comparing harness configurations instead of models. And fail closed. If the route to a model is broken, the request should fail loudly instead of falling back to a different model. Otherwise your evaluation is measuring a mix of two models and reporting it as one.</p>
 
       <h2>Evaluate the watchers</h2>
 
       <p>Monitoring systems for agents need their own evaluations, and they almost never get them. One of the first monitors I built ran a model over everything it saw and produced a stream of false alarms that people learned to ignore, which is the worst outcome a monitor can have.</p>
 
-      <p>The fix was a labeled test set for the monitor itself. It contains snapshots of normal runs, which must produce no alert at all, and snapshots of known failures, which must produce exactly the right alert. A detector ships only if it passes both. False alarms on normal runs aren't tuned down over time. They fail the test. That turns "is the monitor too noisy?" from a feeling into a check you run before anything changes.</p>
+      <p>The fix was a labeled test set for the monitor itself. It contains snapshots of normal runs, which must produce no alert at all, and snapshots of known failures, which must produce the right alert. A detector ships only if it passes both. False alarms on normal runs aren't tuned down over time. They fail the test. That turns "is the monitor too noisy?" from a feeling into a check you run before anything changes.</p>
 
       <h2>Unknown is not zero</h2>
 
-      <p>Cost is the measurement teams most want and most often get wrong, and it usually goes wrong quietly. At one point every single call in a sample of more than a thousand from one of my research runs reported its cost as unknown. The proxy in the middle simply wasn't passing a figure through. Nothing broke. The dashboards just showed less spend than there really was.</p>
+      <p>Cost is the measurement teams most want and most often get wrong, and it usually goes wrong without any error. At one point every single call in a sample of more than a thousand from one of my research runs reported its cost as unknown. The proxy in the middle wasn't passing a figure through, so the dashboards showed less spend than there really was.</p>
 
-      <p>The rule that came out of that is simple. Never record an unknown cost as zero. A zero reads as "this was free," which is the exact opposite of the truth. Keep unknowns visible, and report how many calls actually had a cost alongside the total, so a partial number can't pass as a complete one.</p>
+      <p>The rule that came out of that is simple. Never record an unknown cost as zero. A zero reads as "this was free," which is the opposite of the truth. Keep unknowns visible, and report how many calls actually had a cost alongside the total, so a partial number can't pass as a complete one.</p>
 
-      <p>Two more habits help. Record two figures for each call, what the provider billed and what you'd estimate from its published prices. When they agree, good. When they drift apart, that gap is a signal worth chasing. And don't half-translate a pricing scheme you only partly understand. If a provider charges more for long prompts and you can only model part of that, decline the whole price card rather than quietly falling back to the base rate. A partial translation under-reports on exactly the expensive calls.</p>
+      <p>Record two figures for each call, what the provider billed and what you'd estimate from its published prices. When they agree, good. When they drift apart, that gap is a signal worth chasing. And don't half-translate a pricing scheme you only partly understand. If a provider charges more for long prompts and you can only model part of that, decline the whole price card rather than falling back to the base rate. A partial translation under-reports on the expensive calls.</p>
 
       <h2>Where the money actually goes</h2>
 
@@ -72,13 +72,11 @@
 
       <p>Every turn re-sends the whole conversation. Cached tokens are much cheaper, but they're not free, and one oversized tool result keeps getting billed on every turn after it. That's why I cap large outputs and write the overflow to a file the agent can read if it really needs it. Caching itself is fragile, too. A routing layer in one of my research setups was silently discarding the provider's roughly tenfold discount on cached input, and nothing reported it as a failure. Waiting costs money as well. An agent that checks for news and finds none still pays for a full turn, which is one more reason to keep waiting in plain code, outside the model.</p>
 
-      <p>None of this argues for using AI less. It argues for using it more efficiently, so the same work costs less. You can only do that once spend is broken down by role and by phase, so "the agents are expensive" turns into "this reviewer is expensive in this phase, and here's why."</p>
+      <p>The goal is making the same work cost less, and that takes spend broken down by role and by phase, so "the agents are expensive" turns into "this reviewer is expensive in this phase, and here's why."</p>
 
-      <h2>Beyond code</h2>
+      <h2>Rolling it out to an organization</h2>
 
-      <p>Any organization rolling out AI tools will be asked whether they're worth it, and the honest answer depends on measuring the whole system. That means knowing what each workflow actually costs, with no silent gaps. It means comparing tools fairly, with the same settings, not whatever each vendor defaults to. And it means making sure the alerts and reports people rely on have been tested themselves. A tool that looks cheap because half its costs went unreported isn't cheap. It's unmeasured.</p>
-
-      <p>Evaluate the model, by all means. Then evaluate everything you've been trusting around it.</p>
+      <p>Any organization rolling out AI tools will be asked whether they're worth it, and the honest answer depends on measuring the whole system. That means knowing what each workflow actually costs, with no silent gaps. It means comparing tools fairly, with the same settings, not whatever each vendor defaults to. And it means making sure the alerts and reports people rely on have been tested themselves.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

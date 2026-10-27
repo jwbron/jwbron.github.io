@@ -44,13 +44,13 @@
 
       <p>The easy way to use several agents is to put them in a room and let them talk. A few write, a few review, everyone reads everyone else's messages, and eventually they agree they're done. It feels collaborative, and on small tasks it can work.</p>
 
-      <p>At any real scale it falls apart in familiar ways. Everyone reviews everyone, so the number of conversations explodes. Approvals go stale the moment the work changes. One agent declares victory while another is still objecting. Two agents end up waiting on each other forever. None of that is a model problem. It's a coordination problem, and coordination problems have well-understood solutions. A team of agents needs a protocol, and that protocol has more in common with a distributed system than with a group chat.</p>
+      <p>At any real scale it falls apart in familiar ways. Everyone reviews everyone, so the number of conversations explodes. Approvals go stale the moment the work changes. One agent declares victory while another is still objecting. Two agents end up waiting on each other forever. These are coordination problems, and coordination problems have well-understood solutions. A team of agents needs a protocol, and that protocol has more in common with a distributed system than with a group chat.</p>
 
       <h2>Decide who reviews whom</h2>
 
       <p>In a well-run agent team, agents have roles. Producers make things, like the code, the tests and the docs. Reviewers judge them, and each reviewer has a specific lens: correctness, overall design, security, concurrency, or whether the work actually meets the plan. Producers don't approve reviews of their own work. When a reviewer objects, the producer responds by fixing the work and proposing it again, never by arguing until the reviewer gives up.</p>
 
-      <p>The review relationships are drawn deliberately, not left as everyone-reviews-everyone. For a typical implementation phase that's around a dozen review relationships instead of the fifty-plus you'd get if all of them reviewed each other. Every relationship that exists is one that's worth having.</p>
+      <p>The review relationships are chosen on purpose. For a typical implementation phase that's around a dozen review relationships instead of the fifty-plus you'd get if all of them reviewed each other. Every relationship that exists is one that's worth having.</p>
 
       <p>Some roles do double duty. The tester both writes tests and actively tries to break the implementation, and when it finds a bug, it reports it as a failing test. An objection that comes with a failing test is hard to argue with.</p>
 
@@ -58,27 +58,27 @@
 
       <p>Agents coordinate through a handful of explicit moves: propose, approve, object, withdraw and confirm. Every proposal carries a version, and every approval is tied to the exact version it looked at. When a producer proposes something new, every approval of the old version stops counting automatically. Nobody has to remember to re-check, because the protocol won't accept a stale approval.</p>
 
-      <p>Publishing work goes through the same door. The only way for a producer to push its work is to propose it, and a direct push is simply rejected. That closes a gap that's easy to miss, where work gets updated after reviewers looked at it and nobody notices. If it was published, it was proposed, and if it was proposed, reviewers saw it.</p>
+      <p>Publishing work goes through the same door. The only way for a producer to push its work is to propose it, and a direct push is rejected. That closes a gap that's easy to miss, where work gets updated after reviewers looked at it and nobody notices. If it was published, it was proposed, and if it was proposed, reviewers saw it.</p>
 
       <h2>Collect every objection before revising</h2>
 
-      <p>When two reviewers object to the same version, the producer can't fix the first objection and immediately resubmit. The protocol makes it read every open objection first. Without that rule, the second reviewer just objects again to the same problem on the new version, and the team burns a whole round on something it already knew. It's a small rule that saves a surprising amount of time.</p>
+      <p>When two reviewers object to the same version, the producer can't fix the first objection and immediately resubmit. The protocol makes it read every open objection first. Without that rule, the second reviewer just objects again to the same problem on the new version, and the team burns a whole round on something it already knew.</p>
 
-      <p>Withdrawing a proposal has rules too. It needs a reason, a short cooldown, and a limit on how many times a producer can flip back and forth. Churn is expensive, so the protocol makes it deliberate.</p>
+      <p>Withdrawing a proposal has rules too. It needs a reason, a short cooldown, and a limit on how many times a producer can flip back and forth. Churn is expensive, so the protocol limits it.</p>
 
       <h2>Turn every deadlock into a rule</h2>
 
-      <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. These rules stop a team from finishing in an invalid state. They don't guarantee it finishes, which is why a team that stops making progress gets escalated to a person rather than forced through. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything, which sounds obvious until you see a team "finish" without its main deliverable because a reviewer objected to an empty proposal and then moved on.</p>
+      <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. These rules stop a team from finishing in an invalid state. They don't guarantee it finishes, which is why a team that stops making progress gets escalated to a person rather than forced through. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything. That rule exists because one team "finished" without its main deliverable after a reviewer objected to an empty proposal and then moved on.</p>
 
-      <p>The older recovery patches, the ones that used to unstick these situations after the fact, are still there. They should never fire now, so each one counts how often it does. A count above zero means there's a gap in the rules, and that's the kind of signal you want: a measurable sign that the protocol has a hole, not a vague feeling that things are slow.</p>
+      <p>The older recovery patches, the ones that used to unstick these situations after the fact, are still there. They should never fire now, so each one counts how often it does. A count above zero means there's a gap in the rules, and that's the kind of signal you want: a count that shows the protocol has a hole.</p>
 
       <h2>Why not let them figure it out?</h2>
 
-      <p>Agents can coordinate on their own. They'll do it slowly, expensively, and a little differently every time, and the failures will look random because the coordination was improvised. A protocol makes efficiency and reliability properties of the system rather than of whichever model happens to be running. It also makes the team legible. You can look at the state of every proposal, approval and objection and know exactly where things stand.</p>
+      <p>Agents can coordinate on their own. They'll do it slowly, expensively, and a little differently every time, and the failures will look random because the coordination was improvised. A protocol makes efficiency and reliability properties of the system rather than of whichever model happens to be running. It also makes the team easy to inspect. You can look at the state of every proposal, approval and objection and know where things stand.</p>
 
-      <h2>Beyond code</h2>
+      <h2>A research team's version</h2>
 
-      <p>Picture a team of agents preparing a legal memo. One drafts, one checks every citation, one looks for risk, and one checks the memo against the client's actual question. The same rules apply. Decide who reviews what instead of having everyone comment on everything. Tie every sign-off to a specific draft, so an edit after review can't slip through. Make the drafter address every open comment before sending a new version. And never let the team call it done while someone still has an objection on the table. That's how good human teams already work. Agents just need it written down and enforced.</p>
+      <p>Picture a team of agents preparing a market analysis. One drafts, one checks every figure against its source, one looks for risk, and one checks the report against the question that was actually asked. The same rules apply. Decide who reviews what instead of having everyone comment on everything. Tie every sign-off to a specific draft, so an edit after review can't slip through. Make the drafter address every open comment before sending a new version. And never let the team call it done while someone still has an objection on the table. That's how good human teams already work. Agents just need it written down and enforced.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

@@ -56,31 +56,29 @@
 
       <p>The first fix is to stop asking reviewers questions that a machine can answer for certain. Does it build? Do the tests pass? Is the file under the limit? Those get settled before the work is ever offered for review. If the checks fail, it never reaches a reviewer at all. The author fixes it and tries again.</p>
 
-      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems checkers aren't built to find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, not a substitute for the shared checks.</p>
+      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems checkers aren't built to find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, and the shared checks still run.</p>
 
-      <p>A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast. It just isn't proof that the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
+      <p>A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast, but it can't prove the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
 
       <h2>Make approval cost something</h2>
 
-      <p>"Looks good to me" is cheap to say whether or not you looked. So an approval has to point at specific things, like the files, lines, commits or tests it's vouching for, and a generic approval is rejected outright. The same goes for objections. It's hard to fake specific evidence without doing the reading, which is the whole point.</p>
+      <p>"Looks good to me" is cheap to say whether or not you looked. So an approval has to point at specific things, like the files, lines, commits or tests it's vouching for, and a generic approval is rejected outright. The same goes for objections. It's hard to fake specific evidence without doing the reading.</p>
 
       <h2>Judge first, then read the author's take</h2>
 
       <p>Reviewers can see the work as soon as it exists, but they can't see the author's self-assessment until they've given their own verdict. They're told that a proposal is waiting, so nobody sits idle, but the author's framing stays hidden until each reviewer has formed a view of their own.</p>
 
-      <p>The same idea applies to any shared material reviewers start from. It should carry evidence, not conclusions, in a plain, mechanical order with no "areas of concern" and nothing ranked by importance. Emphasis is a form of anchoring. If whoever gathers the evidence editorializes, every reviewer inherits that framing, and agreement between them stops meaning anything.</p>
+      <p>The same idea applies to any shared material reviewers start from. It should carry evidence and leave the conclusions to the reviewers, in a plain, mechanical order with no "areas of concern" and nothing ranked by importance. Emphasis is a form of anchoring. If whoever gathers the evidence editorializes, every reviewer inherits that framing, and agreement between them stops meaning anything.</p>
 
       <h2>Grade every claim</h2>
 
       <p>The last piece is honesty about how sure a reviewer actually is. Every potential finding gets one of three verdicts. It's confirmed when the reviewer can point to the exact requirement that isn't met and the code that fails it. It's plausible when it looks wrong but the evidence is incomplete, and the reviewer says what would settle it. It's refuted when the requirement turns out to be met, and the reviewer quotes where.</p>
 
-      <p>Two rules follow from that. Only a confirmed finding, with a concrete way it fails, can block the work. Everything plausible is kept but downgraded to advice, so the signal survives without forcing another round of revisions. And the burden of evidence runs both ways. A reviewer who drops a finding has to show why, just as much as one who keeps it.</p>
+      <p>Only a confirmed finding, with a concrete way it fails, can block the work. Everything plausible is kept but downgraded to advice, so the signal survives without forcing another round of revisions. And the burden of evidence runs both ways. A reviewer who drops a finding has to show why, just as much as one who keeps it.</p>
 
-      <h2>Beyond code</h2>
+      <h2>Reviewing a contract</h2>
 
-      <p>This matters even more when agents review knowledge work, where "running the tests" isn't obvious. Three agents agreeing that a contract has no risky clauses tells you very little. What tells you something is checking against the source. Does every cited case exist? Is every quotation verbatim? Does each flagged risk point to a specific clause? Those are the execution checks of legal work, and they should run before any reviewer weighs in. After that, reviewers should judge the document before they read the drafter's summary of it, cite the clause behind every finding, and say plainly what they're sure of and what they aren't.</p>
-
-      <p>Agreement is a fact about your reviewers. Verification is a fact about the work. Build systems that check the work.</p>
+      <p>The same split matters when agents review knowledge work, where "running the tests" isn't obvious. Three agents agreeing that a contract has no risky clauses tells you very little. What tells you something is checking against the source. Does every cited case exist? Is every quotation verbatim? Does each flagged risk point to a specific clause? Those are the execution checks of legal work, and they should run before any reviewer weighs in. After that, reviewers should judge the document before they read the drafter's summary of it, cite the clause behind every finding, and say plainly what they're sure of and what they aren't.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

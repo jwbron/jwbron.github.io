@@ -42,7 +42,7 @@
         <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
-      <p>When people start putting AI agents to work, the first safety tool they reach for is the prompt. Never merge a pull request. Don't touch the production database. Don't email the client. Almost every team starts there, and it works right up until it doesn't.</p>
+      <p>When people start putting AI agents to work, the first safety tool they reach for is the prompt. Never merge a pull request. Don't touch the production database. Don't email the client. Almost every team starts there, and it holds only as long as the agent keeps following it.</p>
 
       <p>A prompt is a suggestion. It's one more thing in the agent's context, weighed against everything else it's trying to get done. A few hours into a long task, with your instructions buried under a pile of newer messages, an agent that was told never to merge can decide that merging is obviously the helpful thing to do. And if someone slips their own instructions into a document the agent reads, your prompt is the first thing they'll talk it out of.</p>
 
@@ -50,29 +50,28 @@
 
       <h2>Take the door away</h2>
 
-      <p>In the agent systems I build, agents can't merge at all. Everything they do with git and GitHub goes through a gateway that lives outside their sandbox, and that gateway simply doesn't have a merge operation. There's no flag that unlocks it and nobody to talk into it. If an agent tries, it's told that merging isn't something it can do, and that a person has to.</p>
+      <p>In the agent systems I build, agents can't merge at all. Everything they do with git and GitHub goes through a gateway that lives outside their sandbox, and that gateway doesn't have a merge operation. There's no flag that unlocks it and nobody to talk into it. If an agent tries, it's told that merging isn't something it can do, and that a person has to.</p>
 
       <p>Credentials work the same way. There are no tokens or keys anywhere in the agent's environment. They get attached to requests on the way out, after the agent is done with them, so the agent can't leak something it never had. "Don't print your API key" stops being a rule you have to hope it follows.</p>
 
-      <p>Once you start looking at problems this way, a lot of rules turn into missing doors. Agents can only push to their own branches. An agent that's planning can't write code, and an agent that's writing code can't quietly edit the plan it was handed.</p>
+      <p>Once you start looking at problems this way, a lot of rules turn into missing doors. Agents can only push to their own branches. An agent that's planning can't write code, and an agent that's writing code can't edit the plan it was handed.</p>
 
       <h2>Let the wall explain itself</h2>
 
-      <p>The other half of this matters just as much. When an agent bumps into a limit, what comes back should tell it why, and what to do instead. If it pushes to the wrong branch, the error spells out the naming convention, and it fixes the mistake on its next try.</p>
+      <p>When an agent bumps into a limit, what comes back should tell it why, and what to do instead. If it pushes to the wrong branch, the error spells out the naming convention, and it fixes the mistake on its next try.</p>
 
       <p>That works far better than cramming every rule into the system prompt up front. The agent doesn't spend attention on rules it may never need, and when it does need one, the explanation shows up right when it matters, not fifty thousand tokens ago.</p>
 
-      <p>Sometimes the best version is one the agent never notices. GitHub won't let a bot approve its own pull request, so the system quietly turns those approvals into comments and keeps the verdict. The agent gets what it was going for, and nobody wastes a retry.</p>
+      <p>Sometimes the best version is one the agent never notices. GitHub won't let a bot approve its own pull request, so the system turns those approvals into comments and keeps the verdict. The agent gets what it was going for, and nobody wastes a retry.</p>
 
       <h2>It isn't just about code</h2>
 
-      <p>The same idea carries straight over to agents doing everyday knowledge work. Say a firm wants an agent that drafts replies from a shared inbox. You could tell it never to send anything without sign-off. Or you could give it a connection that can read and draft but has no way to send, and let a person press the button. Only one of those still holds on the agent's worst day, or on the day someone emails it a cleverly worded request.</p>
+      <p>The same idea carries straight over to agents doing everyday knowledge work. Say a team wants an agent that drafts replies from a shared inbox. You could tell it never to send anything without sign-off. Or you could give it a connection that can read and draft but has no way to send, and let a person press the button. Only the second still holds when the agent gets confused, or when someone emails it a cleverly worded request.</p>
 
       <p>A well-built Jira connection works this way. Agents can read tickets, file new ones and leave comments. Deleting a ticket isn't something they're told not to do. It just isn't something they can do.</p>
 
       <p>The same goes for what agents read. A wiki page or an email is information to work with, never a list of orders, and the system has to treat it that way no matter how authoritative the text sounds.</p>
-
-      <p>If you catch yourself writing a sterner prompt to stop an agent from doing something, take the ability away instead. It's the difference between a sign that says "don't open this door" and not having a door.</p>
+      <p>If you catch yourself writing a sterner prompt to stop an agent from doing something, take the ability away instead.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

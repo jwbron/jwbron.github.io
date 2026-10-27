@@ -38,13 +38,13 @@
       <header class="post-head">
         <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Intent</p>
         <h1>Give agents a contract, not a conversation</h1>
-        <p class="post-dek">When intent lives in a chat, agents drift. Write it down somewhere they can't quietly rewrite.</p>
+        <p class="post-dek">When intent lives in a chat, agents drift. Write it down somewhere they can't rewrite.</p>
         <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
       </header>
 
       <p>In most agent setups, the only record of what you asked for is the conversation. The agent's understanding of the task lives in its context window, which grows, gets summarized and eventually gets replaced. Another agent can't read it. You can't audit it. And when the agent decides partway through that the task really means something slightly different, nothing anywhere disagrees with it.</p>
 
-      <p>That's fine for a quick question. For real work, the intent needs to live somewhere more durable than a chat, somewhere the agents read from, report back to, and can't quietly rewrite. I call that place a contract.</p>
+      <p>That's fine for a quick question. For real work, the intent needs to live somewhere that outlasts a chat, somewhere the agents read from, report back to, and can't rewrite. I call that place a contract.</p>
 
       <h2>What goes in it</h2>
 
@@ -54,9 +54,9 @@
 
       <h2>Each role owns part of it, and only part</h2>
 
-      <p>A shared document that anyone can edit isn't much of a contract. What makes it hold is that each role can change only the fields it owns, and the system enforces that, not a prompt.</p>
+      <p>A shared document that anyone can edit isn't much of a contract. What makes it hold is that each role can change only the fields it owns, and the system enforces it, so no prompt has to.</p>
 
-      <p>The agent doing the work can record what it did, link the change to its task and leave notes. It can't mark its own task complete. A reviewer can mark tasks and phases done, but it can't touch the work itself. Only a person can resolve a decision. Once the contract is created, nobody can go back and rewrite its scaffolding. An agent can't edit the plan it's in the middle of executing, which turns out to be exactly the move an agent under pressure wants to make.</p>
+      <p>The agent doing the work can record what it did, link the change to its task and leave notes. It can't mark its own task complete. A reviewer can mark tasks and phases done, but it can't touch the work itself. Only a person can resolve a decision. Once the contract is created, nobody can go back and rewrite its scaffolding. An agent can't edit the plan it's in the middle of executing.</p>
 
       <p>This is the same idea as removing capabilities instead of writing rules. "Don't approve your own work" is a suggestion. An implementer that has no way to set a task's status doesn't need to be told.</p>
 
@@ -64,27 +64,27 @@
 
       <p>The most important thing a contract tracks is which questions are yours. When an agent hits a real choice, like a scope question, a tradeoff or anything a reasonable person would want a say in, it adds a decision to the contract instead of resolving it in its head.</p>
 
-      <p>Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so a decision that's already been made isn't asked again. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, not a quiet push forward with open questions.</p>
+      <p>Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so a decision that's already been made isn't asked again. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, rather than a push forward with open questions.</p>
 
       <h2>"Nothing to decide" is a claim</h2>
 
       <p>Agents look for the path of least resistance, and the easiest decision to make is the one you never mention. If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
 
-      <p>So an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning, not waving through a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff, not a way for it to vanish.</p>
+      <p>So an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning instead of a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff.</p>
 
-      <p>Reviewers have a job here too. A draft that quietly commits to a choice that belongs to a person gets sent back, even if the choice it made is a good one.</p>
+      <p>Reviewers have a job here too. A draft that commits to a choice that belongs to a person gets sent back, even if the choice it made is a good one.</p>
 
       <h2>Catch it at the plan</h2>
 
       <p>The contract is also where you catch mistakes while they're cheap. Redirecting an agent before it starts costs minutes. Redirecting it after a day of implementation costs a day.</p>
 
-      <p>That's why the plan is a phase with its own gate, and why plan reviewers do more than read for sense. They check that everything the plan depends on actually exists, in the place where the work will run. A plan can be perfectly reasonable on paper and still assume a tool, a data source or a permission the executing agent will never have. The more you constrain agents, the more important this check becomes, because the planner can't see the walls unless someone looks for them. I've watched a confident plan burn most of a day of agent time on exactly that, when one quick search during planning would have caught it.</p>
+      <p>That's why the plan is a phase with its own gate, and why plan reviewers do more than read for sense. They check that everything the plan depends on actually exists, in the place where the work will run. A plan can be perfectly reasonable on paper and still assume a tool, a data source or a permission the executing agent will never have. The more you constrain agents, the more important this check becomes, because the planner can't see the walls unless someone looks for them. I've watched a confident plan burn most of a day of agent time on that, when one quick search during planning would have caught it.</p>
 
-      <h2>Beyond code</h2>
+      <h2>A legal team's version</h2>
 
       <p>Swap the vocabulary and this is how good professional work already runs. A legal team has an engagement scope, a matter plan, deliverables with clear standards and a partner who owns the judgment calls. An agent drafting research for that team should work against the same structure. It can't mark its own memo reviewed. The questions that belong to the partner are logged and answered once. And before anyone drafts, someone checks that the agent can actually reach the sources the plan assumes.</p>
 
-      <p>A conversation is how you talk to an agent. A contract is what you agreed on. When alignment depends on the conversation, it lasts only as long as the context does. When it's built into the structure, it can't be quietly rewritten. That doesn't guarantee the agent reads it correctly or notices every question that should go to a person. What it does is make drift visible and bounded. Fields have owners, decisions are itemized, plans get checked against reality, and divergence surfaces at a gate instead of at the end. That's a big part of what I mean by runtime alignment.</p>
+      <p>When alignment depends on the conversation, it lasts only as long as the context does. A contract doesn't guarantee the agent reads it correctly or notices every question that should go to a person. What it does is make drift visible and bounded. Fields have owners, decisions are itemized, plans get checked against reality, and divergence surfaces at a gate instead of at the end. That's a big part of what I mean by runtime alignment.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>

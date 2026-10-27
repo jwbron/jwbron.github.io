@@ -1011,7 +1011,7 @@ body { line-height: 1.65; }
     <div class="prose">
       <p data-step="1">I trialed it on my own team's PRs first, alongside the managed review, and anyone else could run it by commenting on a PR. In its first week with real users it caught real problems, including a cross-package compile break. The volume was the problem. One PR got seven non-blocking comments on a single push and five more two days later, and the recap re-listed every open thread each time.</p>
       <p data-step="2">Engineers said the nits and questions were the main issue, and the frontend infra team turned auto-review off.</p>
-      <p data-step="3">Attention was the thing to protect. Once a review has six comments in it, people start skimming, and they skim past the blocking one too.</p>
+      <p data-step="3">Attention was the thing to protect, and every extra comment spent some of it.</p>
       <p data-step="4">The fixes shipped within about a day. Blocking findings always post. Non-blocking ones are ranked and capped at three, nitpicks never post inline, and the rest go into a collapsed section, so nothing is lost and the notification stays short. Re-reviews only look at what changed.</p>
       <p data-step="5">The comments themselves changed too. Each one became two layers: a short comment written for a person, with the model's fuller reasoning collapsed underneath for agents. Scripts enforce that format, and a separate model grades the writing.</p>
       <p data-step="6">Fixes only run when the author asks, by replying "ship" on the comment. Nobody had to install anything or change how they worked.</p>
@@ -1095,7 +1095,7 @@ body { line-height: 1.65; }
   <h2>Things I didn't build</h2>
   <div class="prose-only">
     <p class="rise">I built a panel of skeptic agents to double-check blocking claims, then took it out. An audit of every blocking review over about a week (90 PRs) found 12 false blocks, and only 2 were the kind another verification layer could catch. The rest were wrong severity calls and questions about what the author meant. Stricter claim validation, with no extra agents, handled it.</p>
-    <p class="rise">I proposed a stronger model for five reviewer roles. In review, five got pushed back on as overkill, so I tried it on the correctness reviewer alone, where recall went from 82 to 89 percent on the eval set for 35 percent more cost.</p>
+    <p class="rise">I proposed a stronger model for five reviewer roles. Review pushback was that five was overkill, so I tried it on the correctness reviewer alone, where recall went from 82 to 89 percent on the eval set for 35 percent more cost.</p>
     <p class="rise">A cheaper model was worth testing. It caught 32 of 36 required findings against 36 of 36, and at our actual rates it didn't save money either. That's from one full repeat, so it isn't a benchmark, but it settled the question. The transcripts also showed that some apparent model failures were problems with the test setup: different hidden reasoning defaults, an eval that let the model go looking for answers, and scoring bugs.</p>
     <p class="rise">Blocking merges was off the table, since compliance requires a human approval. Fixes ran only when an author asked, and each specialist stayed opt-in per repo until it earned its place in evals.</p>
   </div>
@@ -1192,7 +1192,7 @@ body { line-height: 1.65; }
 <section class="chapter">
   <h2>What I'd do differently</h2>
   <div class="prose-only">
-    <p class="rise">I'd have moved off GitHub Agentic Workflows (gh-aw) sooner. It came with the first version and got us running fast, which was the right call at the start. Once we needed the reviewer to do things gh-aw wasn't built for, every change needed a workaround, and we couldn't run the reviewer locally. At that point gh-aw was hosting our pipeline more than running it, and that's the time to own the runtime.</p>
+    <p class="rise">I'd have moved off GitHub Agentic Workflows (gh-aw) sooner. It came with the first version and got us running fast, which was the right call at the start. Once we needed the reviewer to do things gh-aw wasn't built for, every change needed a workaround, and we couldn't run the reviewer locally.</p>
     <p class="rise">The next steps from there were our own harness, the model out of orchestration entirely, one review engine across CI, a local CLI and a pi plugin, and a real before-and-after measurement of time to merge.</p>
   </div>
 </section>

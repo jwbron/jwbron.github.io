@@ -50,11 +50,11 @@
 
       <p>Most conversations about alignment are about training, meaning what a model values and how it behaves before it ever ships. That work matters, and it's mostly the model makers' job. The problem I work on is different. I call it runtime alignment: keeping an agent doing what you actually intended while it runs, in your environment, on your work, over hours, alongside other agents.</p>
 
-      <p>A well-trained model can still drift from the task in front of it, quietly settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model, and it goes hand in hand with trust and safety. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
+      <p>A well-trained model can still drift from the task in front of it, settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model, and it goes hand in hand with trust and safety. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
 
       <h2>How to build for it</h2>
 
-      <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. Write the intent down somewhere the agent can't quietly rewrite. Limit what the agent can do instead of asking it to behave. Check the work independently, against reality. Keep people at the decisions that are actually theirs. I think of this as intentional agentic work, and this series is how I approach each piece. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
+      <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. Write the intent down somewhere the agent can't rewrite. Limit what the agent can do instead of asking it to behave. Check the work independently, against reality. Keep people at the decisions that are actually theirs. I think of this as intentional agentic work, and this series is how I approach each piece. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
 
       <p>The examples come from personal research systems I've built and run, mostly <a href="https://github.com/jwbron/egg">egg</a>, an open-source testbed for these ideas, not from production deployments. They come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
 
@@ -62,7 +62,7 @@
 
       <p><strong><a href="give-agents-a-contract.html">Intent: give agents a contract, not a conversation.</a></strong> The work is defined in a structured document that lives outside the chat. Each role can change only its own part, decisions owed to a person are tracked until they're answered, and the plan gets checked before anyone starts working on it.</p>
 
-      <p><strong><a href="reseed-dont-compact.html">Memory: reseed, don't compact.</a></strong> Long, structured work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core of instructions that holds the intent, fetch everything else when it's needed, and rebuild from that core deliberately.</p>
+      <p><strong><a href="reseed-dont-compact.html">Memory: reseed, don't compact.</a></strong> Long, structured work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core of instructions that holds the intent, fetch everything else when it's needed, and rebuild from that core on purpose.</p>
 
       <p><strong><a href="agreement-isnt-verification.html">Verification: agreement isn't verification.</a></strong> When agents agree, that shows their reasoning is consistent, not that the work is correct. Done means checked against reality, with findings backed by evidence and reviewers who form their own view before reading the author's.</p>
 

@@ -48,17 +48,17 @@
 
       <h2>When the model ends the loop</h2>
 
-      <p>If an agent has to hold a waiting loop and re-enter it after every step, then every re-entry is a point where it can simply stop. It writes a final message, and the loop is over. One model would reliably come back. Another model, given the same instructions, often didn't. You can tune a prompt until a particular model behaves, but you've only fixed it for that model, and only until the next release.</p>
+      <p>If an agent has to hold a waiting loop and re-enter it after every step, then every re-entry is a point where it can stop. It writes a final message, and the loop is over. One model would reliably come back. Another model, given the same instructions, often didn't. You can tune a prompt until a particular model behaves, but you've only fixed it for that model, and only until the next release.</p>
 
       <h2>Turn it inside out</h2>
 
       <p>The fix is to stop asking the model to run the loop at all. Instead, a plain, deterministic orchestrator owns sequencing. It reads the current state of the work, works out what should happen next for each role, and waits when nothing needs doing. When something does, like a proposal to review or an objection to answer, it starts a fresh agent for that one event. The agent does its job, records its judgment and exits.</p>
 
-      <p>A role is finished when the orchestrator records that it's finished, not when a model decides to stop talking. The orchestrator schedules the next step without depending on the model choosing to continue, and it works the same way regardless of which model is running.</p>
+      <p>A role is finished when the orchestrator records that it's finished. The orchestrator schedules the next step itself, so it works the same way whichever model is running.</p>
 
-      <p>Before acting, each agent checks once more that its event is still current, so if someone else already handled it, it skips. At most one agent runs per event. And continuity doesn't come from a long-running session. It comes from a short memory file for each role plus the protected core described in <a href="reseed-dont-compact.html">Reseed, don't compact</a>, so a brand-new agent can pick up a review cycle exactly where the last one left off.</p>
+      <p>Before acting, each agent checks once more that its event is still current, so if someone else already handled it, it skips. At most one agent runs per event. And continuity doesn't come from a long-running session. It comes from a short memory file for each role plus the protected core described in <a href="reseed-dont-compact.html">Reseed, don't compact</a>, so a brand-new agent can pick up a review cycle where the last one left off.</p>
 
-      <h2>Quiet isn't failure</h2>
+      <h2>When nothing happens for a while</h2>
 
       <p>Once the orchestrator owns the clock, it also has to decide what to do when nothing happens for a while. The obvious answer, which is to restart things a few times and then give up, turned out to be wrong. Some phases are legitimately quiet for a long stretch, and a restart cap would eventually kill perfectly healthy work. So idleness doesn't fail anything. Past a time budget, the orchestrator alerts a person, raises the priority if it keeps going, and keeps running. A person decides whether quiet means stuck.</p>
 
@@ -68,11 +68,9 @@
 
       <p>The rebuilt version splits the job three ways. Deterministic detectors watch for problems they can prove, and the vast majority of observations end there, with no model involved. A model is only consulted on the ambiguous minority, and it advises rather than acts. A separate control plane carries out its advice, choosing from a short, fixed list of actions: nudge an agent, restart a group, or ask a person. Every action is deduplicated, rate-limited and logged. The advising agent can't open a decision on a person's behalf. Only the control plane can, through a path that's bounded and audited.</p>
 
-      <h2>Beyond code</h2>
+      <h2>Outside software</h2>
 
-      <p>Most firms already run on this split. Deadlines, routing and reminders live in a case management or workflow system, and people bring the judgment. An agent drafting or reviewing inside that workflow should be treated the same way. The system tracks the deadline and hands it the next document, and the agent decides what the document needs. Nobody should be relying on an AI to remember to check back on Thursday.</p>
-
-      <p>Models are remarkable at judgment and unreliable at bookkeeping. Let code keep the clock, and call the model when there's something worth deciding.</p>
+      <p>Most operations teams already run on this split. Deadlines, routing and reminders live in a ticketing or workflow system, and people bring the judgment. An agent drafting or reviewing inside that workflow should be treated the same way. The system tracks the deadline and hands it the next ticket, and the agent decides what the ticket needs. Nobody should be relying on an AI to remember to check back on Thursday.</p>
 
       <footer class="post-foot">
         <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
