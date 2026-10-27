@@ -1,0 +1,1371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Reviewer Writeup</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="description" content="How I built the AI code reviewer Khan Academy turned on for every pull request.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+<style>
+/* Tokens match jameswiesebron.com: kanagawa-inspired pastels, violet ink dark mode. */
+:root {
+  --bg: #f1ecf7;
+  --bg-2: #e6def2;
+  --card: #fcf9ff;
+  --ink: #261d38;
+  --ink-2: #5d5373;
+  --line-c: #261d38;
+
+  --coral: #f2a28c;
+  --peri: #93a6ee;
+  --butter: #f2d58c;
+  --mint: #9fd6c0;
+  --sakura: #efb0c7;
+  --violet: #b8a1e0;
+  --cobalt: #3a52e6;
+  --on: #261d38;
+
+  --contrast-bg: #2f2546;
+  --contrast-fg: #efe7d2;
+  --contrast-accent: #f2d58c;
+
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --text: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --gutter: clamp(1rem, 4.5vw, 5.5rem);
+  --line: 3px solid var(--line-c);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #251e37;
+    --bg-2: #2d2542;
+    --card: #322a4b;
+    --ink: #ece4cd;
+    --ink-2: #b9afcb;
+    --line-c: #ece4cd;
+    --cobalt: #6f86ff;
+    --contrast-bg: #b8a1e0;
+    --contrast-fg: #261d38;
+    --contrast-accent: #261d38;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #251e37;
+  --bg-2: #2d2542;
+  --card: #322a4b;
+  --ink: #ece4cd;
+  --ink-2: #b9afcb;
+  --line-c: #ece4cd;
+  --cobalt: #6f86ff;
+  --contrast-bg: #b8a1e0;
+  --contrast-fg: #261d38;
+  --contrast-accent: #261d38;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  /* sized for a 1080p screen share: about 30px body text at 1920 wide */
+  font-size: clamp(15px, 1.6vw + 0.35vh, 40px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--text);
+  line-height: 1.4;
+  counter-reset: slide;
+}
+
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { text-wrap: pretty; margin: 0; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em; }
+
+/* ---------- progress and chrome ---------- */
+
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: 6px;
+  background: var(--cobalt);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+.mark {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--line-c);
+  &.d1 { background: var(--coral); border-radius: 50%; }
+  &.d2 { background: var(--butter); rotate: 45deg; scale: 0.85; }
+  &.d3 { background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); border: 0; }
+}
+
+/* ---------- slides ---------- */
+
+.slide {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  border-bottom: var(--line);
+  counter-increment: slide;
+}
+
+.slide:nth-of-type(even) { background: var(--bg-2); }
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: clamp(2rem, 5.5vh, 4.5rem) var(--gutter) clamp(2.5rem, 6.5vh, 4.5rem);
+  overflow: clip;
+}
+
+.num {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 1.4rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--ink-2);
+  &::before { content: counter(slide, decimal-leading-zero); }
+}
+
+.backup .num::before { content: "backup"; }
+
+
+.kicker {
+  align-self: flex-start;
+  padding: 0.15rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 999px;
+}
+
+.title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5.6vw, 5.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  max-width: 17ch;
+}
+
+h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.3vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  max-width: 24ch;
+}
+
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  max-width: 40ch;
+  font-size: 1.1rem;
+  color: var(--ink-2);
+}
+
+mark {
+  color: var(--on);
+  padding: 0 0.15em;
+  background: var(--butter);
+  border-radius: 0.2em 0.6em 0.2em 0.6em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  &.m2 { background: var(--mint); }
+  &.m3 { background: var(--sakura); }
+}
+
+.small { font-size: 0.9rem; color: var(--ink-2); }
+
+.card {
+  padding: 1rem 1.2rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px 22px 4px 4px;
+  & h3 { margin-bottom: 0.35rem; }
+  & p { font-size: 1rem; color: var(--ink-2); }
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+
+.ticks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  & li {
+    position: relative;
+    padding-left: 1.5rem;
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.42em;
+      width: 0.6rem;
+      height: 0.6rem;
+      background: var(--coral);
+      border: 2px solid var(--line-c);
+      rotate: 45deg;
+    }
+  }
+}
+
+.pill {
+  align-self: flex-start;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 999px;
+}
+
+.quote {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.6vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 28ch;
+}
+
+.ph {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ink);
+  border: 2.5px dashed var(--coral);
+  border-radius: 6px;
+}
+
+/* decorative shapes, never data */
+.deco {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: var(--line);
+  &.circle { border-radius: 50%; background: var(--coral); }
+  &.diamond { background: var(--butter); rotate: 45deg; }
+  &.tri { border: 0; background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  &.ring { background: none; border: clamp(0.8rem, 1.4vw, 1.4rem) solid var(--cobalt); border-left-color: transparent; border-bottom-color: transparent; border-radius: 50%; rotate: -45deg; }
+  &.stripe { border: 0; background: repeating-linear-gradient(-45deg, var(--mint) 0 10px, transparent 10px 20px); }
+}
+
+/* ---------- title slide ---------- */
+
+.cover .stage { gap: 1.8rem; }
+.cover .byline { font-weight: 700; font-size: 1rem; }
+.cover .byline span { display: block; font-weight: 400; color: var(--ink-2); }
+
+/* ---------- chain (why now) ---------- */
+
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  & .link {
+    padding: 0.9rem 1.2rem;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 999px;
+  }
+  & .link:nth-of-type(2) { background: var(--butter); color: var(--on); }
+  & .link:nth-of-type(3) { background: var(--sakura); color: var(--on); }
+  & .link:nth-of-type(4) { background: var(--coral); color: var(--on); }
+  & .arrow { font-family: var(--display); font-size: 1.4rem; }
+}
+
+/* ---------- goals ---------- */
+
+.goals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  & div {
+    min-height: 6.5rem;
+    padding: 1.2rem;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.15;
+    color: var(--on);
+    border: var(--line);
+    border-radius: 4px;
+  }
+  & div:nth-child(1) { background: var(--mint); }
+  & div:nth-child(2) { background: var(--butter); border-radius: 50% 50% 4px 4px / 30% 30% 4px 4px; }
+  & div:nth-child(3) { background: var(--peri); }
+  & div:nth-child(4) { background: var(--sakura); border-radius: 4px 40px 4px 4px; }
+}
+
+/* ---------- two tools ---------- */
+
+.versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.2rem;
+  align-items: stretch;
+  & .plus { align-self: center; font-family: var(--display); font-weight: 800; font-size: 1.6rem; }
+}
+
+.gap {
+  align-self: flex-start;
+  padding: 0.8rem 1.2rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--on);
+  background: var(--butter);
+  border: var(--line);
+  border-radius: 4px 30px 4px 30px;
+}
+
+/* ---------- diagrams ---------- */
+
+.diagram { width: 100%; height: auto; max-height: 62vh; overflow: visible; }
+.build .stage { gap: 1rem; }
+h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
+.diagram text { fill: var(--ink); font-family: var(--text); font-size: 32px; }
+.diagram .t-b { font-weight: 700; }
+.diagram .t-s { font-size: 25px; fill: var(--ink-2); }
+.diagram .box { stroke: var(--line-c); stroke-width: 3; }
+.diagram .code { fill: var(--butter); }
+.diagram .model { fill: var(--peri); }
+.diagram .event { fill: var(--coral); }
+.diagram .on-pastel { fill: #261d38; }
+.diagram .wire { fill: none; stroke: var(--line-c); stroke-width: 3; }
+.diagram .loop { fill: none; stroke: var(--cobalt); stroke-width: 4; }
+.diagram .fence { fill: none; stroke: var(--cobalt); stroke-width: 4; stroke-dasharray: 14 10; }
+.diagram .fence-label { fill: var(--cobalt); font-weight: 700; }
+.diagram .fence-label.t-s { fill: var(--cobalt); }
+.diagram .track { fill: none; stroke: var(--cobalt); stroke-width: 8; stroke-linecap: round; }
+.diagram .node { fill: var(--card); stroke: var(--line-c); stroke-width: 4; }
+.diagram .node.hot { fill: var(--coral); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  & span { display: inline-flex; gap: 0.4rem; align-items: center; }
+  & i { width: 1.1rem; height: 1.1rem; border: 2.5px solid var(--line-c); border-radius: 4px; }
+}
+
+/* ---------- bars (single hue, direct labels) ---------- */
+
+.bars {
+  display: grid;
+  gap: 1rem;
+  max-width: 62rem;
+  & .row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 16rem) 1fr;
+    gap: 0.4rem 1.2rem;
+    align-items: center;
+  }
+  & .label { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+  & .label span { display: block; font-weight: 400; color: var(--ink-2); }
+  & .lane {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: calc(100% - 7rem);
+  }
+  & .bar {
+    flex: none;
+    height: 2.4rem;
+    width: var(--w);
+    min-width: 0.6rem;
+    background: var(--cobalt);
+    border-radius: 0 6px 6px 0;
+    transform-origin: 0 50%;
+  }
+  & .bar.muted { background: var(--ink-2); }
+  & .val {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+}
+
+.stamp {
+  align-self: flex-start;
+  padding: 0.5rem 1.1rem;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--on);
+  background: var(--mint);
+  border: var(--line);
+  rotate: -3deg;
+}
+
+/* ---------- comment wall ---------- */
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+  gap: 0.5rem;
+  max-width: none;
+  & div {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.95rem;
+    background: var(--card);
+    border: 2.5px solid var(--line-c);
+    border-radius: 4px 14px 4px 4px;
+  }
+  & b { display: block; font-size: 1rem; }
+}
+
+.off {
+  align-self: flex-start;
+  padding: 0.6rem 1.1rem;
+  font-weight: 800;
+  color: var(--on);
+  background: var(--coral);
+  border: var(--line);
+  rotate: 2deg;
+}
+
+/* ---------- quieter surface ---------- */
+
+.mock {
+  padding: 0.9rem 1.1rem;
+  font-size: 0.95rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px;
+  & .who { font-weight: 800; font-size: 0.8rem; color: var(--ink-2); margin-bottom: 0.3rem; }
+  & details { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px dashed var(--ink-2); color: var(--ink-2); }
+  & summary { font-weight: 700; cursor: pointer; }
+}
+
+/* ---------- dispatch trial ---------- */
+
+.runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  & div {
+    display: grid;
+    place-items: center;
+    width: 7.5rem;
+    height: 7.5rem;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border: var(--line);
+    border-radius: 50%;
+  }
+  & .ok { background: var(--mint); color: var(--on); }
+}
+
+/* ---------- flow chips ---------- */
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  & b {
+    padding: 0.5rem 1rem;
+    font-family: var(--display);
+    font-weight: 600;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 4px;
+  }
+  & span { font-size: 0.85rem; font-weight: 700; color: var(--ink-2); }
+}
+
+.roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.8rem;
+  & div { padding: 0.8rem 1rem; background: var(--card); border: var(--line); border-radius: 4px; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+  & span { font-size: 0.95rem; color: var(--ink-2); }
+}
+
+.reported {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  vertical-align: 0.2em;
+  border: 2px solid var(--line-c);
+  border-radius: 999px;
+}
+
+.beliefs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+  counter-reset: belief;
+  & li {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2.1vw, 2rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+}
+
+
+/* ---------- quieter surface visual ---------- */
+
+.quiet-visual { display: grid; gap: 0.8rem; align-content: start; }
+.ticks { align-content: start; align-self: start; }
+.mini-wall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  & div {
+    white-space: nowrap;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--card);
+    border: 2.5px solid var(--line-c);
+    border-radius: 4px 12px 4px 4px;
+  }
+  & .extra { display: none; }
+  & .fold { color: var(--on); background: var(--butter); border-style: dashed; }
+}
+.reply p { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+
+/* ---------- dispatch trial flip ---------- */
+
+.runs .skip { position: relative; overflow: hidden; background: var(--card); }
+.runs .skip span { position: relative; }
+.runs .hatch {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, var(--coral) 0 8px, var(--card) 8px 16px);
+}
+.runs .look { display: none; }
+.runs .truth { color: var(--ink); }
+
+
+/* ---------- buy-in, phases, proof ---------- */
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: 1.2rem 2.4rem;
+  align-items: start;
+}
+.yes { display: grid; gap: 0.6rem; }
+.yes .card { padding: 0.7rem 1rem; }
+.yes .card b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.yes .card span { font-size: 0.9rem; color: var(--ink-2); }
+.goals-sm div { min-height: 4.6rem; padding: 0.8rem 1rem; font-size: 0.95rem; }
+.goals-label { margin-bottom: -0.6rem; }
+.diagram.tl, .diagram.arch { flex: 1 1 0; min-height: 0; width: 100%; height: auto; max-height: none; }
+.diagram.tl text { font-size: 36px; }
+.diagram.tl .t-s { font-size: 29px; }
+.toprow { display: flex; flex-wrap: wrap; gap: 0.8rem 1.6rem; align-items: center; }
+.phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.7rem;
+  & div { padding: 0.6rem 0.9rem; background: var(--card); border: var(--line); border-radius: 4px 18px 4px 4px; }
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 0.9rem; color: var(--cobalt); }
+  & span { font-size: 0.95rem; }
+}
+.deferred { font-size: 0.95rem; color: var(--ink-2); }
+.deferred b { color: var(--ink); }
+.proof {
+  padding: 1rem 1.2rem;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 4px 26px 4px 4px;
+  & h3 { margin-bottom: 0.35rem; }
+  & p { font-size: 1rem; }
+}
+.grid.next { grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+.grid.next .card { padding: 0.7rem 0.9rem; }
+
+/* ---------- notes ---------- */
+
+.notes { display: none; }
+
+.notes-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 1rem 1.2rem;
+  font-size: 0.7rem;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+}
+
+.notes-panel[hidden] { display: none; }
+
+.help {
+  position: fixed;
+  left: 1rem;
+  bottom: 0.8rem;
+  z-index: 5;
+  font-size: 0.6rem;
+  color: var(--ink-2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.help.show { opacity: 0.85; }
+
+@media (max-width: 760px) {
+  .goals { grid-template-columns: 1fr 1fr; }
+  .versus { grid-template-columns: 1fr; }
+  .versus .plus { justify-self: center; }
+  .bars .row { grid-template-columns: 1fr; }
+  .help { display: none; }
+}
+
+/* ---------- motion ----------
+   GSAP drives every animation from the natural (final) layout, so reduced
+   motion or a missing script leaves a complete static deck. */
+
+.pin-spacer { background: inherit; }
+.runner { fill: var(--coral); stroke: var(--line-c); stroke-width: 4; }
+.progress { display: none; }
+html.motion .progress { display: block; }
+.runner { display: none; }
+html.motion .runner { display: inline; }
+html.motion .mini-wall .extra { display: block; }
+html.motion .runs .look { display: block; }
+html.motion .runs .skip { background: var(--mint); color: var(--on); }
+.runs div > span { grid-area: 1 / 1; }
+
+/* ---------- writeup ---------- */
+
+html { font-size: clamp(16px, 0.55vw + 0.62rem, 21px); }
+body { line-height: 1.65; }
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.4rem;
+  padding: 5rem var(--gutter) 4rem;
+  border-bottom: var(--line);
+  overflow: clip;
+}
+.hero .title { font-size: clamp(2.4rem, 6.4vw, 6rem); max-width: 15ch; }
+.dek { max-width: 36rem; font-size: 1.25rem; color: var(--ink-2); }
+.byline { font-weight: 700; }
+.byline span { display: block; font-weight: 400; color: var(--ink-2); }
+.home-link { position: absolute; top: 1.4rem; left: var(--gutter); display: inline-flex; gap: 0.4rem; align-items: center; font-family: var(--display); font-weight: 600; font-size: 0.85rem; text-decoration: none; }
+
+.chapter { padding: 5rem var(--gutter) 3rem; border-bottom: var(--line); }
+.chapter:nth-of-type(even) { background: var(--bg-2); }
+.chapter > h2, .chapter > .kicker, .prose-only {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+.chapter > .kicker { display: block; width: fit-content; margin-bottom: 1rem; }
+.chapter:has(.story) > h2, .chapter:has(.story) > .kicker { max-width: 92rem; }
+.chapter:has(.story) > .kicker { margin-left: max(0px, calc((100% - 92rem) / 2)); }
+.chapter > h2 { margin-bottom: 2rem; font-size: clamp(1.7rem, 3.4vw, 2.8rem); }
+.chapter p { margin: 0 0 1.15rem; font-size: 1.12rem; }
+
+.story {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.45fr);
+  gap: 3rem;
+  max-width: 92rem;
+  margin: 0 auto;
+}
+.story .prose { padding-bottom: 20vh; }
+.story .prose p { font-size: 1.12rem; }
+html.motion .story .prose p[data-step] { padding-block: 26vh; margin: 0; }
+html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
+.story .visual {
+  position: sticky;
+  top: 8vh;
+  height: 84vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 6px 36px 6px 6px;
+  overflow: clip;
+}
+.visual .diagram { max-height: none; flex: 1 1 0; min-height: 0; }
+.visual .diagram text { font-size: 36px; }
+.visual .diagram .t-s { font-size: 28px; }
+.visual .diagram.tl text { font-size: 34px; }
+.visual .diagram.tl .t-s { font-size: 28px; }
+
+.figure {
+  max-width: 64rem;
+  margin: 2rem auto 2.4rem;
+}
+
+.pullquote {
+  max-width: 44rem;
+  margin: 2.6rem auto;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.pullquote::before { content: ""; display: block; width: 3rem; height: 6px; margin-bottom: 1rem; background: var(--coral); }
+
+.visual .chain .link { font-size: 1rem; }
+.visual .goals div { min-height: 5rem; font-size: 0.95rem; }
+.visual .mini-wall div { font-size: 0.95rem; }
+.visual .off { font-size: 1.05rem; }
+.visual .bars .row { grid-template-columns: minmax(8rem, 13rem) 1fr; }
+.visual .runs div { width: 6.5rem; height: 6.5rem; font-size: 0.75rem; }
+
+.closing { max-width: 44rem; margin: 0 auto; }
+.closing .beliefs li { font-size: clamp(1.2rem, 2.2vw, 1.8rem); }
+.footer { padding: 3rem var(--gutter); text-align: center; color: var(--ink-2); font-size: 0.9rem; }
+
+@media (max-width: 900px) {
+  .story { grid-template-columns: 1fr; gap: 1rem; }
+  .story .visual { order: -1; position: static; height: auto; min-height: 0; }
+  .story .visual .diagram { flex: none; height: auto; }
+  .story .prose { padding-bottom: 0; }
+  .hero .deco { display: none; }
+  .goals { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"></div>
+
+<header class="hero">
+  <a class="home-link" href="/"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span> James Wiesebron</a>
+  <span class="deco ring" style="top: 10vh; right: 9vw; width: 16rem; aspect-ratio: 1"></span>
+  <span class="deco tri" style="top: 30vh; right: 30vw; width: 4.5rem; aspect-ratio: 1"></span>
+  <span class="deco circle" style="bottom: 12vh; right: 16vw; width: 8rem; aspect-ratio: 1"></span>
+  <span class="kicker rise">A project writeup</span>
+  <h1 class="title rise">Every PR gets a thorough first pass</h1>
+  <p class="dek rise">How I built the AI code reviewer Khan Academy turned on for every pull request, what the first week of real use changed, and what I decided not to build.</p>
+  <p class="byline rise">James Wiesebron <span>Founding engineer, AI Developer Experience, Khan Academy · October 2026</span></p>
+</header>
+
+<main>
+
+<section class="chapter">
+  <div class="prose-only">
+    <p class="rise">By the end of this project, every pull request in Khan Academy's frontend and backend monorepos got a thorough first pass from an AI reviewer, on every push, before a human approved it. About 120 engineers worked in those repos, opening dozens to low hundreds of PRs a day.</p>
+    <p class="rise">The review quality was good early. Most of the work went into three other things: keeping cost low enough to run on every push, cutting the comment volume until engineers wanted it on, and checking that the system actually did what it said it did.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Review became the bottleneck</h2>
+  <div class="story" data-story="why">
+    <div class="prose">
+      <p data-step="1">AI made code cheaper to write. Khan had encouraged every engineer to try AI tools, they did, and the number of pull requests went up.</p>
+      <p data-step="2">Review didn't keep up. Reviewers got tired, and quality got uneven, since AI use was uneven on both sides of a review. The worst case was a reviewer who wasn't using AI much, reading a PR from an author who wasn't using it well either.</p>
+      <p data-step="3">Compliance still requires a human approval on every merge, so replacing the human reviewer was never an option. The goal was for every PR to already have a thorough review by the time a person opened it.</p>
+      <p data-step="4">We set four goals for the reviewer, all about the people using it: less fatigue for reviewers, a higher quality bar for PRs, reviews that were consistent no matter who wrote or reviewed the code, and a team that could ship faster without worrying about what slipped through.</p>
+    </div>
+    <div class="visual">
+      <div class="chain">
+        <span class="link">AI made code cheaper to write</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="link">More PRs</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="link">Tired reviewers</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="link">Uneven quality</span>
+      </div>
+      <p class="pill">Every merge still needs a human approval</p>
+      <div class="goals goals-sm">
+        <div>Less fatigue for reviewers</div>
+        <div>A higher quality bar</div>
+        <div>Consistent reviews</div>
+        <div>Shipping faster, safely</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>What we had before</h2>
+  <div class="prose-only">
+    <p class="rise">We already had two AI reviewers. Claude Code's managed review was good, but too expensive to run on every PR and every push, so it only ran when someone asked for it. My estimate is that running it on everything would have cost about five times what our reviewer ended up costing. Engineers also found its comments hard to read.</p>
+    <p class="rise">Khan's chief architect had built a lighter bot of his own. It was cheap on purpose: it looked for a few specific things and told the human reviewer where to focus. It was never meant to be thorough.</p>
+  </div>
+  <div class="figure versus rise">
+    <div class="card">
+      <h3>Claude Code's managed review</h3>
+      <ul class="ticks"><li>Ran only when someone asked</li><li>Too expensive for every PR and push</li><li>Comments engineers found hard to read</li></ul>
+    </div>
+    <span class="plus" aria-hidden="true">+</span>
+    <div class="card">
+      <h3>The chief architect's triage bot</h3>
+      <ul class="ticks"><li>Cheap by design</li><li>Pointed reviewers at what to check</li><li>Never meant to be thorough</li></ul>
+    </div>
+  </div>
+  <div class="prose-only">
+    <p class="rise">Neither one gave every PR a thorough first pass that knew Khan's own standards. I looked at open source review systems and didn't find anything mature or flexible enough, so I built on the chief architect's bot.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Getting three groups to say yes</h2>
+  <div class="prose-only">
+    <p class="rise">I started with a written proposal, "more depth, less noise." It opened with what already worked in the existing design: a triage pass, focused sub-agents, and a validator that double-checked claims before posting. Then it described the gap. On the first PR I traced, the reviewer never raised an authorization question that the repo's own risk config rated High, because the prompts leaned so hard toward precision that it dropped anything uncertain.</p>
+    <p class="rise">The plan had four phases, cheapest first, with evals gating only the changes that could regress. It also asked who would own the reviewer as a product, since an internal tool nobody owns ends up maintained in people's spare time. I took it on.</p>
+    <p class="rise">Three groups had to agree. The chief architect owned the technical direction, reviewed every change I made, and pushed hard on cost. Engineers had to want it on their PRs, and in the end that's what decided the switch. And it had to fit the budget. I owned AI spend and my manager approved increases, which was an easy conversation once the cost per PR was low enough to run on everything.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>How a review runs</h2>
+  <div class="story" data-story="arch">
+    <div class="prose">
+      <p data-step="1">A PR opens or gets a push. Code, not a model, picks which specialist reviewers to run, based on what changed.</p>
+      <p data-step="2">A full review runs about a dozen specialists: correctness, tests, docs, security (on repos that turn it on), a holistic pass that reads the whole change, and audits against Khan's own best-practice skills. Each one looks for one kind of problem, which is where the depth comes from.</p>
+      <p data-step="3">Their findings get validated and deduplicated before anything posts.</p>
+      <p data-step="4">Code then computes the verdict and writes the comments. The verdict is advisory, since a human always approves the merge.</p>
+      <p data-step="5">On a new push it doesn't start over. It checks whether the open comments were addressed, resolves the ones that were, and only reruns the full review if the diff changed a lot. This ended up being the biggest cost saver.</p>
+      <p data-step="6">None of the agents had credentials or permissions. They read what the pipeline gave them (source code, tickets, PR descriptions and comments) and wrote their results back. The pipeline held the credentials and posted the review. Security reviewed the setup before launch.</p>
+    </div>
+    <div class="visual">
+      <div class="legend">
+        <span><i style="background: var(--butter)"></i>Code</span>
+        <span><i style="background: var(--peri)"></i>Model sub-agents</span>
+        <span><i style="background: var(--coral)"></i>GitHub event</span>
+      </div>
+      <svg class="diagram arch" viewBox="0 0 1600 780" role="img" aria-labelledby="arch-t arch-d">
+      <title id="arch-t">Reviewer architecture</title>
+      <desc id="arch-d">A PR event goes to a code router, which picks specialist model sub-agents: correctness, tests, docs, security where configured, a holistic pass and Khan best-practice skills. Their claims are validated and deduplicated in code, then code computes the verdict and posts. On each push, the reviewer reconciles open threads and re-arms a full review if the diff shifts a lot. The sub-agents sit inside a boundary with no credentials and no permissions.</desc>
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g style="color: var(--line-c)">
+        <g class="fence-g">
+          <rect class="fence" x="515" y="8" width="530" height="652" rx="28"/>
+          <text class="fence-label" x="780" y="60" text-anchor="middle" style="font-size: 29px">No credentials · no permissions</text>
+        </g>
+        <g class="pr">
+          <rect class="box event" x="10" y="280" width="200" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="110" y="332" text-anchor="middle">PR opened</text>
+          <text class="t-s on-pastel" x="110" y="368" text-anchor="middle">or pushed</text>
+        </g>
+        <path class="wire w0" pathLength="1" d="M210 340 H242" marker-end="url(#ah)"/>
+        <g class="router code-node">
+          <rect class="box code" x="250" y="280" width="230" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="365" y="332" text-anchor="middle">Route</text>
+          <text class="t-s on-pastel" x="365" y="368" text-anchor="middle">pick specialists</text>
+        </g>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 135" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 220" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 305" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 390" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 475" marker-end="url(#ah)"/>
+          <path class="wire fan" pathLength="1" d="M480 340 L552 560" marker-end="url(#ah)"/>
+          <g class="rv"><title>Correctness: Logic errors and broken behavior in the change</title>
+            <rect class="box model" x="560" y="100" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="146" text-anchor="middle">Correctness</text>
+          </g>
+          <g class="rv"><title>Tests: Whether the tests actually cover what changed</title>
+            <rect class="box model" x="560" y="185" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="231" text-anchor="middle">Tests</text>
+          </g>
+          <g class="rv"><title>Docs: Comments and docs that no longer match the code</title>
+            <rect class="box model" x="560" y="270" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="316" text-anchor="middle">Docs</text>
+          </g>
+          <g class="rv"><title>Security (opt-in): Auth, injection and data exposure, on repos that opt in</title>
+            <rect class="box model" x="560" y="355" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="401" text-anchor="middle">Security (opt-in)</text>
+          </g>
+          <g class="rv"><title>Holistic pass: Reads the whole change, not one concern</title>
+            <rect class="box model" x="560" y="440" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="486" text-anchor="middle">Holistic pass</text>
+          </g>
+          <g class="rv"><title>Khan best-practice skills: Audits against Khan's own written conventions</title>
+            <rect class="box model" x="560" y="525" width="440" height="70" rx="14"/>
+            <text class="on-pastel" x="780" y="571" text-anchor="middle">Khan best-practice skills</text>
+          </g>
+        <text class="t-s rv-note" x="780" y="635" text-anchor="middle">about 12 sub-agents on a full review</text>
+          <path class="wire into" pathLength="1" d="M1000 135 L1072 328" marker-end="url(#ah)"/>
+          <path class="wire into" pathLength="1" d="M1000 305 L1072 336" marker-end="url(#ah)"/>
+          <path class="wire into" pathLength="1" d="M1000 390 L1072 344" marker-end="url(#ah)"/>
+          <path class="wire into" pathLength="1" d="M1000 560 L1072 352" marker-end="url(#ah)"/>
+        <g class="validate code-node">
+          <rect class="box code" x="1080" y="280" width="220" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="1190" y="332" text-anchor="middle">Validate</text>
+          <text class="t-s on-pastel" x="1190" y="368" text-anchor="middle">and dedupe</text>
+        </g>
+        <path class="wire w-post" pathLength="1" d="M1300 340 H1342" marker-end="url(#ah)"/>
+        <g class="post code-node">
+          <rect class="box code" x="1350" y="280" width="240" height="120" rx="18"/>
+          <text class="t-b on-pastel" x="1470" y="332" text-anchor="middle">Verdict</text>
+          <text class="t-s on-pastel" x="1470" y="368" text-anchor="middle">and post</text>
+          <text class="t-s" x="1470" y="440" text-anchor="middle">advisory: a human</text>
+          <text class="t-s" x="1470" y="470" text-anchor="middle">always approves</text>
+        </g>
+        <path class="loop" pathLength="1" d="M1470 490 V720 H365 V410" marker-end="url(#ah)" style="color: var(--cobalt)"/>
+        <g class="loop-label">
+          <text x="900" y="705" text-anchor="middle" class="t-b">On each push: reconcile open threads</text>
+          <text x="900" y="760" text-anchor="middle" class="t-s">full re-review only if the diff shifts a lot</text>
+        </g>
+        <circle class="runner pr-dot" cx="110" cy="340" r="16"/>
+      </g>
+    </svg>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Anything that could regress went through evals</h2>
+  <div class="prose-only">
+    <p class="rise">Changes that could regress went through an eval bench first: real PRs plus planted defects the reviewer had to catch, run as A/B comparisons. We also ran identical versions against each other to measure the noise, so we knew how big a difference had to be before it meant anything.</p>
+    <p class="rise">Against a generic reviewer on the same PR, all of our extra catches came from the audits against Khan's own skills, like a swallowed error and a fetch that loaded whole entities when it only needed keys. A reviewer that doesn't know the codebase can't catch those.</p>
+    <p class="rise">The eval itself needed checking too. One case looked flaky, so I read all 28 runs. The reviewer had found the defect in every one, and the scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer, which is why I read transcripts before trusting a score.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>The first week: good catches, way too many comments</h2>
+  <div class="story" data-story="quiet">
+    <div class="prose">
+      <p data-step="1">The reviewer caught real problems in its first week with real users, including a cross-package compile break. The volume was the problem. One PR got seven non-blocking comments on a single push and five more two days later, and the recap re-listed every open thread each time.</p>
+      <p data-step="2">Engineers said the nits and questions were the main issue, and the frontend infra team (the chief architect's own team) turned auto-review off.</p>
+      <p data-step="3">Reviewer attention was the thing to protect. Once a review has six comments in it, people start skimming, and they skim past the blocking one too.</p>
+      <p data-step="4">The fixes shipped within about a day. Blocking findings always post. Non-blocking ones are ranked and capped at three, nitpicks never post inline, and the rest go into a collapsed section, so nothing is lost and the notification stays short. Re-reviews only look at what changed.</p>
+      <p data-step="5">The comments themselves changed too. Each one became two layers: a short comment written for a person, with the model's fuller reasoning collapsed underneath for agents. Scripts enforce that format, and a separate model grades the writing.</p>
+      <p data-step="6">Fixes only run when the author asks, by replying "ship" on the comment. Nobody had to install anything or change how they worked.</p>
+    </div>
+    <div class="visual">
+      <div class="mini-wall" aria-label="Illustration: seven comments become three inline plus a collapsed section">
+        <div>suggestion · test coverage</div>
+        <div>question · non-blocking</div>
+        <div>nitpick · naming</div>
+        <div class="extra">suggestion · test coverage</div>
+        <div class="extra">note · non-blocking</div>
+        <div class="extra">question · non-blocking</div>
+        <div class="extra">suggestion · test coverage</div>
+        <div class="fold">▸ 4 more, collapsed</div>
+      </div>
+      <p class="off">The frontend infra team turned auto-review off</p>
+      <div class="mock layer">
+        <div class="who">review bot · illustration</div>
+        <p><b>issue (blocking):</b> the retry counter resets inside the loop, so this job never stops retrying.</p>
+        <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
+      </div>
+      <div class="mock reply">
+        <div class="who">author reply</div>
+        <p><code>ship</code> <span class="small">→ a fix commit lands on the branch</span></p>
+      </div>
+    </div>
+  </div>
+  <p class="pullquote rise">Comment six teaches people to skim, and they skim past the blocking finding too.</p>
+</section>
+
+<section class="chapter">
+  <h2>About a fifth of the managed review's cost</h2>
+  <div class="story" data-story="cost">
+    <div class="prose">
+      <p data-step="1">Cost was a constraint from the start, and the chief architect's triage bot is the baseline here. His concern was that a dozen reviewers would make reviews expensive and long.</p>
+      <p data-step="2">The full first-pass review ended up at about 2.2 times the triage bot's cost. Turns out most of the cost was the orchestrating model deciding what to do next, not the reviewers, so I moved that work into code. Re-reviews were the other big cost, and checking only the open comments cut a repeat round by 82 percent.</p>
+      <p data-step="3">Running the managed review on every PR and push would have been about 11 times the baseline, roughly five times what we spent, using the same models. That's an estimate, since it only ever ran on request.</p>
+    </div>
+    <div class="visual">
+      <div class="bars" role="table" aria-label="Relative cost for the same PR volume">
+        <div class="row" role="row"><div class="label" role="rowheader">Triage bot <span>points reviewers at what to check</span></div><div class="track" role="cell"><div class="lane"><div class="bar muted" style="--w: 9%"></div><span class="val">1×</span></div></div></div>
+        <div class="row" role="row"><div class="label" role="rowheader">Full first-pass review <span>what I built</span></div><div class="track" role="cell"><div class="lane"><div class="bar" style="--w: 20%"></div><span class="val">≈2.2×</span></div></div></div>
+        <div class="row" role="row"><div class="label" role="rowheader">Managed review on every PR and push <span>estimate, it only ran on request</span></div><div class="track" role="cell"><div class="lane"><div class="bar muted" style="--w: 100%"></div><span class="val">≈11×</span></div></div></div>
+      </div>
+      <p class="pill">Same models in all three</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Things I didn't build</h2>
+  <div class="prose-only">
+    <p class="rise">I built a panel of skeptic agents to double-check blocking claims, then took it out. An audit of every blocking review over about a week (90 PRs) found 12 false blocks, and only 2 were the kind another verification layer could catch. The rest were wrong severity calls and questions about what the author meant. Stricter claim validation, with no extra agents, handled it.</p>
+    <p class="rise">I proposed a stronger model for five reviewer roles. The chief architect thought that was overkill, so I tried it on the correctness reviewer alone, where recall went from 82 to 89 percent on the eval set for 35 percent more cost.</p>
+    <p class="rise">A cheaper model was worth testing. It caught 32 of 36 required findings against 36 of 36, and at our actual rates it didn't save money either. That's from one full repeat, so it isn't a benchmark, but it settled the question. The transcripts also showed that some apparent model failures were problems with the test setup: different hidden reasoning defaults, an eval that let the model go looking for answers, and scoring bugs.</p>
+    <p class="rise">Blocking merges was off the table, since compliance requires a human approval. Fixes ran only when an author asked, and each specialist stayed opt-in per repo until it earned its place in evals.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>2 of 5 runs skipped dispatch and still looked fine</h2>
+  <div class="story" data-story="runs">
+    <div class="prose">
+      <p data-step="1">Early on, the orchestrating model was told to dispatch the specialists and validate their findings before posting. In a seeded trial, all five runs posted a review that looked fine.</p>
+      <p data-step="2">Two of them had skipped dispatch and written the review themselves. Nothing in the output showed it. Our scripted eval missed it because its own dispatch was already deterministic.</p>
+      <p data-step="3">So I moved staging, dispatch and submission checks into code, and scripted dispatch became the only mode. It also cut cost: the orchestrator went from about 80 percent of a review's cost to about a quarter.</p>
+    </div>
+    <div class="visual">
+      <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+    </div>
+      <p class="after-row"><mark>Dispatch and submission checks moved into code.</mark></p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Rollout</h2>
+  <div class="story" data-story="rollout">
+    <div class="prose">
+      <p data-step="1">The chief architect's triage bot was already running in the frontend monorepo. After the proposal, I ran a trial on my own team's PRs for a few weeks, alongside the managed review. Anyone else could run ours by commenting on a PR.</p>
+      <p data-step="2">Then came the first week with real users, and the quieter version a day later.</p>
+      <p data-step="3">Before turning it on by default, I wrote a launch brief that set the success criteria ahead of time: no incident affecting authors, and noise reports staying at trial levels. It had three levels of rollback (a label to skip one PR, a kill switch for the repo, and a single revert). The opt-out label existed, but we didn't advertise it. After the chief architect approved the brief, the reviewer went on for every author in the backend monorepo, then frontend after a clean week, and stayed the main reviewer for a couple of months. The frontend infra team turned it back on.</p>
+      <p data-step="4">The work followed the proposal's four phases: quick fixes that couldn't break anything plus a feedback loop, then a small benchmark and noise controls, then the full eval suite and deeper reviews, then hardening before deciding on default-on. The first week moved the noise work earlier. To keep the launch small, I put off a weekly feedback report, gathering context across repos, unattended fixes, and moving off GitHub Agentic Workflows. All four were worth doing, and none was needed to launch.</p>
+    </div>
+    <div class="visual">
+      <svg class="diagram tl" viewBox="40 120 1520 400" role="img" aria-labelledby="tl-t tl-d">
+      <title id="tl-t">Rollout timeline</title>
+      <desc id="tl-d">Triage bot in frontend. Written proposal. A trial of a few weeks on my team's PRs beside the managed review. A field week with too many comments. A quieter surface ships. The launch brief is approved. Default-on in the backend monorepo, then frontend. The main reviewer for a couple of months.</desc>
+      <line class="track tl-track" x1="150" y1="280" x2="1450" y2="280"/>
+      <g class="tl-node" data-x="150">
+        <circle class="node" cx="150" cy="280" r="20"/>
+        <text x="150" y="200" text-anchor="middle" class="t-b">Triage bot</text>
+        <text x="150" y="232" text-anchor="middle" class="t-s">in frontend</text>
+      </g>
+      <g class="tl-node" data-x="336">
+        <circle class="node" cx="336" cy="280" r="20"/>
+        <text x="336" y="350" text-anchor="middle" class="t-b">Proposal</text>
+        <text x="336" y="382" text-anchor="middle" class="t-s">more depth, less noise</text>
+      </g>
+      <g class="tl-node" data-x="521">
+        <circle class="node" cx="521" cy="280" r="20"/>
+        <text x="521" y="168" text-anchor="middle" class="t-b">Trial beside</text>
+        <text x="521" y="200" text-anchor="middle" class="t-b">the managed review</text>
+        <text x="521" y="232" text-anchor="middle" class="t-s">a few weeks</text>
+      </g>
+      <g class="tl-node" data-x="707">
+        <circle class="node hot" cx="707" cy="280" r="20"/>
+        <text x="707" y="350" text-anchor="middle" class="t-b">Field week</text>
+        <text x="707" y="382" text-anchor="middle" class="t-s">right findings, too many</text>
+      </g>
+      <g class="tl-node" data-x="893">
+        <circle class="node" cx="893" cy="280" r="20"/>
+        <text x="893" y="200" text-anchor="middle" class="t-b">Quieter surface</text>
+        <text x="893" y="232" text-anchor="middle" class="t-s">ships within a day</text>
+      </g>
+      <g class="tl-node" data-x="1079">
+        <circle class="node" cx="1079" cy="280" r="20"/>
+        <text x="1079" y="350" text-anchor="middle" class="t-b">Launch brief</text>
+        <text x="1079" y="382" text-anchor="middle" class="t-s">approved</text>
+      </g>
+      <g class="tl-node" data-x="1264">
+        <circle class="node" cx="1264" cy="280" r="20"/>
+        <text x="1264" y="200" text-anchor="middle" class="t-b">Default-on</text>
+        <text x="1264" y="232" text-anchor="middle" class="t-s">backend, then frontend</text>
+      </g>
+      <g class="tl-node" data-x="1450">
+        <circle class="node" cx="1450" cy="280" r="20"/>
+        <text x="1450" y="350" text-anchor="middle" class="t-b">Main reviewer</text>
+        <text x="1450" y="382" text-anchor="middle" class="t-s">for a couple of months</text>
+      </g>
+      <text class="tl-coda" x="800" y="500" text-anchor="middle" font-weight="700">And the frontend infra team turned auto-review back on.</text>
+      <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
+    </svg>
+      <div class="phases">
+        <div><b>Phase 1</b><span>Quick fixes, a feedback loop</span></div>
+        <div><b>Phase 2</b><span>A small benchmark, noise controls</span></div>
+        <div><b>Phase 3</b><span>The full eval suite, deeper reviews</span></div>
+        <div><b>Phase 4</b><span>Hardening, then default-on</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>How the work ran</h2>
+  <div class="prose-only">
+    <p class="rise">Agents wrote the code, and I made the decisions about what shipped. I wrote the specs and plans, validated results, and read the sensitive parts myself, like the verification logic and the cost caps.</p>
+    <p class="rise">To keep my own understanding current, agents checked each handoff: plans against the original spec, the implementation against the plan (no unexpected additions), and the docs against the implementation. Agents made mistakes constantly, so the process assumed they would. Review agents posted findings, my local agents fixed them, and the change went back for review until it passed. The reviewer also ran on its own repo, so it reviewed the changes to itself.</p>
+    <p class="rise">I was on call for it during work hours. A pipeline read every reply to the bot's comments, decided whether it pointed at a real problem, opened or updated a ticket, and pinged me, so engineers never had to file anything.</p>
+  </div>
+  <div class="figure flow rise">
+    <b>Spec</b><span>checked against</span><b>Plan</b><span>checked against</span><b>Code</b><span>checked against</span><b>Docs</b>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Impact</h2>
+  <div class="figure goals rise">
+    <div>Less fatigue<br><span class="small" style="color: inherit">Less time per review <span class="reported">reported</span></span></div>
+    <div>Higher bar<br><span class="small" style="color: inherit">Cleaner PRs, fewer human rounds <span class="reported">reported</span></span></div>
+    <div>Consistent<br><span class="small" style="color: inherit">Every PR, every push</span></div>
+    <div>Faster<br><span class="small" style="color: inherit">Time to merge dropped <span class="reported">reported</span></span></div>
+  </div>
+  <div class="prose-only">
+    <p class="rise">Reviewers told us they spent less time per PR, because PRs came in cleaner after the first pass. They needed fewer rounds of human review, and time to merge dropped. Those are reported, not measured. A before-and-after analysis was next on the list.</p>
+    <p class="rise">What we did measure: it replaced the managed review and reviewed every PR and push, at about a fifth of what the managed review would have cost for the same coverage. Noise reports stayed at trial levels after default-on. Engineers who had used both said ours was more thorough and easier to read quickly.</p>
+  </div>
+  <div class="figure proof rise" style="max-width: 44rem">
+    <h3>The blind rerun</h3>
+    <p>While review was still opt-in, a PR that skipped it caused a production incident. Afterward I ran the reviewer on that merged PR, blind, with no context about the incident, and it flagged the problem. One case doesn't show it prevents incidents, but it's why we turned it on by default.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>What I'd do differently</h2>
+  <div class="prose-only">
+    <p class="rise">I'd have moved off GitHub Agentic Workflows (gh-aw) sooner. It came with the first version and got us running fast, which was the right call at the start. Once we needed the reviewer to do things gh-aw wasn't built for, every change needed a workaround, and we couldn't run the reviewer locally. At that point gh-aw was hosting our pipeline more than running it, and that's the time to own the runtime.</p>
+    <p class="rise">The roadmap from there: our own harness, the model out of orchestration entirely, one review engine across CI, a local CLI and a pi plugin, and a real before-and-after measurement of time to merge. On the eval bench the new harness ran at about half the cost, and the changes together projected 57 to 65 percent cheaper per full review. Those are projections.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <div class="prose-only closing">
+    <p class="rise">A few rules came out of this that I still use. Anything that has to happen goes in code, and the model gets the judgment calls. Agents don't hold credentials, the pipeline does. The tools you measure with need checking too, since a broken scorer looks exactly like a weak model. And the people using a tool decide whether it works, so build it around how they already work.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer"><a href="/">jameswiesebron.com</a></footer>
+
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script>
+// Each step paragraph scrubs its own change to the sticky figure beside it.
+// Everything animates from a hidden state to the natural layout, so reduced motion
+// or a failed script load leaves the complete static page.
+(() => {
+  const root = document.documentElement;
+  const params = new URLSearchParams(location.search);
+  if (params.get("theme")) root.dataset.theme = params.get("theme");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // phones get the finished figures inline, since a sticky figure can't fit beside the text
+  const wide = matchMedia("(min-width: 901px)").matches;
+  if (reduce || !wide || !window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+  root.classList.add("motion");
+
+  gsap.to(".progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
+
+  const step = (story, k, build) => {
+    const para = story.querySelector(`[data-step="${k}"]`);
+    const tl = gsap.timeline({
+      defaults: { ease: "power2.inOut", duration: 0.5 },
+      scrollTrigger: { trigger: para, start: "top 72%", end: "top 38%", scrub: 0.6 },
+    });
+    build(tl);
+  };
+
+  const stories = {
+    why(story, q) {
+      const links = q(".chain .link"), arrows = q(".chain .arrow");
+      gsap.set([...links.slice(1), ...arrows, ...q(".pill"), ...q(".goals > div")], { opacity: 0 });
+      step(story, 2, (tl) => {
+        tl.fromTo([arrows[0], links[1], arrows[1], links[2], arrows[2], links[3]], { x: 80, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, immediateRender: false });
+      });
+      step(story, 3, (tl) => tl.fromTo(q(".pill"), { scale: 0.6, rotation: -4, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, ease: "back.out(2)", immediateRender: false }));
+      step(story, 4, (tl) => tl.fromTo(q(".goals > div"), { y: 50, opacity: 0, rotation: (i) => [-4, 3, -2, 4][i] }, { y: 0, opacity: 1, rotation: 0, stagger: 0.08, ease: "back.out(1.6)", immediateRender: false }));
+    },
+
+    arch(story, q) {
+      const ys = [100, 185, 270, 355, 440, 525];
+      gsap.set(q(".wire, .loop"), { strokeDasharray: 1 });
+      gsap.set(q(".fan, .into, .w-post, .loop"), { strokeDashoffset: 1, opacity: 0 });
+      gsap.set(q(".rv, .rv-note, .validate, .post, .loop-label, .fence-g, .pr-dot"), { opacity: 0 });
+      step(story, 1, (tl) => {
+        tl.fromTo(q(".pr-dot"), { opacity: 0, x: 0 }, { opacity: 1, x: 255, duration: 0.5, immediateRender: false });
+        tl.to(q(".pr-dot"), { opacity: 0, scale: 0.3, svgOrigin: "365 340", duration: 0.3 });
+      });
+      step(story, 2, (tl) => {
+        tl.to(q(".fan"), { strokeDashoffset: 0, opacity: 1, stagger: 0.04, duration: 0.3 });
+        tl.fromTo(q(".rv"), { x: -415, y: (i) => 340 - (ys[i] + 35), scale: 0.25, opacity: 0, transformOrigin: "50% 50%" },
+          { x: 0, y: 0, scale: 1, opacity: 1, transformOrigin: "50% 50%", stagger: 0.05, duration: 0.45, immediateRender: false }, 0.1);
+        tl.to(q(".rv-note"), { opacity: 1, duration: 0.2 });
+      });
+      step(story, 3, (tl) => {
+        tl.to(q(".into"), { strokeDashoffset: 0, opacity: 1, stagger: 0.05, duration: 0.3 });
+        tl.fromTo(q(".validate"), { scale: 0.3, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, transformOrigin: "50% 50%", ease: "back.out(1.6)", duration: 0.4, immediateRender: false });
+      });
+      step(story, 4, (tl) => {
+        tl.to(q(".w-post"), { strokeDashoffset: 0, opacity: 1, duration: 0.25 });
+        tl.fromTo(q(".post"), { x: -90, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, immediateRender: false });
+      });
+      step(story, 5, (tl) => {
+        tl.to(q(".loop"), { strokeDashoffset: 0, opacity: 1, duration: 0.6 });
+        tl.fromTo(q(".loop-label"), { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: false });
+      });
+      step(story, 6, (tl) => {
+        tl.fromTo(q(".fence-g"), { scale: 1.12, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, transformOrigin: "50% 50%", duration: 0.5, immediateRender: false });
+        tl.to(q(".pr, .code-node, .w0, .w-post, .loop, .loop-label, .fan, .into"), { opacity: 0.3, duration: 0.4 }, 0.1);
+      });
+    },
+
+    quiet(story, q) {
+      const chips = q(".mini-wall > div:not(.fold)");
+      gsap.set([...chips, ...q(".fold"), ...q(".off"), ...q(".layer"), ...q(".reply")], { opacity: 0 });
+      step(story, 1, (tl) => tl.fromTo(chips, { y: -120, rotation: (i) => [-7, 5, -3, 8, -6, 4, -5][i] }, { y: 0, rotation: 0, opacity: 1, stagger: 0.06, ease: "bounce.out", duration: 0.35, immediateRender: false }));
+      step(story, 2, (tl) => tl.fromTo(q(".off"), { scale: 2.2, rotation: -14, opacity: 0 }, { scale: 1, rotation: 2, opacity: 1, ease: "back.out(1.8)", immediateRender: false }));
+      step(story, 3, (tl) => tl.to(chips, { opacity: 0.4, duration: 0.3 }));
+      step(story, 4, (tl) => {
+        tl.to(q(".off"), { opacity: 0, y: -20, duration: 0.25 });
+        tl.to(chips.slice(0, 3), { opacity: 1, duration: 0.2 }, 0);
+        tl.to(q(".mini-wall .extra"), { opacity: 0, scale: 0.4, width: 0, paddingLeft: 0, paddingRight: 0, borderWidth: 0, marginLeft: -6, stagger: 0.05, duration: 0.45 }, 0.1);
+        tl.fromTo(q(".fold"), { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, immediateRender: false }, 0.4);
+      });
+      step(story, 5, (tl) => tl.fromTo(q(".layer"), { y: 50, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false }));
+      step(story, 6, (tl) => tl.fromTo(q(".reply"), { x: 80, opacity: 0 }, { x: 0, opacity: 1, immediateRender: false }));
+    },
+
+    cost(story, q) {
+      const rows = q(".row"), bars = q(".bar");
+      gsap.set(bars[0], { width: "45%" });
+      gsap.set([rows[1], rows[2], ...q(".pill")], { opacity: 0 });
+      gsap.set([bars[1], bars[2]], { width: "0%" });
+      step(story, 2, (tl) => {
+        tl.to(rows[1], { opacity: 1, duration: 0.2 });
+        tl.to(bars[0], { width: "20%" }, 0.1);
+        tl.to(bars[1], { width: "45%" }, 0.1);
+      });
+      step(story, 3, (tl) => {
+        tl.to(rows[2], { opacity: 1, duration: 0.2 });
+        tl.to(bars[0], { width: "9%" }, 0.1);
+        tl.to(bars[1], { width: "20%" }, 0.1);
+        tl.to(bars[2], { width: "100%" }, 0.1);
+        tl.to(q(".pill"), { opacity: 1, duration: 0.25 }, 0.45);
+      });
+    },
+
+    runs(story, q) {
+      gsap.set(q(".truth, .hatch, .after-row"), { opacity: 0 });
+      step(story, 2, (tl) => {
+        tl.to(q(".look"), { opacity: 0, duration: 0.25 });
+        tl.to(q(".truth"), { opacity: 1, duration: 0.25 }, 0.2);
+        tl.to(q(".hatch"), { opacity: 1, duration: 0.35 }, 0.2);
+        tl.fromTo(q(".skip"), { scale: 1 }, { scale: 1.12, duration: 0.15, yoyo: true, repeat: 1, immediateRender: false }, 0.2);
+      });
+      step(story, 3, (tl) => tl.fromTo(q(".after-row"), { y: 30, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false }));
+    },
+
+    rollout(story, q) {
+      const track = q(".tl-track")[0], runner = q(".tl-runner")[0];
+      const segs = [[150, 521], [521, 893], [893, 1450]];
+      gsap.set(track, { attr: { x2: 150 } });
+      gsap.set(runner, { attr: { cx: 150 } });
+      gsap.set(q(".tl-coda, .phases > div"), { opacity: 0 });
+      const nodes = q(".tl-node").filter((n) => Number(n.dataset.x) !== 150);
+      gsap.set(nodes, { opacity: 0 });
+      segs.forEach(([x0, x1], i) => {
+        step(story, i + 1, (tl) => {
+          tl.fromTo(runner, { attr: { cx: x0 } }, { attr: { cx: x1 }, ease: "none", duration: 0.8, immediateRender: false });
+          tl.fromTo(track, { attr: { x2: x0 } }, { attr: { x2: x1 }, ease: "none", duration: 0.8, immediateRender: false }, 0);
+          nodes.filter((n) => Number(n.dataset.x) > x0 && Number(n.dataset.x) <= x1).forEach((n) => {
+            const at = 0.8 * (Number(n.dataset.x) - x0) / (x1 - x0) - 0.1;
+            tl.fromTo(n, { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, transformOrigin: "50% 50%", ease: "back.out(2)", duration: 0.18, immediateRender: false }, Math.max(0, at));
+          });
+          if (i === 2) tl.to(q(".tl-coda"), { opacity: 1, duration: 0.2 }, 0.75);
+        });
+      });
+      step(story, 4, (tl) => {
+        tl.to(q(".diagram"), { opacity: 0.55, duration: 0.25 });
+        tl.fromTo(q(".phases > div"), { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.35, immediateRender: false }, 0.05);
+      });
+    },
+  };
+
+  document.querySelectorAll(".story").forEach((story) => {
+    const q = (sel) => [...story.querySelector(".visual").querySelectorAll(sel)];
+    stories[story.dataset.story]?.(story, q);
+  });
+
+  gsap.utils.toArray(".rise").forEach((el) => {
+    gsap.from(el, { y: 50, opacity: 0, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 92%", end: "top 70%", scrub: 0.6 } });
+  });
+
+  gsap.utils.toArray(".deco").forEach((el) => {
+    const tilt = el.classList.contains("diamond") ? 45 : el.classList.contains("ring") ? -45 : 0;
+    gsap.set(el, { rotate: 0 });
+    gsap.fromTo(el, { yPercent: 0, rotation: tilt }, { yPercent: -60, rotation: tilt + 20, ease: "none", scrollTrigger: { trigger: el.parentElement, start: "top top", end: "bottom top", scrub: true } });
+  });
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "t" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
+    }
+  });
+  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+})();
+</script>
+
+</body>
+</html>
