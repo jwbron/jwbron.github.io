@@ -720,12 +720,12 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <div class="stage">
     <span class="deco diamond" style="top: 12vh; right: 12vw; width: 5rem; aspect-ratio: 1"></span>
     <span class="kicker rise">Context</span>
-    <h2 class="rise">First the software factory, then its AI layer</h2>
+    <h2 class="rise">My role at Khan</h2>
     <div class="grid two rise">
-      <div class="card"><h3>Infrastructure first</h3><p>CI runners, deploys, terraform, reliability</p></div>
+      <div class="card"><h3>Infrastructure first</h3><p>CI runners, deploys, Terraform, reliability</p></div>
       <div class="card"><h3>Then the AI portion</h3><p>Agent harnesses, guardrails, evals, the reviewer</p></div>
     </div>
-    <p class="rise late">Founding engineer on Khan's AI Developer Experience team. <mark>I wrote its charter</mark>, set norms for AI tooling, and taught engineers and designers.</p>
+    <p class="rise late">Founding engineer on Khan's AI Developer Experience team. <mark>I wrote its charter</mark>, set norms for AI tooling, and taught engineers and non-engineers.</p>
   </div>
   <span class="num"></span>
 </section>
@@ -762,11 +762,11 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <h2 class="rise">Two tools, one gap</h2>
     <div class="versus rise">
       <div class="card">
-        <h3>claude code review (managed)</h3>
+        <h3>Claude Code's managed review</h3>
         <ul class="ticks">
           <li>Ran only when someone asked</li>
           <li>Too costly for every PR and push</li>
-          <li>Prose engineers found hard to read</li>
+          <li>Comments engineers found hard to read</li>
         </ul>
       </div>
       <span class="plus" aria-hidden="true">+</span>
@@ -792,17 +792,17 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <p class="quote rise">“More depth, less noise.”</p>
         <p class="small rise">My written proposal</p>
         <ul class="ticks rise late">
-          <li>Keep what worked, and name the gap: a High-risk auth question went unasked</li>
-          <li>Four phases, cheapest value first</li>
+          <li>It credited what worked, then named the gap: a High-risk auth question went unasked</li>
+          <li>Four phases, cheapest first</li>
           <li>Evals gate anything that can regress</li>
-          <li>Ask who owns it as a product. I did.</li>
+          <li>It asked who would own the reviewer as a product, and I took that on</li>
         </ul>
       </div>
       <div class="yes">
         <h3 class="rise">Who had to say yes</h3>
-        <div class="card rise"><b>Technical leadership</b><span>The direction, with review of every change I made. Convinced by the proposal and the evals.</span></div>
-        <div class="card rise"><b>Every engineer</b><span>Whether it ran on their PRs. Convinced by a trial beside the managed review, and fixes within a day.</span></div>
-        <div class="card rise late"><b>The budget</b><span>I owned AI spend, and my manager approved increases. Convinced by a cost per PR low enough to run on everything.</span></div>
+        <div class="card rise"><b>Technical leadership</b><span>Signed off on the direction after the proposal and evals, and reviewed every change I made.</span></div>
+        <div class="card rise"><b>Every engineer</b><span>Decided whether it ran on their PRs. A trial beside the managed review, and fixes within a day, won them over.</span></div>
+        <div class="card rise late"><b>The budget</b><span>I owned AI spend, and my manager approved increases. A low cost per PR made running it on everything easy to justify.</span></div>
       </div>
     </div>
   </div>
@@ -819,7 +819,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <span><i style="background: var(--coral)"></i>GitHub event</span>
       </div>
     </div>
-    <h2 class="wide">Code does the mechanics, models do the judgment</h2>
+    <h2 class="wide">How a review runs</h2>
     <svg class="diagram arch" viewBox="0 0 1600 780" role="img" aria-labelledby="arch-t arch-d">
       <title id="arch-t">Reviewer architecture</title>
       <desc id="arch-d">A PR event goes to a code router, which picks specialist model sub-agents: correctness, tests, docs, security where configured, a holistic pass and Khan best-practice skills. Their claims are validated and deduplicated in code, then code computes the verdict and posts. On each push, the reviewer reconciles open threads and re-arms a full review if the diff shifts a lot. The sub-agents sit inside a boundary with no credentials and no permissions.</desc>
@@ -909,7 +909,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <div class="stage">
     <span class="deco tri" style="top: 10vh; right: 8vw; width: 6rem; aspect-ratio: 1"></span>
     <span class="kicker rise">Evaluating changes</span>
-    <h2 class="rise">Measured before shipped</h2>
+    <h2 class="rise">Anything that could regress went through evals</h2>
     <div class="grid rise">
       <div class="card"><h3>Real and seeded cases</h3><p>Real PRs plus planted defects the reviewer must catch</p></div>
       <div class="card"><h3>A/B with a known noise floor</h3><p>Identical arms run side by side to measure variation</p></div>
@@ -917,7 +917,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     </div>
     <div class="grid two rise late">
       <p><mark>Khan's own skills</mark> were the margin over a generic reviewer.</p>
-      <p><mark class="m2">Check the checker:</mark> in 28 runs the reviewer found the defect every time. The scorer was wrong.</p>
+      <p><mark class="m2">The scorer needed checking too:</mark> in 28 runs the reviewer found the defect every time. The scorer was wrong.</p>
     </div>
   </div>
   <span class="num"></span>
@@ -926,7 +926,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide build" style="--steps: 3" data-steps="3" data-title="Field week" data-time="150">
   <div class="stage">
     <span class="kicker">The first week with real users</span>
-    <h2>The findings held up. The volume didn't.</h2>
+    <h2>The first week: good catches, way too many comments</h2>
     <div class="wall" aria-label="Illustration: seven non-blocking comments on one push">
       <div><b>suggestion</b>test coverage</div>
       <div><b>question</b>non-blocking</div>
@@ -947,12 +947,12 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide build" style="--steps: 4" data-steps="4" data-title="Quiet the human surface" data-time="90">
   <div class="stage">
     <span class="kicker">What changed</span>
-    <h2>Meet engineers where they are</h2>
+    <h2>Fewer, shorter comments</h2>
     <div class="grid two">
       <ul class="ticks quiet-list">
         <li>A comment budget: 3 inline, nitpicks never, the rest collapsed</li>
         <li>Re-reviews look at what changed</li>
-        <li>Two layers in every comment, enforced by scripts and checked by a prose judge</li>
+        <li>Two layers in every comment, enforced by scripts and graded by a separate model</li>
         <li>Fixes only when the author replies <code>ship</code></li>
       </ul>
       <div class="quiet-visual">
@@ -984,7 +984,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide build" style="--steps: 3" data-steps="3" data-title="Required steps in code" data-time="60">
   <div class="stage">
     <span class="kicker">Failure modes</span>
-    <h2>A fluent result isn't proof the steps ran</h2>
+    <h2>2 of 5 runs skipped dispatch and still looked fine</h2>
     <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
       <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
       <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
@@ -1002,7 +1002,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide build" style="--steps: 3" data-steps="3" data-title="Cost ladder" data-time="105">
   <div class="stage">
     <span class="kicker">Cost</span>
-    <h2>Thoroughness bought with engineering, not spend</h2>
+    <h2>About a fifth of the managed review's cost</h2>
     <div class="bars" role="table" aria-label="Relative cost for the same PR volume">
       <div class="row step r4-1" role="row">
         <div class="label" role="rowheader">Triage bot <span>points reviewers at what to check</span></div>
@@ -1025,11 +1025,11 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide" data-title="Directions not taken" data-time="120">
   <div class="stage">
     <span class="kicker rise">Directions not taken</span>
-    <h2 class="rise">What the evidence said no to</h2>
+    <h2 class="rise">Things I didn't build</h2>
     <div class="grid rise">
       <div class="card"><h3>A panel of skeptic agents</h3><p>Built, then removed. 12 false blocks in 90 PRs, only 2 it could catch.</p></div>
       <div class="card"><h3>A stronger model everywhere</h3><p>One role instead of five. Recall 82% → 89%, cost +35%.</p></div>
-      <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving. One full repeat.</p></div>
+      <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving, from one full repeat.</p></div>
       <div class="card"><h3>Blocking merges</h3><p>Compliance keeps a human approval, so I built for the human.</p></div>
       <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
       <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
@@ -1040,8 +1040,8 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,3,4" data-title="Rollout" data-time="150">
   <div class="stage">
-    <span class="kicker">Rollout</span>
-    <h2 class="wide">Earned one step at a time</h2>
+    <span class="kicker">Timeline</span>
+    <h2 class="wide">Rollout</h2>
     <svg class="diagram tl" viewBox="40 120 1520 400" role="img" aria-labelledby="tl-t tl-d">
       <title id="tl-t">Rollout timeline</title>
       <desc id="tl-d">Triage bot in frontend. Written proposal. A trial of a few weeks on my team's PRs beside the managed review. A field week with too many comments. A quieter surface ships. The launch brief is approved. Default-on in the backend monorepo, then frontend. The main reviewer for a couple of months.</desc>
@@ -1091,12 +1091,12 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
     </svg>
     <div class="phases">
-      <div><b>Phase 1</b><span>Zero-regret fixes and a feedback loop</span></div>
+      <div><b>Phase 1</b><span>Quick fixes that couldn't break anything, plus a feedback loop</span></div>
       <div><b>Phase 2</b><span>A smoke benchmark, then noise controls</span></div>
       <div><b>Phase 3</b><span>The full eval suite and more depth</span></div>
-      <div><b>Phase 4</b><span>Make it durable, then decide on default-on</span></div>
+      <div><b>Phase 4</b><span>Hardening, then deciding on default-on</span></div>
     </div>
-    <p class="deferred"><b>Deferred to hold scope:</b> a weekly feedback report, cross-repo context, unattended fixes, leaving gh-aw</p>
+    <p class="deferred"><b>Put off to keep the launch small:</b> a weekly feedback report, cross-repo context, unattended fixes, leaving gh-aw</p>
   </div>
   <span class="num"></span>
 </section>
@@ -1105,11 +1105,11 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <div class="stage">
     <span class="deco circle" style="top: 9vh; right: 7vw; width: 5rem; aspect-ratio: 1"></span>
     <span class="kicker rise">Launching to every author</span>
-    <h2 class="rise">The bar was set before launch</h2>
+    <h2 class="rise">Launch plan</h2>
     <div class="grid rise">
       <div class="card"><h3>Success</h3><p>No author-facing incident. Noise reports hold at trial levels.</p></div>
       <div class="card"><h3>Rollback</h3><p>A label per PR, a kill switch, or one revert.</p></div>
-      <div class="card"><h3>Opt-out</h3><p>It existed. We didn't promote it.</p></div>
+      <div class="card"><h3>Opt-out</h3><p>Available, but not advertised.</p></div>
       <div class="card"><h3>Comms</h3><p>Announcement, a support channel, me as the owner.</p></div>
     </div>
   </div>
@@ -1119,14 +1119,14 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide" data-title="Who was involved" data-time="60">
   <div class="stage">
     <span class="kicker rise">People</span>
-    <h2 class="rise">A small core, a whole org of users</h2>
+    <h2 class="rise">Who was involved</h2>
     <div class="roles rise">
       <div><b>Me</b><span>Architecture, specs, validation, rollout, on call</span></div>
-      <div><b>Chief architect</b><span>Built the first version, reviewed my changes, approved go-live</span></div>
+      <div><b>Original author</b><span>Built the first version, reviewed my changes, approved go-live</span></div>
       <div><b>My manager</b><span>Budget and priorities from leadership</span></div>
       <div><b>A teammate</b><span>The security-focused reviewer</span></div>
       <div><b>Security</b><span>Reviewed it before launch</span></div>
-      <div><b>About 120 engineers</b><span>The users, and the bar</span></div>
+      <div><b>About 120 engineers</b><span>The users, whose preference decided the switch</span></div>
     </div>
     <p class="small rise late">Kept in sync with guild demos and talks, the support channel, and release notes.</p>
   </div>
@@ -1167,7 +1167,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <div class="grid next rise late">
       <div class="card"><h3>Own the runtime</h3><p>Our own harness, off gh-aw</p></div>
       <div class="card"><h3>Model out of orchestration</h3><p>Prompt assembly and posting in code</p></div>
-      <div class="card"><h3>One engine</h3><p>CI, a local CLI, a pi plugin</p></div>
+      <div class="card"><h3>One engine</h3><p>CI, a local CLI, and our coding agents</p></div>
       <div class="card"><h3>Measure outcomes</h3><p>Time to merge before and after</p></div>
     </div>
   </div>
@@ -1180,10 +1180,9 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <span class="deco diamond" style="bottom: 12vh; right: 20vw; width: 4rem; aspect-ratio: 1"></span>
     <span class="mark rise" aria-hidden="true"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></span>
     <ul class="beliefs rise">
-      <li>Required steps go in code. Judgment goes to models.</li>
-      <li>Agents get no credentials. The pipeline does.</li>
-      <li>Measure the whole system, including your measurements.</li>
-      <li>Protect people's attention.</li>
+      <li>Put required steps and permissions in code, and keep the model for judgment.</li>
+      <li>Check the measuring tools as carefully as the model.</li>
+      <li>Treat people's attention as the budget every output spends.</li>
     </ul>
     <p class="sub rise late">Thanks. Questions?</p>
   </div>
@@ -1198,7 +1197,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div class="row" role="row"><div class="label" role="rowheader">Current model</div><div class="track" role="cell"><div class="lane"><div class="bar grow r3-1" style="--w: 100%"></div><span class="val">36 / 36</span></div></div></div>
       <div class="row" role="row"><div class="label" role="rowheader">Proposed replacement</div><div class="track" role="cell"><div class="lane"><div class="bar muted grow r3-1" style="--w: 89%"></div><span class="val">32 / 36</span></div></div></div>
     </div>
-    <p class="small step r3-1">Required findings caught. One full repeat.</p>
+    <p class="small step r3-1">Required findings caught, from one full repeat.</p>
     <p class="stamp step r3-2">We didn't switch</p>
     <ul class="ticks step r3-2">
       <li>No saving at our actual rates</li>
@@ -1228,8 +1227,8 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide backup" data-title="Backup: how the work ran" data-time="0">
   <div class="stage">
-    <span class="kicker rise">How the work ran</span>
-    <h2 class="rise">Agents wrote the code. I owned the decisions.</h2>
+    <span class="kicker rise">Backup</span>
+    <h2 class="rise">How the work ran</h2>
     <div class="flow rise">
       <b>Spec</b><span>checked against</span><b>Plan</b><span>checked against</span><b>Code</b><span>checked against</span><b>Docs</b>
     </div>
@@ -1246,14 +1245,14 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 <section class="slide backup" data-title="Backup: operating it" data-time="0">
   <div class="stage">
     <span class="deco diamond" style="top: 10vh; right: 8vw; width: 4rem; aspect-ratio: 1"></span>
-    <span class="kicker rise">Operating it</span>
-    <h2 class="rise">Feedback without filing tickets</h2>
+    <span class="kicker rise">Backup</span>
+    <h2 class="rise">Operating it</h2>
     <div class="flow rise">
       <b>Engineer replies</b><span>read by a pipeline</span><b>Ticket opened or updated</b><span>then</span><b>I'm alerted</b>
     </div>
     <div class="card rise late">
       <h3>A silent failure</h3>
-      <p>Re-reviews quietly ran at full depth. Output sanitizing deleted the state marker. Fix: the marker survives publishing.</p>
+      <p>Re-reviews were running at full depth without anyone noticing. Output sanitizing deleted the state marker. Fix: the marker survives publishing.</p>
     </div>
   </div>
   <span class="num"></span>
@@ -1297,7 +1296,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <h2>The broader AI tooling program</h2>
     <div class="grid two">
       <div class="card"><h3>Why a dedicated team</h3><p>Proven tools, no owner. Maintenance on spare time, five separate fixes for the same prose problem, requests nobody was resourced to take.</p></div>
-      <div class="card"><h3>Principles</h3><p>Support and enable, don't prescribe. Meet people where they are. Everyone should lean on AI, and the bar is using it well.</p></div>
+      <div class="card"><h3>Principles</h3><p>Support and enable, don't prescribe. Everyone should lean on AI, and the bar is using it well.</p></div>
     </div>
     <p class="small">Talk: multi-agent pipelines and agent coordination, at the AI coding tools guild.</p>
   </div>
