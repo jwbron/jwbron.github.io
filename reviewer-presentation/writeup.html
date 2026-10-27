@@ -740,8 +740,10 @@ body { line-height: 1.65; }
 }
 .story .prose { padding-bottom: 20vh; }
 .story .prose p { font-size: 1.12rem; }
-html.motion .story .prose p[data-step] { padding-block: 26vh; margin: 0; }
-html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
+@media (min-width: 901px) {
+  html.motion .story .prose p[data-step] { padding-block: 26vh; margin: 0; }
+  html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
+}
 .story .visual {
   position: sticky;
   top: 8vh;
@@ -787,6 +789,8 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 
 .closing { max-width: 44rem; margin: 0 auto; }
 .closing .beliefs li { font-size: clamp(1.2rem, 2.2vw, 1.8rem); }
+.closing .last-line { margin-top: 2rem; font-family: var(--display); font-weight: 600; font-size: clamp(1.3rem, 2.4vw, 2rem); line-height: 1.2; letter-spacing: -0.02em; }
+.figure.phases { max-width: 64rem; }
 .footer { padding: 3rem var(--gutter); text-align: center; color: var(--ink-2); font-size: 0.9rem; }
 
 @media (max-width: 900px) {
@@ -857,7 +861,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
   <h2>What we had before</h2>
   <div class="prose-only">
     <p class="rise">We already had two AI reviewers. Claude Code's managed review was good, but too expensive to run on every PR and every push, so it only ran when someone asked for it. My estimate is that running it on everything would have cost about five times what our reviewer ended up costing. Engineers also found its comments hard to read.</p>
-    <p class="rise">Khan's chief architect had built a lighter bot of his own. It was cheap on purpose: it looked for a few specific things and told the human reviewer where to focus. It was never meant to be thorough.</p>
+    <p class="rise">Khan also had a lightweight triage bot. It was cheap on purpose: it looked for a few specific things and told the human reviewer where to focus. It was never meant to be thorough.</p>
   </div>
   <div class="figure versus rise">
     <div class="card">
@@ -866,12 +870,12 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
     </div>
     <span class="plus" aria-hidden="true">+</span>
     <div class="card">
-      <h3>The chief architect's triage bot</h3>
+      <h3>The existing triage bot</h3>
       <ul class="ticks"><li>Cheap by design</li><li>Pointed reviewers at what to check</li><li>Never meant to be thorough</li></ul>
     </div>
   </div>
   <div class="prose-only">
-    <p class="rise">Neither one gave every PR a thorough first pass that knew Khan's own standards. I looked at open source review systems and didn't find anything mature or flexible enough, so I built on the chief architect's bot.</p>
+    <p class="rise">Neither one gave every PR a thorough first pass that knew Khan's own standards. I looked at open source review systems and didn't find anything mature or flexible enough, so I built on the existing triage bot.</p>
   </div>
 </section>
 
@@ -879,8 +883,24 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
   <h2>Getting three groups to say yes</h2>
   <div class="prose-only">
     <p class="rise">I started with a written proposal, "more depth, less noise." It opened with what already worked in the existing design: a triage pass, focused sub-agents, and a validator that double-checked claims before posting. Then it described the gap. On the first PR I traced, the reviewer never raised an authorization question that the repo's own risk config rated High, because the prompts leaned so hard toward precision that it dropped anything uncertain.</p>
-    <p class="rise">The plan had four phases, cheapest first, with evals gating only the changes that could regress. It also asked who would own the reviewer as a product, since an internal tool nobody owns ends up maintained in people's spare time. I took it on.</p>
-    <p class="rise">Three groups had to agree. The chief architect owned the technical direction, reviewed every change I made, and pushed hard on cost. Engineers had to want it on their PRs, and in the end that's what decided the switch. And it had to fit the budget. I owned AI spend and my manager approved increases, which was an easy conversation once the cost per PR was low enough to run on everything.</p>
+    <p class="rise">The proposal also asked who would own the reviewer as a product, since an internal tool nobody owns ends up maintained in people's spare time. I took it on.</p>
+    <p class="rise">Three groups had to agree. Technical leadership had to sign off on the direction, every change I made went through review, and cost was the main concern going in. Engineers had to want it on their PRs, and in the end that's what decided the switch. And it had to fit the budget. I owned AI spend and my manager approved increases, which was an easy conversation once the cost per PR was low enough to run on everything.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>The plan</h2>
+  <div class="prose-only">
+    <p class="rise">The proposal split the work into four phases, cheapest first. Evals gated only the changes that could regress, so the cheap fixes shipped right away.</p>
+  </div>
+  <div class="figure phases rise">
+    <div><b>Phase 1</b><span>Quick fixes that couldn't break anything, plus a feedback loop</span></div>
+    <div><b>Phase 2</b><span>A small benchmark, then noise controls</span></div>
+    <div><b>Phase 3</b><span>The full eval suite and deeper reviews</span></div>
+    <div><b>Phase 4</b><span>Hardening, then deciding on default-on</span></div>
+  </div>
+  <div class="prose-only">
+    <p class="rise">Some work was worth doing but not needed to launch, so I put it off: a weekly feedback report, gathering context across repos, unattended fixes, and moving off GitHub Agentic Workflows. That kept the launch small.</p>
   </div>
 </section>
 
@@ -986,20 +1006,11 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 </section>
 
 <section class="chapter">
-  <h2>Anything that could regress went through evals</h2>
-  <div class="prose-only">
-    <p class="rise">Changes that could regress went through an eval bench first: real PRs plus planted defects the reviewer had to catch, run as A/B comparisons. We also ran identical versions against each other to measure the noise, so we knew how big a difference had to be before it meant anything.</p>
-    <p class="rise">Against a generic reviewer on the same PR, all of our extra catches came from the audits against Khan's own skills, like a swallowed error and a fetch that loaded whole entities when it only needed keys. A reviewer that doesn't know the codebase can't catch those.</p>
-    <p class="rise">The eval itself needed checking too. One case looked flaky, so I read all 28 runs. The reviewer had found the defect in every one, and the scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer, which is why I read transcripts before trusting a score.</p>
-  </div>
-</section>
-
-<section class="chapter">
   <h2>The first week: good catches, way too many comments</h2>
   <div class="story" data-story="quiet">
     <div class="prose">
-      <p data-step="1">The reviewer caught real problems in its first week with real users, including a cross-package compile break. The volume was the problem. One PR got seven non-blocking comments on a single push and five more two days later, and the recap re-listed every open thread each time.</p>
-      <p data-step="2">Engineers said the nits and questions were the main issue, and the frontend infra team (the chief architect's own team) turned auto-review off.</p>
+      <p data-step="1">I trialed it on my own team's PRs first, alongside the managed review, and anyone else could run it by commenting on a PR. In its first week with real users it caught real problems, including a cross-package compile break. The volume was the problem. One PR got seven non-blocking comments on a single push and five more two days later, and the recap re-listed every open thread each time.</p>
+      <p data-step="2">Engineers said the nits and questions were the main issue, and the frontend infra team turned auto-review off.</p>
       <p data-step="3">Attention was the thing to protect. Once a review has six comments in it, people start skimming, and they skim past the blocking one too.</p>
       <p data-step="4">The fixes shipped within about a day. Blocking findings always post. Non-blocking ones are ranked and capped at three, nitpicks never post inline, and the rest go into a collapsed section, so nothing is lost and the notification stays short. Re-reviews only look at what changed.</p>
       <p data-step="5">The comments themselves changed too. Each one became two layers: a short comment written for a person, with the model's fuller reasoning collapsed underneath for agents. Scripts enforce that format, and a separate model grades the writing.</p>
@@ -1032,11 +1043,41 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 </section>
 
 <section class="chapter">
+  <h2>Anything that could regress went through evals</h2>
+  <div class="prose-only">
+    <p class="rise">Changes that could regress went through an eval bench first: real PRs plus planted defects the reviewer had to catch, run as A/B comparisons. We also ran identical versions against each other to measure the noise, so we knew how big a difference had to be before it meant anything.</p>
+    <p class="rise">Against a generic reviewer on the same PR, all of our extra catches came from the audits against Khan's own skills, like a swallowed error and a fetch that loaded whole entities when it only needed keys. A reviewer that doesn't know the codebase can't catch those.</p>
+    <p class="rise">The eval itself needed checking too. One case looked flaky, so I read all 28 runs. The reviewer had found the defect in every one, and the scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer, which is why I read transcripts before trusting a score.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>2 of 5 runs skipped dispatch and still looked fine</h2>
+  <div class="story" data-story="runs">
+    <div class="prose">
+      <p data-step="1">Early on, the orchestrating model was told to dispatch the specialists and validate their findings before posting. In a seeded trial, all five runs posted a review that looked fine.</p>
+      <p data-step="2">Two of them had skipped dispatch and written the review themselves. Nothing in the output showed it. Our scripted eval missed it because its own dispatch was already deterministic.</p>
+      <p data-step="3">So I moved staging, dispatch and submission checks into code, and scripted dispatch became the only mode.</p>
+    </div>
+    <div class="visual">
+      <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+    </div>
+      <p class="after-row"><mark>Dispatch and submission checks moved into code.</mark></p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
   <h2>About a fifth of the managed review's cost</h2>
   <div class="story" data-story="cost">
     <div class="prose">
-      <p data-step="1">Cost was a constraint from the start, and the chief architect's triage bot is the baseline here. His concern was that a dozen reviewers would make reviews expensive and long.</p>
-      <p data-step="2">The full first-pass review ended up at about 2.2 times the triage bot's cost. Turns out most of the cost was the orchestrating model deciding what to do next, not the reviewers, so I moved that work into code. Re-reviews were the other big cost, and checking only the open comments cut a repeat round by 82 percent.</p>
+      <p data-step="1">Cost was the main concern going in: would a dozen reviewers make reviews expensive and long? The triage bot is the baseline here.</p>
+      <p data-step="2">The full first-pass review ended up at about 2.2 times the triage bot's cost. Moving dispatch into code paid off here too. Turns out most of the cost had been the orchestrating model deciding what to do next, not the reviewers, and with that work in code its share went from about 80 percent of a review's cost to about a quarter. Re-reviews were the other big cost, and checking only the open comments cut a repeat round by 82 percent.</p>
       <p data-step="3">Running the managed review on every PR and push would have been about 11 times the baseline, roughly five times what we spent, using the same models. That's an estimate, since it only ever ran on request.</p>
     </div>
     <div class="visual">
@@ -1054,41 +1095,20 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
   <h2>Things I didn't build</h2>
   <div class="prose-only">
     <p class="rise">I built a panel of skeptic agents to double-check blocking claims, then took it out. An audit of every blocking review over about a week (90 PRs) found 12 false blocks, and only 2 were the kind another verification layer could catch. The rest were wrong severity calls and questions about what the author meant. Stricter claim validation, with no extra agents, handled it.</p>
-    <p class="rise">I proposed a stronger model for five reviewer roles. The chief architect thought that was overkill, so I tried it on the correctness reviewer alone, where recall went from 82 to 89 percent on the eval set for 35 percent more cost.</p>
+    <p class="rise">I proposed a stronger model for five reviewer roles. In review, five got pushed back on as overkill, so I tried it on the correctness reviewer alone, where recall went from 82 to 89 percent on the eval set for 35 percent more cost.</p>
     <p class="rise">A cheaper model was worth testing. It caught 32 of 36 required findings against 36 of 36, and at our actual rates it didn't save money either. That's from one full repeat, so it isn't a benchmark, but it settled the question. The transcripts also showed that some apparent model failures were problems with the test setup: different hidden reasoning defaults, an eval that let the model go looking for answers, and scoring bugs.</p>
     <p class="rise">Blocking merges was off the table, since compliance requires a human approval. Fixes ran only when an author asked, and each specialist stayed opt-in per repo until it earned its place in evals.</p>
   </div>
 </section>
 
 <section class="chapter">
-  <h2>2 of 5 runs skipped dispatch and still looked fine</h2>
-  <div class="story" data-story="runs">
-    <div class="prose">
-      <p data-step="1">Early on, the orchestrating model was told to dispatch the specialists and validate their findings before posting. In a seeded trial, all five runs posted a review that looked fine.</p>
-      <p data-step="2">Two of them had skipped dispatch and written the review themselves. Nothing in the output showed it. Our scripted eval missed it because its own dispatch was already deterministic.</p>
-      <p data-step="3">So I moved staging, dispatch and submission checks into code, and scripted dispatch became the only mode. It also cut cost: the orchestrator went from about 80 percent of a review's cost to about a quarter.</p>
-    </div>
-    <div class="visual">
-      <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
-      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
-      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
-      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
-      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
-      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
-    </div>
-      <p class="after-row"><mark>Dispatch and submission checks moved into code.</mark></p>
-    </div>
-  </div>
-</section>
-
-<section class="chapter">
-  <h2>Rollout</h2>
+  <h2>Launching to everyone</h2>
   <div class="story" data-story="rollout">
     <div class="prose">
-      <p data-step="1">The chief architect's triage bot was already running in the frontend monorepo. After the proposal, I ran a trial on my own team's PRs for a few weeks, alongside the managed review. Anyone else could run ours by commenting on a PR.</p>
-      <p data-step="2">Then came the first week with real users, and the quieter version a day later.</p>
-      <p data-step="3">Before turning it on by default, I wrote a launch brief that set the success criteria ahead of time: no incident affecting authors, and noise reports staying at trial levels. It had three levels of rollback (a label to skip one PR, a kill switch for the repo, and a single revert). The opt-out label existed, but we didn't advertise it. After the chief architect approved the brief, the reviewer went on for every author in the backend monorepo, then frontend after a clean week, and stayed the main reviewer for a couple of months. The frontend infra team turned it back on.</p>
-      <p data-step="4">The work followed the proposal's four phases: quick fixes that couldn't break anything plus a feedback loop, then a small benchmark and noise controls, then the full eval suite and deeper reviews, then hardening before deciding on default-on. The first week moved the noise work earlier. To keep the launch small, I put off a weekly feedback report, gathering context across repos, unattended fixes, and moving off GitHub Agentic Workflows. All four were worth doing, and none was needed to launch.</p>
+      <p data-step="1">The triage bot was already running in the frontend monorepo. After the proposal, the trial ran on my own team's PRs for a few weeks, alongside the managed review.</p>
+      <p data-step="2">Then the first week with real users, and the quieter version a day later.</p>
+      <p data-step="3">While review was still opt-in, a PR that skipped it caused a production incident. Afterward I ran the reviewer on that merged PR, blind, with no context about the incident, and it flagged the problem. One case doesn't show it prevents incidents, but it's why we turned it on by default.</p>
+      <p data-step="4">Before default-on, I wrote a launch brief that set the success criteria ahead of time: no incident affecting authors, and noise reports staying at trial levels. It had three levels of rollback (a label to skip one PR, a kill switch for the repo, and a single revert). The opt-out label existed, but we didn't advertise it. Once technical leadership approved the brief, the reviewer went on for every author in the backend monorepo, then frontend after a clean week, and stayed the main reviewer for a couple of months. The frontend infra team turned it back on.</p>
     </div>
     <div class="visual">
       <svg class="diagram tl" viewBox="40 120 1520 400" role="img" aria-labelledby="tl-t tl-d">
@@ -1139,12 +1159,6 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
       <text class="tl-coda" x="800" y="500" text-anchor="middle" font-weight="700">And the frontend infra team turned auto-review back on.</text>
       <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
     </svg>
-      <div class="phases">
-        <div><b>Phase 1</b><span>Quick fixes, a feedback loop</span></div>
-        <div><b>Phase 2</b><span>A small benchmark, noise controls</span></div>
-        <div><b>Phase 3</b><span>The full eval suite, deeper reviews</span></div>
-        <div><b>Phase 4</b><span>Hardening, then default-on</span></div>
-      </div>
     </div>
   </div>
 </section>
@@ -1171,11 +1185,7 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
   </div>
   <div class="prose-only">
     <p class="rise">Reviewers told us they spent less time per PR, because PRs came in cleaner after the first pass. They needed fewer rounds of human review, and time to merge dropped. Those are reported, not measured. A before-and-after analysis was next on the list.</p>
-    <p class="rise">What we did measure: it replaced the managed review and reviewed every PR and push, at about a fifth of what the managed review would have cost for the same coverage. Noise reports stayed at trial levels after default-on. Engineers who had used both said ours was more thorough and easier to read quickly.</p>
-  </div>
-  <div class="figure proof rise" style="max-width: 44rem">
-    <h3>The blind rerun</h3>
-    <p>While review was still opt-in, a PR that skipped it caused a production incident. Afterward I ran the reviewer on that merged PR, blind, with no context about the incident, and it flagged the problem. One case doesn't show it prevents incidents, but it's why we turned it on by default.</p>
+    <p class="rise">What we did measure: it replaced the managed review and reviewed every PR and push. Noise reports stayed at trial levels after default-on. Engineers who had used both said ours was more thorough and easier to read quickly.</p>
   </div>
 </section>
 
@@ -1183,13 +1193,16 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
   <h2>What I'd do differently</h2>
   <div class="prose-only">
     <p class="rise">I'd have moved off GitHub Agentic Workflows (gh-aw) sooner. It came with the first version and got us running fast, which was the right call at the start. Once we needed the reviewer to do things gh-aw wasn't built for, every change needed a workaround, and we couldn't run the reviewer locally. At that point gh-aw was hosting our pipeline more than running it, and that's the time to own the runtime.</p>
-    <p class="rise">The roadmap from there: our own harness, the model out of orchestration entirely, one review engine across CI, a local CLI and a pi plugin, and a real before-and-after measurement of time to merge. On the eval bench the new harness ran at about half the cost, and the changes together projected 57 to 65 percent cheaper per full review. Those are projections.</p>
+    <p class="rise">The next steps from there were our own harness, the model out of orchestration entirely, one review engine across CI, a local CLI and a pi plugin, and a real before-and-after measurement of time to merge.</p>
   </div>
 </section>
 
 <section class="chapter">
+  <h2>Rules I still use</h2>
   <div class="prose-only closing">
-    <p class="rise">A few rules came out of this that I still use. Anything that has to happen goes in code, and the model gets the judgment calls. Agents don't hold credentials, the pipeline does. The tools you measure with need checking too, since a broken scorer looks exactly like a weak model. And protect people's attention. The people using a tool decide whether it works, so build it around how they already work and keep it quiet unless it has something worth saying.</p>
+    <p class="rise">Anything that has to happen goes in code, and the model gets the judgment calls. Agents don't hold credentials, the pipeline does. The tools you measure with need checking too, since a broken scorer looks exactly like a weak model.</p>
+    <p class="rise">And protect people's attention. The people using a tool decide whether it works, so build it around how they already work.</p>
+    <p class="rise last-line">Keep it quiet unless it has something worth saying.</p>
   </div>
 </section>
 
@@ -1209,21 +1222,34 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
   const params = new URLSearchParams(location.search);
   if (params.get("theme")) root.dataset.theme = params.get("theme");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // phones get the finished figures inline, since a sticky figure can't fit beside the text
+  if (reduce || !window.gsap || !window.ScrollTrigger) return;
+  // wide screens sync each figure step to its paragraph beside it. Phones show the figure
+  // inline above the text and play all its steps as the figure scrolls past.
   const wide = matchMedia("(min-width: 901px)").matches;
-  if (reduce || !wide || !window.gsap || !window.ScrollTrigger) return;
   gsap.registerPlugin(ScrollTrigger);
   root.classList.add("motion");
 
   gsap.to(".progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
 
+  const passes = new Map();
   const step = (story, k, build) => {
-    const para = story.querySelector(`[data-step="${k}"]`);
-    const tl = gsap.timeline({
-      defaults: { ease: "power2.inOut", duration: 0.5 },
-      scrollTrigger: { trigger: para, start: "top 72%", end: "top 38%", scrub: 0.6 },
-    });
+    if (wide) {
+      const para = story.querySelector(`[data-step="${k}"]`);
+      const tl = gsap.timeline({
+        defaults: { ease: "power2.inOut", duration: 0.5 },
+        scrollTrigger: { trigger: para, start: "top 72%", end: "top 38%", scrub: 0.6 },
+      });
+      build(tl);
+      return;
+    }
+    if (!passes.has(story)) {
+      passes.set(story, gsap.timeline({
+        scrollTrigger: { trigger: story.querySelector(".visual"), start: "top 75%", end: "top 8%", scrub: 0.6 },
+      }));
+    }
+    const tl = gsap.timeline({ defaults: { ease: "power2.inOut", duration: 0.5 } });
     build(tl);
+    passes.get(story).add(tl).add(gsap.timeline().set({}, {}, 0.25));
   };
 
   const stories = {
@@ -1318,14 +1344,15 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
 
     rollout(story, q) {
       const track = q(".tl-track")[0], runner = q(".tl-runner")[0];
-      const segs = [[150, 521], [521, 893], [893, 1450]];
+      // paragraphs 1, 2 and 4 move the marker; paragraph 3 is the incident, between them
+      const segs = [[150, 521, 1], [521, 893, 2], [893, 1450, 4]];
       gsap.set(track, { attr: { x2: 150 } });
       gsap.set(runner, { attr: { cx: 150 } });
-      gsap.set(q(".tl-coda, .phases > div"), { opacity: 0 });
+      gsap.set(q(".tl-coda"), { opacity: 0 });
       const nodes = q(".tl-node").filter((n) => Number(n.dataset.x) !== 150);
       gsap.set(nodes, { opacity: 0 });
-      segs.forEach(([x0, x1], i) => {
-        step(story, i + 1, (tl) => {
+      segs.forEach(([x0, x1, k], i) => {
+        step(story, k, (tl) => {
           tl.fromTo(runner, { attr: { cx: x0 } }, { attr: { cx: x1 }, ease: "none", duration: 0.8, immediateRender: false });
           tl.fromTo(track, { attr: { x2: x0 } }, { attr: { x2: x1 }, ease: "none", duration: 0.8, immediateRender: false }, 0);
           nodes.filter((n) => Number(n.dataset.x) > x0 && Number(n.dataset.x) <= x1).forEach((n) => {
@@ -1334,10 +1361,6 @@ html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
           });
           if (i === 2) tl.to(q(".tl-coda"), { opacity: 1, duration: 0.2 }, 0.75);
         });
-      });
-      step(story, 4, (tl) => {
-        tl.to(q(".diagram"), { opacity: 0.55, duration: 0.25 });
-        tl.fromTo(q(".phases > div"), { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.35, immediateRender: false }, 0.05);
       });
     },
   };

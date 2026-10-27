@@ -771,7 +771,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       </div>
       <span class="plus" aria-hidden="true">+</span>
       <div class="card">
-        <h3>The chief architect's triage bot</h3>
+        <h3>The existing triage bot</h3>
         <ul class="ticks">
           <li>Cheap by design</li>
           <li>Pointed reviewers at what to check</li>
@@ -800,7 +800,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       </div>
       <div class="yes">
         <h3 class="rise">Who had to say yes</h3>
-        <div class="card rise"><b>The chief architect</b><span>Technical direction. Convinced by the proposal, the evals, and reviewing every change I made.</span></div>
+        <div class="card rise"><b>Technical leadership</b><span>The direction, with review of every change I made. Convinced by the proposal and the evals.</span></div>
         <div class="card rise"><b>Every engineer</b><span>Whether it ran on their PRs. Convinced by a trial beside the managed review, and fixes within a day.</span></div>
         <div class="card rise late"><b>The budget</b><span>I owned AI spend, and my manager approved increases. Convinced by a cost per PR low enough to run on everything.</span></div>
       </div>
@@ -981,6 +981,24 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Required steps in code" data-time="60">
+  <div class="stage">
+    <span class="kicker">Failure modes</span>
+    <h2>A fluent result isn't proof the steps ran</h2>
+    <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+    </div>
+    <div class="after-row">
+      <p><mark>Dispatch and submission checks moved into code.</mark> Judgment stayed with the models. The orchestrator went from about 80% of a review's cost to about a quarter.</p>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
 <section class="slide build" style="--steps: 3" data-steps="3" data-title="Cost ladder" data-time="105">
   <div class="stage">
     <span class="kicker">Cost</span>
@@ -1015,24 +1033,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div class="card"><h3>Blocking merges</h3><p>Compliance keeps a human approval, so I built for the human.</p></div>
       <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
       <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
-    </div>
-  </div>
-  <span class="num"></span>
-</section>
-
-<section class="slide build" style="--steps: 3" data-steps="3" data-title="Required steps in code" data-time="60">
-  <div class="stage">
-    <span class="kicker">Failure modes</span>
-    <h2>A fluent result isn't proof the steps ran</h2>
-    <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
-      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
-      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
-      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
-      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
-      <div class="skip"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
-    </div>
-    <div class="after-row">
-      <p><mark>Dispatch and submission checks moved into code.</mark> Judgment stayed with the models. The orchestrator went from about 80% of a review's cost to about a quarter.</p>
     </div>
   </div>
   <span class="num"></span>
