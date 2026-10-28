@@ -548,7 +548,7 @@ p {
   display: grid;
   gap: 0.5rem;
   width: clamp(6.5rem, 14vw, 11rem);
-  padding: 0.9rem 0.9rem 0.7rem;
+  padding: 0.9rem;
   color: var(--on);
   background: #fcf9ff;
   rotate: 4deg;
@@ -592,14 +592,6 @@ p {
   bottom: 0;
   height: 25%;
   background: repeating-linear-gradient(var(--sakura) 0 6px, var(--coral) 6px 9px);
-}
-
-.stamp-label {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 0.85rem;
-  letter-spacing: -0.01em;
-  text-align: center;
 }
 
 .steps {
@@ -961,11 +953,7 @@ p {
 
   .stamp {
     width: 5.5rem;
-    padding: 0.55rem 0.55rem 0.4rem;
-  }
-
-  .stamp-label {
-    font-size: 0.7rem;
+    padding: 0.55rem;
   }
 
   .ticket {
