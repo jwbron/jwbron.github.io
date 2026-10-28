@@ -343,7 +343,7 @@
         "Every stone looks the same from here, so you test each one.",
       ],
       wrenOops: "Oops. That one looked fine to me too.",
-      ch2Done: "Testing every stone got you here. It was slow.",
+      ch2Done: "Testing every stone got you here.",
       ch3: { num: "3", name: "The rapids" },
       mossHello: "Leave it to me! Fastest way across.",
       mossPlan: "Moss's way goes straight through the rapids.",
@@ -380,7 +380,7 @@
         hemiSky: "#ffffff", hemiGround: "#d9cfe8", hemi: 2.2, dir: 2.0,
       },
       dark: {
-        top: "#3b3257", top2: "#362e51", side: "#8a7aa8", side2: "#8a7aa8", ground: "#2f5a50", groundSide: "#264a42",
+        top: "#3b3257", top2: "#362e51", side: "#8a7aa8", side2: "#8a7aa8", ground: "#2a2240", groundSide: "#211a33",
         ink: "#120d1c", mark: "#261d38", chip0: "#f2d58c", chip1: "#efb0c7", chip2: "#9fd6c0", chip3: "#ece4cd",
         water: "#5d6fd6", waterSide: "#4858b4", rapids: "#4b5bbd", foam: "#8090e6", mist: "#2b2340", ripple: "#ece4cd",
         stone: "#ece4cd", stoneSide: "#b9afcb", sound: "#9fd6c0", slop: "#8a7da3",
@@ -708,8 +708,25 @@
     lantern.add(halo);
     tiles.get(key(4, 14)).blocked = true;
     lantern.traverse((o) => o.isMesh && o !== halo && !o.userData.hull && (o.userData.action = "lantern", pickables.push(o)));
-    // The light's reach across the long stretch, drawn as a soft glow on the water.
-    const glow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: pal.lamp, transparent: true, opacity: 0, depthWrite: false }));
+    // The light's reach across the long stretch, drawn as a soft glow on the water that fades out at its edges.
+    function softEdges(size = 64, edge = 0.28) {
+      const c = document.createElement("canvas");
+      c.width = c.height = size;
+      const g = c.getContext("2d");
+      const img = g.createImageData(size, size);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const u = (x + 0.5) / size;
+          const v = (y + 0.5) / size;
+          const k = Math.min(1, Math.min(u, 1 - u) / edge) * Math.min(1, Math.min(v, 1 - v) / edge);
+          const a = Math.round(255 * k * k * (3 - 2 * k));
+          img.data.set([a, a, a, 255], (y * size + x) * 4);
+        }
+      }
+      g.putImageData(img, 0, 0);
+      return new THREE.CanvasTexture(c);
+    }
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: pal.lamp, alphaMap: softEdges(), transparent: true, opacity: 0, depthWrite: false }));
     glow.rotation.x = -Math.PI / 2;
     glow.position.set(3, 0.03, 19.2);
     scene.add(glow);
@@ -788,7 +805,7 @@
     function mistBlocked() {
       if (time - mistSaidAt < 7) return;
       mistSaidAt = time;
-      lines([COPY.mistBlocked, COPY.mistNudge], 3.6);
+      lines([COPY.mistBlocked, COPY.mistNudge], 3.6, true);
       lanternHint = 9;
     }
 
@@ -1068,10 +1085,20 @@
     const linesEl = $("lines");
     const lineQueue = [];
     let lineBusy = false;
-    function lines(list, gap = 3.4) {
-      for (const t of list) lineQueue.push({ t, gap });
+    let lineTimer = null;
+    // Story lines wait their turn. A reaction to something that just happened cuts in now instead.
+    function lines(list, gap = 3.4, now = false) {
+      const items = list.map((t) => ({ t, gap }));
+      if (now) {
+        clearTimeout(lineTimer);
+        lineBusy = false;
+        lineQueue.unshift(...items);
+      } else {
+        lineQueue.push(...items);
+      }
       if (!lineBusy) nextLine();
     }
+    const dropLine = (t) => { const i = lineQueue.findIndex((item) => item.t === t); if (i >= 0) lineQueue.splice(i, 1); };
     function nextLine() {
       const item = lineQueue.shift();
       if (!item) { lineBusy = false; return; }
@@ -1081,9 +1108,9 @@
       p.textContent = item.t;
       linesEl.replaceChildren(p);
       requestAnimationFrame(() => p.classList.add("on"));
-      setTimeout(() => {
+      lineTimer = setTimeout(() => {
         p.classList.remove("on");
-        setTimeout(nextLine, 900);
+        lineTimer = setTimeout(nextLine, 900);
       }, item.gap * 1000);
     }
 
@@ -1261,7 +1288,7 @@
         sfx.slop();
         burst(new V3(s.x, STONE_TOP, s.z), ["slop"], 8, { speed: 0.9, up: 1.2, life: 0.7 });
         if (s.lane === 1) {
-          lines([COPY.ownSlop], 3.6);
+          lines([COPY.ownSlop], 3.6, true);
         } else if (!byLight && !game.saidSlop) {
           game.saidSlop = true;
           setTimeout(() => speak(s.by || helpers.wren, COPY.wrenOops, 3), 400);
@@ -1417,6 +1444,7 @@
     const OWN = [[2, 3], [2, 4], [2, 5]];
     makeLane(OWN, 1);
     function setOwnStones() {
+      dropLine(COPY.ch1Hint);
       const open = stones.filter((t) => t.lane === 1 && t.state === "none");
       open.forEach((s, i) => setTimeout(() => s.state === "none" && throwStone(traveler, s), i * 220));
     }
@@ -1508,9 +1536,9 @@
       const lane = stones.filter((s) => s.lane === 3);
       const xs = lane.map((s) => s.x);
       const zs = lane.map((s) => s.z);
-      glow.scale.set(Math.max(...xs) - Math.min(...xs) + 1.6, Math.max(...zs) - Math.min(...zs) + 1.6, 1);
+      glow.scale.set(Math.max(...xs) - Math.min(...xs) + 3, Math.max(...zs) - Math.min(...zs) + 3, 1);
       glow.position.set((Math.max(...xs) + Math.min(...xs)) / 2, 0.03, (Math.max(...zs) + Math.min(...zs)) / 2);
-      lines([COPY.litLine], 4);
+      lines([COPY.litLine], 4, true);
       setTimeout(() => speak(helpers.fizz, COPY.fizzLit, 3), 900);
       lane.filter((s) => s.state === "placed").forEach((s, i) => setTimeout(() => reveal(s, true), 300 + i * 160));
       for (const h of Object.values(helpers)) h.interval *= 0.7;
@@ -1636,7 +1664,7 @@
         const br = body.getBoundingClientRect();
         if (wide) {
           const left = Math.min(W * 0.62, Math.max(W * 0.48, br.right - fr.left - 140));
-          return { x: left, y: 0, w: W - left, h: H };
+          return { x: left, y: 0, w: W - left, h: H, textRight: br.right - fr.left };
         }
         const top = Math.min(H * 0.7, Math.max(H * 0.35, br.bottom - fr.top + 12));
         return { x: 0, y: top, w: W, h: H - top };
@@ -1678,6 +1706,14 @@
       const down = new V3(ISO.x, 0, ISO.z).normalize();
       const off = right.add(down).multiplyScalar(0.16);
       for (const sh of cardShadows) sh.position.copy(sh.userData.at).add(off);
+      // Embedded beside the text, the shores would run under it, so the scene fades in just past where it ends.
+      if (EMBED) {
+        const masks = ["linear-gradient(to bottom, transparent, #000 10%, #000 86%, transparent)"];
+        if (focus.textRight) masks.push(`linear-gradient(to right, transparent ${focus.textRight - 70}px, #000 ${focus.textRight + 20}px)`);
+        canvas.style.webkitMaskImage = canvas.style.maskImage = masks.join(", ");
+        canvas.style.webkitMaskComposite = "source-in";
+        canvas.style.maskComposite = "intersect";
+      }
       // Keep the words and the ending inside that area too.
       const linesEl2 = $("lines");
       if (EMBED) {
@@ -1746,7 +1782,7 @@
         m.visible = m.material.opacity > 0.01;
       }
       if (game.lit) {
-        glow.material.opacity = Math.min(0.22, glow.material.opacity + dt * 0.2);
+        glow.material.opacity = Math.min(0.3, glow.material.opacity + dt * 0.25);
         halo.material.opacity = Math.min(0.4, halo.material.opacity + dt * 0.5);
         halo.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
       }
