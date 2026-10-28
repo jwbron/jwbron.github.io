@@ -14,6 +14,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
   <!-- The site's light/dark choice. Embedded, it also hears when the page around it changes. -->
   <script src="../theme.js?v=a2d527c1"></script>
+  <!-- Embedded in the homepage hero there's no title screen. Decide before first paint, or it flashes. -->
+  <script>if (new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("embed");</script>
   <style>
     /* Same tokens as the main site's style.css. */
     :root {
@@ -409,8 +411,7 @@
     };
 
     // ?embed means we're the background of the homepage hero.
-    const EMBED = new URLSearchParams(location.search).has("embed");
-    if (EMBED) document.documentElement.classList.add("embed");
+    const EMBED = document.documentElement.classList.contains("embed");
 
     const darkQuery = matchMedia("(prefers-color-scheme: dark)");
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
