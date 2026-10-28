@@ -542,15 +542,7 @@
         mat("groundSide"), mat("groundSide"), mat("ground"), mat("groundSide"), mat("groundSide"), mat("groundSide"),
       ], { receive: true });
       g.position.set((WORLD.x0 + WORLD.x1) / 2, GROUND_TOP - 1, (z0 + z1) / 2);
-      g.userData.ground = true;
       scene.add(g);
-      pickables.push(g);
-    }
-    // The grass along the far shoreline is walkable the whole width of the river, so a route ends the
-    // moment it reaches the shore and you step off onto it, instead of walking stones along the edge.
-    for (let x = -3; x <= 9; x++) {
-      if (tiles.has(key(x, 23))) continue;
-      tiles.set(key(x, 23), { x, z: 23, kind: "land", region: "far", top: GROUND_TOP, blocked: false });
     }
 
     // Water fills the whole channel. The top is a gentle flowing shader.
@@ -862,11 +854,27 @@
 
     // A helper's route from an island to a goal, optionally through a point you gave it.
     function planRoute(fromRegion, goalPred, { avoid = false, via = null } = {}) {
-      const ok = (x, z) => isWater(x, z) && !(avoid && inRapids(x, z));
+      const base = (x, z) => isWater(x, z) && !(avoid && inRapids(x, z));
+      // Past the first stone, a stone only touches land where the route lands, so a route never runs
+      // along a shore and nobody walks stones beside land they could just step onto.
+      // If where you pointed makes that impossible, plan the plain way rather than not at all.
+      // The grass along either shore counts too, even though nobody walks on it.
+      const touchesLand = (x, z) => z === 3 || z === 22 || DIRS.some(([dx, dz]) => {
+        const t = tiles.get(key(x + dx, z + dz));
+        return t && !t.blocked;
+      });
+      const isVia = (x, z) => via && x === via[0] && z === via[1];
+      const clean = (x, z) => base(x, z) && (isVia(x, z) || goalPred(x, z) || !touchesLand(x, z));
+      return route(clean) || route(base);
+      function route(ok) {
+        return routeWith(fromRegion, goalPred, via, ok, base);
+      }
+    }
+    function routeWith(fromRegion, goalPred, via, ok, base) {
       const starts = [];
       for (const t of tiles.values()) {
         if (t.region !== fromRegion || t.blocked) continue;
-        for (const [dx, dz] of DIRS) if (ok(t.x + dx, t.z + dz)) starts.push([t.x + dx, t.z + dz]);
+        for (const [dx, dz] of DIRS) if (base(t.x + dx, t.z + dz)) starts.push([t.x + dx, t.z + dz]);
       }
       const d = (c) => Math.abs(c[0] - traveler.x) + Math.abs(c[1] - traveler.z);
       starts.sort((a, b) => d(a) - d(b) || b[1] - a[1]);
@@ -1729,8 +1737,7 @@
       }, 4200);
     }
 
-    // Any water cell next to solid far shore. The route ends the moment it reaches land
-    // instead of running along the shoreline, and you walk the rest of the way on the shore.
+    // Any water cell right below the garden plaza on the far shore.
     function shoreCell() {
       return nextTo("far");
     }
@@ -1847,8 +1854,7 @@
         });
         return;
       }
-      // Tapping open grass walks you there if it's somewhere you can stand.
-      const t = o.userData.tile || (o.userData.ground && tiles.get(key(Math.round(hit.point.x), Math.round(hit.point.z))));
+      const t = o.userData.tile;
       if (!t) return;
       if (walkTo(traveler, t.x, t.z)) ring(new V3(t.x, (t.top ?? 0) + 0.02, t.z), "ripple");
     }
