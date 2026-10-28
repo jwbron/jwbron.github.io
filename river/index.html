@@ -1242,19 +1242,42 @@
     }
 
     // An idle helper moves to a free neighboring tile, off the mover's route if possible.
+    // Boxed in, it walks to the nearest open tile instead, but only over open tiles, never through anyone.
     function stepAside(h, mover) {
       const route = new Set(mover.path.map(([x, z]) => key(x, z)));
+      const open = (x, z) => walkable(tileAt(x, z)) && !occupant(x, z, h) && !(x === mover.x && z === mover.z);
       let best = null;
       for (const [dx, dz] of DIRS) {
         const x = h.x + dx;
         const z = h.z + dz;
-        const t = tileAt(x, z);
-        if (!walkable(t) || occupant(x, z, h) || (x === mover.x && z === mover.z)) continue;
-        const score = (route.has(key(x, z)) ? 2 : 0) + (t.kind === "land" ? 0 : 1);
+        if (!open(x, z)) continue;
+        const score = (route.has(key(x, z)) ? 2 : 0) + (tileAt(x, z).kind === "land" ? 0 : 1);
         if (!best || score < best.score) best = { x, z, score };
       }
-      if (!best) return false;
-      h.path = [[best.x, best.z]];
+      if (best) {
+        h.path = [[best.x, best.z]];
+        return true;
+      }
+      const start = key(h.x, h.z);
+      const prev = new Map([[start, null]]);
+      const q = [[h.x, h.z]];
+      let fallback = null;
+      while (q.length) {
+        const [x, z] = q.shift();
+        const k = key(x, z);
+        if (k !== start) {
+          if (!route.has(k)) { h.path = findPathKey(h, start, k, prev); return true; }
+          fallback ||= k;
+        }
+        for (const [dx, dz] of DIRS) {
+          const nk = key(x + dx, z + dz);
+          if (prev.has(nk) || !open(x + dx, z + dz)) continue;
+          prev.set(nk, k);
+          q.push([x + dx, z + dz]);
+        }
+      }
+      if (!fallback) return false;
+      h.path = findPathKey(h, start, fallback, prev);
       return true;
     }
 
@@ -1301,8 +1324,7 @@
       // Nobody walks through anybody.
       const other = occupant(nx, nz, w);
       if (other) {
-        const idle = !other.path.length && !other.busy;
-        if (other !== traveler && idle && stepAside(other, w)) return;
+        const idle = !other.path.length && !other.busy && !other.step;
         if (other === traveler && !isTraveler) {
           // A helper finds another way around you, or stops where it is.
           const [gx, gz] = w.path[w.path.length - 1];
@@ -1310,9 +1332,15 @@
           w.path = around && around.length && !occupant(...around[0], w) ? around : [];
           return;
         }
-        // Someone's on the move there, so wait a moment, then slip past rather than stall.
+        if (idle) {
+          // They move out of the way, or if they truly can't, you stop beside them.
+          if (other === traveler || !stepAside(other, w)) w.path = [];
+          return;
+        }
+        // Someone's on the move there, so wait a moment for them, and if they're still there, stop short.
         w.waited = (w.waited || 0) + dt;
-        if (w.waited < 1.2) return;
+        if (w.waited > 1.2) { w.waited = 0; w.path = []; }
+        return;
       }
       w.waited = 0;
       // You test any stone you haven't seen tested, unless the lantern already has.
@@ -1568,6 +1596,19 @@
       walkTo(helpers.wren, 1, 14);
       for (const id of ["moss", "fizz"]) {
         const h = helpers[id];
+        // Appear on a free tile, never inside you or on the way you're still walking.
+        const route = new Set(traveler.path.map(([x, z]) => key(x, z)));
+        const taken = (t) => occupant(t.x, t.z, h) || route.has(key(t.x, t.z));
+        if (taken(tileAt(h.x, h.z))) {
+          const free = [...tiles.values()]
+            .filter((t) => t.region === "isle2" && walkable(t) && !taken(t))
+            .sort((a, b) => Math.abs(a.x - h.x) + Math.abs(a.z - h.z) - (Math.abs(b.x - h.x) + Math.abs(b.z - h.z)))[0];
+          if (free) {
+            h.x = free.x;
+            h.z = free.z;
+            h.pos.set(free.x, free.top, free.z);
+          }
+        }
         h.g.visible = true;
         h.g.scale.setScalar(0.001);
         h.appear = 0;
@@ -1847,6 +1888,12 @@
           h.hop = Math.max(0, h.hop - dt * 3);
           h.inner.position.y = Math.sin(h.hop * Math.PI) * 0.18;
         }
+      }
+      // Whatever else happens, an idle helper sharing a tile with anyone moves off it.
+      for (const h of Object.values(helpers)) {
+        if (!h.g.visible || h.path.length || h.step) continue;
+        const other = occupant(h.x, h.z, h);
+        if (other && !(other !== traveler && other.path.length)) stepAside(h, other);
       }
       updateThrows(dt);
       updateStones(dt);
