@@ -3,9 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Review Deep Dive</title>
+<title>AI code reviewer deep dive · James Wiesebron</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI code reviewer deep dive · James Wiesebron">
+<meta property="og:description" content="Project deep dive: the AI code reviewer I built at Khan Academy.">
+<meta property="og:url" content="https://jameswiesebron.com/reviewer-presentation/">
+<meta property="og:image" content="https://jameswiesebron.com/og-image.png">
 <meta name="description" content="Project deep dive: the AI code reviewer I built at Khan Academy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -756,10 +761,10 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide" data-title="Two tools, one gap" data-time="105">
+<section class="slide" data-title="What we had before" data-time="105">
   <div class="stage">
     <span class="kicker rise">Where it started</span>
-    <h2 class="rise">Two tools, one gap</h2>
+    <h2 class="rise">What we had before</h2>
     <div class="versus rise">
       <div class="card">
         <h3>Claude Code's managed review</h3>
@@ -917,7 +922,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     </div>
     <div class="grid two rise late">
       <p><mark>Khan's own skills</mark> were the margin over a generic reviewer.</p>
-      <p><mark class="m2">The scorer needed checking too:</mark> in 28 runs the reviewer found the defect every time. The scorer was wrong.</p>
+      <p><mark class="m2">The scorer needed checking too:</mark> in 28 runs the reviewer found the defect every time, but the scorer only accepted one source location.</p>
     </div>
   </div>
   <span class="num"></span>
@@ -925,7 +930,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide build" style="--steps: 3" data-steps="3" data-title="Field week" data-time="150">
   <div class="stage">
-    <span class="kicker">The first week with real users</span>
+    <span class="kicker">Field week</span>
     <h2>The first week: good catches, way too many comments</h2>
     <div class="wall" aria-label="Illustration: seven non-blocking comments on one push">
       <div><b>suggestion</b>test coverage</div>
@@ -956,7 +961,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <li>Fixes only when the author replies <code>ship</code></li>
       </ul>
       <div class="quiet-visual">
-        <div class="mini-wall" aria-label="Illustration: seven comments become three inline plus a collapsed fold">
+        <div class="mini-wall" aria-label="Illustration: seven comments become three inline plus a collapsed section">
           <div>suggestion · test coverage</div>
           <div>question · non-blocking</div>
           <div>nitpick · naming</div>
@@ -1030,7 +1035,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div class="card"><h3>A panel of skeptic agents</h3><p>Built, then removed. 12 false blocks in 90 PRs, only 2 it could catch.</p></div>
       <div class="card"><h3>A stronger model everywhere</h3><p>One role instead of five. Recall 82% → 89%, cost +35%.</p></div>
       <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving, from one full repeat.</p></div>
-      <div class="card"><h3>Blocking merges</h3><p>Compliance keeps a human approval, so I built for the human.</p></div>
+      <div class="card"><h3>Blocking merges</h3><p>Compliance requires a human approval, so the reviewer stays advisory.</p></div>
       <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
       <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
     </div>
@@ -1295,7 +1300,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <span class="kicker">Backup</span>
     <h2>The broader AI tooling program</h2>
     <div class="grid two">
-      <div class="card"><h3>Why a dedicated team</h3><p>Proven tools, no owner. Maintenance on spare time, five separate fixes for the same prose problem, requests nobody was resourced to take.</p></div>
+      <div class="card"><h3>Why a dedicated team</h3><p>Proven tools, no owner. Maintenance in spare time, five separate fixes for the same prose problem, requests nobody was resourced to take.</p></div>
       <div class="card"><h3>Principles</h3><p>Support and enable, don't prescribe. Everyone should lean on AI, and the bar is using it well.</p></div>
     </div>
     <p class="small">Talk: multi-agent pipelines and agent coordination, at the AI coding tools guild.</p>
@@ -1549,13 +1554,14 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
   const renderNotes = () => {
     if (notesWin && !notesWin.closed) notesWin.document.getElementById("n").innerHTML = notesHtml();
-    if (!panel.hidden) panel.innerHTML = notesHtml();
+    // The public copy has no notes panel.
+    if (panel && !panel.hidden) panel.innerHTML = notesHtml();
   };
 
   const openNotes = () => {
     started ??= Date.now();
     notesWin = window.open("", "deck-notes", "width=760,height=900");
-    if (!notesWin) { panel.hidden = !panel.hidden; renderNotes(); return; }
+    if (!notesWin) { if (panel) panel.hidden = !panel.hidden; renderNotes(); return; }
     notesWin.document.title = "Speaker notes";
     notesWin.document.body.innerHTML = '<div id="n"></div>';
     notesWin.document.body.style.cssText = "font:22px/1.5 system-ui,sans-serif;padding:24px 32px;background:#251e37;color:#ece4cd";
@@ -1576,7 +1582,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     else if (k === "Home") { e.preventDefault(); go(-1e6); }
     else if (k === "End") { e.preventDefault(); go(1e6); }
     else if (k === "n") openNotes();
-    else if (k === "o") { panel.hidden = !panel.hidden; renderNotes(); }
+    else if (k === "o" && panel) { panel.hidden = !panel.hidden; renderNotes(); }
     else if (k === "t") {
       const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
       root.dataset.theme = dark ? "light" : "dark";
