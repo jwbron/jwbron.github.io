@@ -333,7 +333,7 @@
         "Some of it holds. Some of it is slop. From here it all looks the same.",
       ],
       ch1Hint: "Tap the water to set stones, then walk across.",
-      ownSlop: "That one was yours, and it still didn't hold.",
+      ownSlop: "That one was yours.",
       ch2: { num: "2", name: "Where to" },
       wrenAsk: "I can set stones for you! Where are we headed?",
       pickGoal: "Tap where you're going.",
@@ -352,7 +352,7 @@
       mossOk: "Around it is!",
       mistBlocked: "Too misty out here to test anything.",
       mistNudge: "The lantern back on the island could light the way.",
-      litLine: "The light checks every stone at once.",
+      litLine: "The light checks every stone, whoever set it.",
       fizzLit: "Oh! Now we can all see which ones won't hold.",
       wrenEnd: "Same time tomorrow?",
       endTitle: "The far shore",
@@ -1262,8 +1262,6 @@
         burst(new V3(s.x, STONE_TOP, s.z), ["slop"], 8, { speed: 0.9, up: 1.2, life: 0.7 });
         if (s.lane === 1) {
           lines([COPY.ownSlop], 3.6);
-          setTimeout(() => s.state === "none" && throwStone(traveler, s), 1000);
-          setTimeout(() => game.ch === 1 && walkTo(traveler, 2, 6), 2300);
         } else if (!byLight && !game.saidSlop) {
           game.saidSlop = true;
           setTimeout(() => speak(s.by || helpers.wren, COPY.wrenOops, 3), 400);
