@@ -735,7 +735,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,2,4" data-title="Why now" data-time="150">
+<section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,2,4" data-title="Why now" data-time="120">
   <div class="stage">
     <span class="deco circle" style="top: 10vh; right: 8vw; width: 6rem; aspect-ratio: 1"></span>
     <span class="kicker">Why now</span>
@@ -757,6 +757,21 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div>Consistent reviews</div>
       <div>Moving faster, with confidence</div>
     </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide" data-title="Where it ended up" data-time="45">
+  <div class="stage">
+    <span class="deco circle" style="top: 10vh; right: 12vw; width: 6rem; aspect-ratio: 1"></span>
+    <span class="kicker rise">The outcome first</span>
+    <h2 class="rise">Where it ended up</h2>
+    <ul class="ticks rise">
+      <li>Every PR in Khan's frontend and backend monorepos got a first pass, on every push</li>
+      <li>Default-on for about 120 engineers, with a human still approving every merge</li>
+      <li>The team that had switched it off turned it back on</li>
+    </ul>
+    <p class="small rise late">The rest is how it got there, and how strong the evidence is for each result.</p>
   </div>
   <span class="num"></span>
 </section>
@@ -789,7 +804,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide" data-title="Proposal and buy-in" data-time="150">
+<section class="slide" data-title="Proposal and buy-in" data-time="120">
   <div class="stage">
     <span class="kicker rise">Shaping it</span>
     <div class="split">
@@ -814,7 +829,29 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 6" data-steps="6" data-title="Architecture" data-time="180">
+<section class="slide" data-title="What I inherited, what I built" data-time="60">
+  <div class="stage">
+    <span class="kicker rise">My contribution</span>
+    <h2 class="rise">What I inherited, what I built</h2>
+    <div class="grid two rise">
+      <div class="card"><h3>Inherited</h3><p>The original author's triage bot in the frontend monorepo: a triage pass, focused sub-agents, and a validator that double-checked claims before posting.</p></div>
+      <div class="card"><h3>Built</h3>
+        <ul class="ticks">
+          <li>About a dozen specialists, routed by code</li>
+          <li>Dispatch, validation and the verdict moved into code</li>
+          <li>Re-reviews that reconcile open threads</li>
+          <li>The comment budget, two-layer comments and <code>ship</code></li>
+          <li>The eval bench and the cost work</li>
+          <li>The rollout, the launch brief and on call</li>
+        </ul>
+      </div>
+    </div>
+    <p class="small rise late">A teammate built the security-focused reviewer.</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide build" style="--steps: 6" data-steps="6" data-title="Architecture" data-time="120">
   <div class="stage">
     <div class="toprow">
       <span class="kicker">How it works</span>
@@ -928,7 +965,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 3" data-steps="3" data-title="Field week" data-time="150">
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Field week" data-time="120">
   <div class="stage">
     <span class="kicker">Field week</span>
     <h2>The first week: good catches, way too many comments</h2>
@@ -1004,7 +1041,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 3" data-steps="3" data-title="Cost ladder" data-time="105">
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Cost ladder" data-time="90">
   <div class="stage">
     <span class="kicker">Cost</span>
     <h2>About a fifth of the managed review's cost</h2>
@@ -1027,23 +1064,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide" data-title="Directions not taken" data-time="120">
-  <div class="stage">
-    <span class="kicker rise">Directions not taken</span>
-    <h2 class="rise">Things I didn't build</h2>
-    <div class="grid rise">
-      <div class="card"><h3>A panel of skeptic agents</h3><p>Built, then removed. 12 false blocks in 90 PRs, only 2 it could catch.</p></div>
-      <div class="card"><h3>A stronger model everywhere</h3><p>One role instead of five. Recall 82% → 89%, cost +35%.</p></div>
-      <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving, from one full repeat.</p></div>
-      <div class="card"><h3>Blocking merges</h3><p>Compliance requires a human approval, so the reviewer stays advisory.</p></div>
-      <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
-      <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
-    </div>
-  </div>
-  <span class="num"></span>
-</section>
-
-<section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,3,4" data-title="Rollout" data-time="150">
+<section class="slide build" style="--steps: 5" data-steps="5" data-stops="0,3,4" data-title="Rollout" data-time="120">
   <div class="stage">
     <span class="kicker">Timeline</span>
     <h2 class="wide">Rollout</h2>
@@ -1106,7 +1127,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide" data-title="Launch plan" data-time="75">
+<section class="slide" data-title="Launch plan" data-time="60">
   <div class="stage">
     <span class="deco circle" style="top: 9vh; right: 7vw; width: 5rem; aspect-ratio: 1"></span>
     <span class="kicker rise">Launching to every author</span>
@@ -1140,29 +1161,38 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide" data-title="Impact" data-time="120">
   <div class="stage">
-    <span class="kicker rise">Impact, against the goals</span>
-    <div class="goals rise">
-      <div>Less cognitive burden<br><span class="small" style="color: inherit">Less time per review <span class="reported">reported</span></span></div>
-      <div>Higher bar<br><span class="small" style="color: inherit">Cleaner PRs, fewer human rounds <span class="reported">reported</span></span></div>
-      <div>Consistent<br><span class="small" style="color: inherit">Every PR, every push</span></div>
-      <div>Faster<br><span class="small" style="color: inherit">Time to merge dropped <span class="reported">reported</span></span></div>
-    </div>
-    <div class="grid two">
-      <div class="proof rise late">
-        <h3>The blind rerun</h3>
-        <p>While review was opt-in, a PR that skipped it caused a production incident. Run blind on that PR afterward, the reviewer caught the problem.</p>
+    <span class="kicker rise">Impact, by how strong the evidence is</span>
+    <div class="grid rise">
+      <div class="card"><h3>Measured</h3>
+        <ul class="ticks">
+          <li>Every PR and every push reviewed, in both monorepos</li>
+          <li>Noise reports held at trial levels after default-on</li>
+          <li>Cost per full review about 2.2 times the triage bot</li>
+        </ul>
       </div>
-      <ul class="ticks rise late">
-        <li>Replaced the managed review on every PR, at about a fifth of its estimated cost</li>
-        <li>Noise held at trial levels after default-on</li>
-        <li>Engineers who used both preferred it</li>
-      </ul>
+      <div class="card"><h3>Estimated</h3>
+        <ul class="ticks">
+          <li>About a fifth of what the managed review would have cost for the same coverage</li>
+        </ul>
+      </div>
+      <div class="card"><h3>Reported by engineers</h3>
+        <ul class="ticks">
+          <li>Less time per review</li>
+          <li>Cleaner PRs, fewer human rounds</li>
+          <li>Time to merge dropped</li>
+          <li>Preferred it to the managed review</li>
+        </ul>
+      </div>
+    </div>
+    <div class="proof rise late">
+      <h3>One case: the blind rerun</h3>
+      <p>While review was opt-in, a PR that skipped it caused a production incident. Run blind on that PR afterward, the reviewer caught the problem.</p>
     </div>
   </div>
   <span class="num"></span>
 </section>
 
-<section class="slide" data-title="Differently, and next" data-time="75">
+<section class="slide" data-title="Differently, and next" data-time="60">
   <div class="stage">
     <span class="deco tri" style="top: 12vh; right: 10vw; width: 6rem; aspect-ratio: 1"></span>
     <span class="kicker rise">What I'd do differently</span>
@@ -1190,6 +1220,37 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <li>Treat people's attention as the budget every output spends.</li>
     </ul>
     <p class="sub rise late">Thanks. Questions?</p>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: directions not taken" data-time="0">
+  <div class="stage">
+    <span class="kicker rise">Backup</span>
+    <h2 class="rise">Things I didn't build</h2>
+    <div class="grid rise">
+      <div class="card"><h3>A panel of skeptic agents</h3><p>Built, then removed. 12 false blocks in 90 PRs, only 2 it could catch.</p></div>
+      <div class="card"><h3>A stronger model everywhere</h3><p>One role instead of five. Recall 82% → 89%, cost +35%.</p></div>
+      <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving, from one full repeat.</p></div>
+      <div class="card"><h3>Blocking merges</h3><p>Compliance requires a human approval, so the reviewer stays advisory.</p></div>
+      <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
+      <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
+    </div>
+  </div>
+  <span class="num"></span>
+</section>
+
+<section class="slide backup" data-title="Backup: feedback that changed it" data-time="0">
+  <div class="stage">
+    <span class="kicker rise">Backup</span>
+    <h2 class="rise">Feedback that changed it</h2>
+    <div class="roles rise">
+      <div><b>"Too many comments"</b><span>A comment budget: three inline, nitpicks never, the rest collapsed</span></div>
+      <div><b>"It reads like a model wrote it"</b><span>Two-layer comments: a short one for people, full context collapsed for agents</span></div>
+      <div><b>"A dozen reviewers will cost too much"</b><span>Dispatch moved into code, and a stronger model trialed on one role instead of five</span></div>
+      <div><b>A team switched it off</b><span>The fixes shipped in about a day. After default-on, that team turned it back on.</span></div>
+      <div><b>Replies to the bot</b><span>A pipeline turned them into tickets, so nobody had to file anything</span></div>
+    </div>
   </div>
   <span class="num"></span>
 </section>

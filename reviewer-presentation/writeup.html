@@ -1189,8 +1189,9 @@ body { line-height: 1.65; }
     <div>Faster<br><span class="small" style="color: inherit">Time to merge dropped <span class="reported">reported</span></span></div>
   </div>
   <div class="prose-only">
-    <p class="rise">Reviewers told us they spent less time per PR, because PRs came in cleaner after the first pass. They needed fewer rounds of human review, and time to merge dropped. Those are reported, not measured. A before-and-after analysis was next on the list.</p>
-    <p class="rise">What we did measure: it replaced the managed review and reviewed every PR and push. Noise reports stayed at trial levels after default-on. Engineers who had used both said ours was more thorough and easier to read quickly.</p>
+    <p class="rise">Measured: every PR and every push in both monorepos got a review, noise reports stayed at trial levels after default-on, and a full review cost about 2.2 times the triage bot.</p>
+    <p class="rise">Estimated: about a fifth of what the managed review would have cost for the same coverage. Our side of that is measured. Theirs is its per-PR cost from manual runs times our real volume, since it never ran on everything.</p>
+    <p class="rise">Reported by engineers: less time per review because PRs came in cleaner, fewer rounds of human review, faster time to merge, and that ours was more thorough and easier to read quickly than the managed review. I didn't measure those. A before-and-after analysis was next on the list.</p>
   </div>
 </section>
 
