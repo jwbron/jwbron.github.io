@@ -12,6 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <!-- The site's light/dark choice. Embedded, it also hears when the page around it changes. -->
+  <script src="../theme.js?v=a2d527c1"></script>
   <style>
     /* Same tokens as the main site's style.css. */
     :root {
@@ -35,7 +37,7 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --bg: #251e37;
         --card: #322a4b;
         --ink: #ece4cd;
@@ -45,6 +47,17 @@
         --sky-top: #1c162c;
         color-scheme: dark;
       }
+    }
+
+    :root[data-theme="dark"] {
+    --bg: #251e37;
+    --card: #322a4b;
+    --ink: #ece4cd;
+    --ink-2: #b9afcb;
+    --line-c: #ece4cd;
+    --cobalt: #6f86ff;
+    --sky-top: #1c162c;
+    color-scheme: dark;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -400,7 +413,9 @@
 
     const darkQuery = matchMedia("(prefers-color-scheme: dark)");
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let pal = darkQuery.matches ? PALETTES.dark : PALETTES.light;
+    // The site's choice when there is one, otherwise the system's.
+    const isDark = () => window.siteTheme?.dark() ?? darkQuery.matches;
+    let pal = isDark() ? PALETTES.dark : PALETTES.light;
     const rand = Math.random;
     let seed = 3;
     const srand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
@@ -1627,7 +1642,7 @@
     // ---------- theme and camera ----------
 
     function applyPalette() {
-      pal = darkQuery.matches ? PALETTES.dark : PALETTES.light;
+      pal = isDark() ? PALETTES.dark : PALETTES.light;
       for (const [k, m] of Object.entries(M)) m.color.set(pal[m.userData?.key || k]);
       inkMat.uniforms.uInk.value.set(pal.ink);
       hemi.color.set(pal.hemiSky);
@@ -1647,7 +1662,7 @@
         s.sideMat.color.set(s.state === "sinking" ? pal.slop : pal.stoneSide);
       }
     }
-    darkQuery.addEventListener("change", applyPalette);
+    addEventListener("themechange", applyPalette);
 
     // An isometric view looking up the river crossing, so the way forward runs up and to the right.
     const ISO = new V3(-1, 1.15, -1).normalize();

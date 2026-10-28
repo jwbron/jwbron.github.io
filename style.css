@@ -29,8 +29,9 @@
   color-scheme: light;
 }
 
+/* Dark follows the system unless the visitor picked light. theme.js sets data-theme when they pick. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #251e37;
     --bg-2: #2d2542;
     --card: #322a4b;
@@ -44,6 +45,21 @@
     --contrast-accent: #261d38;
     color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #251e37;
+  --bg-2: #2d2542;
+  --card: #322a4b;
+  --ink: #ece4cd;
+  --ink-2: #b9afcb;
+  --line-c: #ece4cd;
+
+  --cobalt: #6f86ff;
+  --contrast-bg: #b8a1e0;
+  --contrast-fg: #261d38;
+  --contrast-accent: #261d38;
+  color-scheme: dark;
 }
 
 *,
@@ -161,6 +177,7 @@ p {
 .masthead nav {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.2rem 1.6rem;
   font-weight: 600;
 
@@ -172,6 +189,31 @@ p {
     &:hover {
       background-size: 100% 3px;
     }
+  }
+}
+
+/* the light/dark switch theme.js adds to the end of the nav: a half-filled disc that turns over */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  color: var(--ink);
+  background: var(--card);
+  border: var(--line);
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 var(--line-c);
+  cursor: pointer;
+
+  & svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    transition: rotate 0.4s ease;
+  }
+
+  &[aria-pressed="true"] svg {
+    rotate: 180deg;
   }
 }
 
