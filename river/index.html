@@ -1390,6 +1390,11 @@
       if (game.ch === 1 && region === "isle1") enterCh2();
       else if (game.ch === 2 && region === "isle2" && !game.phase) enterCh3();
       else if (game.ch === 3 && region === "far") finale();
+      // Once the mist has sent you back, reaching the lantern is enough to light it.
+      else if (game.ch === 3 && !game.lit && mistSaidAt >= 0 && Math.abs(traveler.x - 4) + Math.abs(traveler.z - 14) === 1) {
+        if (!traveler.path.length) traveler.face = Math.atan2(4 - traveler.x, 14 - traveler.z);
+        lightLantern();
+      }
     }
 
     function begin() {
