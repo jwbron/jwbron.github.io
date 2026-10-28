@@ -1241,47 +1241,72 @@
       return out;
     }
 
-    // An idle helper moves to a free neighboring tile, off the mover's route if possible.
-    // Boxed in, it walks to the nearest open tile instead, but only over open tiles, never through anyone.
+    // How a helper makes way, so nobody walks through anybody and nobody gets stuck:
+    // first, shuffle across land. The helper, and any idle helpers between it and the nearest free land
+    // tile, each move over one tile, off the mover's route if possible, never crossing anyone.
+    // Out on a lane with no land in reach, it drops a passing stone in the water alongside and hops onto it.
+    // Either way it never heads out across the stones ahead of you.
     function stepAside(h, mover) {
       const route = new Set(mover.path.map(([x, z]) => key(x, z)));
-      const open = (x, z) => walkable(tileAt(x, z)) && !occupant(x, z, h) && !(x === mover.x && z === mover.z);
-      let best = null;
-      for (const [dx, dz] of DIRS) {
-        const x = h.x + dx;
-        const z = h.z + dz;
-        if (!open(x, z)) continue;
-        const score = (route.has(key(x, z)) ? 2 : 0) + (tileAt(x, z).kind === "land" ? 0 : 1);
-        if (!best || score < best.score) best = { x, z, score };
-      }
-      if (best) {
-        h.path = [[best.x, best.z]];
-        return true;
-      }
+      const land = (x, z) => tileAt(x, z)?.kind === "land" && walkable(tileAt(x, z)) && !(x === mover.x && z === mover.z);
+      const shuffles = (o) => o !== traveler && o !== mover && !o.path.length && !o.step && !o.busy;
       const start = key(h.x, h.z);
       const prev = new Map([[start, null]]);
       const q = [[h.x, h.z]];
+      let found = null;
       let fallback = null;
-      while (q.length) {
+      while (q.length && !found) {
         const [x, z] = q.shift();
         const k = key(x, z);
-        if (k !== start) {
-          if (!route.has(k)) { h.path = findPathKey(h, start, k, prev); return true; }
-          fallback ||= k;
+        if (k !== start && !occupant(x, z, null)) {
+          if (!route.has(k)) found = k;
+          else fallback ||= k;
+          continue;
         }
         for (const [dx, dz] of DIRS) {
-          const nk = key(x + dx, z + dz);
-          if (prev.has(nk) || !open(x + dx, z + dz)) continue;
+          const nx = x + dx;
+          const nz = z + dz;
+          const nk = key(nx, nz);
+          if (prev.has(nk) || !land(nx, nz)) continue;
+          const o = occupant(nx, nz, null);
+          if (o && !shuffles(o)) continue;
           prev.set(nk, k);
-          q.push([x + dx, z + dz]);
+          q.push([nx, nz]);
         }
       }
-      if (!fallback) return false;
-      h.path = findPathKey(h, start, fallback, prev);
-      return true;
+      const target = found || fallback;
+      if (target) {
+        const cells = [[h.x, h.z], ...findPathKey(h, start, target, prev)];
+        const movers = cells.slice(0, -1).map(([x, z], i) => (i ? occupant(x, z, null) : h));
+        movers.forEach((o, i) => { o.path = [cells[i + 1]]; });
+        return true;
+      }
+      for (const [dx, dz] of DIRS) {
+        const x = h.x + dx;
+        const z = h.z + dz;
+        if (!isWater(x, z) || route.has(key(x, z))) continue;
+        makeLane([[x, z]], "passing");
+        const p = stones[stones.length - 1];
+        p.state = "sound";
+        p.mesh.visible = true;
+        p.mesh.position.y = STONE_TOP - 0.25;
+        p.text.visible = false;
+        p.check.visible = true;
+        p.topMat.color.set(pal.sound);
+        p.wobble = 1;
+        ring(new V3(x, 0.03, z), "ripple");
+        sfx.place();
+        // Step back to where it was once you've gone by, unless it was already on its way somewhere.
+        h.goal ||= [h.x, h.z];
+        h.path = [[x, z]];
+        return true;
+      }
+      return false;
     }
 
     function walkTo(w, tx, tz, onArrive) {
+      // Helpers remember where they were going, so making way doesn't make them forget.
+      if (w !== traveler) w.goal = [tx, tz];
       const path = findPath(w, tx, tz);
       if (!path) return false;
       w.path = path;
@@ -1339,7 +1364,7 @@
         }
         // Someone's on the move there, so wait a moment for them, and if they're still there, stop short.
         w.waited = (w.waited || 0) + dt;
-        if (w.waited > 1.2) { w.waited = 0; w.path = []; }
+        if (w.waited > 2) { w.waited = 0; w.path = []; }
         return;
       }
       w.waited = 0;
@@ -1889,11 +1914,18 @@
           h.inner.position.y = Math.sin(h.hop * Math.PI) * 0.18;
         }
       }
-      // Whatever else happens, an idle helper sharing a tile with anyone moves off it.
+      // Whatever else happens, an idle helper sharing a tile with anyone moves off it,
+      // and one that made way picks up where it was going once the way is clear.
       for (const h of Object.values(helpers)) {
         if (!h.g.visible || h.path.length || h.step) continue;
         const other = occupant(h.x, h.z, h);
-        if (other && !(other !== traveler && other.path.length)) stepAside(h, other);
+        if (other && !(other !== traveler && other.path.length)) { stepAside(h, other); continue; }
+        if (!h.goal) continue;
+        if (h.x === h.goal[0] && h.z === h.goal[1]) { h.goal = null; continue; }
+        if (time - (h.retry || 0) < 1) continue;
+        h.retry = time;
+        const p = findPath(h, h.goal[0], h.goal[1]);
+        if (p && p.length && !occupant(...p[0], h) && !traveler.path.some(([x, z]) => x === p[0][0] && z === p[0][1])) h.path = p;
       }
       updateThrows(dt);
       updateStones(dt);
