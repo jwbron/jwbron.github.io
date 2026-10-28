@@ -332,7 +332,7 @@
         "The river carries everything anyone made today.",
         "Some of it holds. Some of it is slop. From here it all looks the same.",
       ],
-      ch1Hint: "Tap the water to set a stone. Stepping on it tests it.",
+      ch1Hint: "Tap the water to set stones, then walk across.",
       ownSlop: "That one was yours, and it still didn't hold.",
       ch2: { num: "2", name: "Where to" },
       wrenAsk: "I can set stones for you! Where are we headed?",
@@ -340,7 +340,7 @@
       wrenGot: "Your garden! I'll find a way.",
       ch2Lines: [
         "Wren works out the way there.",
-        "Wren's stones need testing too, same as yours.",
+        "Every stone looks the same from here, so you test each one.",
       ],
       wrenOops: "Oops. That one looked fine to me too.",
       ch2Done: "Testing every stone got you here. It was slow.",
@@ -521,7 +521,7 @@
     // The shores run off every edge of the view, so the river sits in a place instead of floating.
     const GROUND_TOP = LAND_TOP - 0.15;
     const WORLD = { x0: -60, x1: 70 };
-    for (const [z0, z1] of [[-60, 2.5], [22.5, 80]]) {
+    for (const [z0, z1] of [[-60, 2.4], [22.6, 80]]) {
       const g = mesh(new THREE.BoxGeometry(WORLD.x1 - WORLD.x0, 2, z1 - z0), [
         mat("groundSide"), mat("groundSide"), mat("ground"), mat("groundSide"), mat("groundSide"), mat("groundSide"),
       ], { receive: true });
@@ -561,7 +561,7 @@
           #include <colorspace_fragment>
         }`,
     });
-    const waterBox = mesh(new THREE.BoxGeometry(WORLD.x1 - WORLD.x0, 0.7, WATER.z1 - WATER.z0), [
+    const waterBox = mesh(new THREE.BoxGeometry(WORLD.x1 - WORLD.x0, 0.7, WATER.z1 - WATER.z0 + 0.2), [
       mat("waterSide"), mat("waterSide"), waterTop, mat("waterSide"), mat("waterSide"), mat("waterSide"),
     ], { cast: false, receive: false, ink: false });
     waterBox.position.set((WORLD.x0 + WORLD.x1) / 2, -0.35, (WATER.z0 + WATER.z1) / 2);
@@ -575,7 +575,7 @@
     for (const [x0, x1, z0, z1] of Object.values(REGIONS)) {
       const sh = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0 + 1, z1 - z0 + 1), flat("ink"));
       sh.rotation.x = -Math.PI / 2;
-      sh.userData.at = new V3((x0 + x1) / 2, z0 > 2 && z1 < 23 ? 0.006 : GROUND_TOP + 0.006, (z0 + z1) / 2);
+      sh.userData.at = new V3((x0 + x1) / 2, 0.006, (z0 + z1) / 2);
       scene.add(sh);
       cardShadows.push(sh);
     }
@@ -1044,25 +1044,9 @@
       o.start(t);
       o.stop(t + dur + 0.05);
     }
-    // A short wooden tock, dry, with no echo.
-    function tock(gain = 0.035) {
-      if (muted || !audio) return;
-      const t = audio.currentTime;
-      const o = audio.createOscillator();
-      const g = audio.createGain();
-      o.type = "triangle";
-      o.frequency.setValueAtTime(820 + rand() * 220, t);
-      o.frequency.exponentialRampToValueAtTime(300, t + 0.05);
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(gain, t + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
-      o.connect(g).connect(master);
-      o.start(t);
-      o.stop(t + 0.1);
-    }
     const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
     const sfx = {
-      step: () => tock(),
+      step: () => note(SCALE[Math.floor(rand() * 5)], 0.25, "sine", 0.018),
       test: () => note(392, 0.5, "triangle", 0.03),
       sound: () => { note(784, 0.6, "sine", 0.035); note(1174.7, 0.8, "sine", 0.02, 0.08); },
       slop: () => note(196, 0.7, "triangle", 0.04),
@@ -1278,6 +1262,8 @@
         burst(new V3(s.x, STONE_TOP, s.z), ["slop"], 8, { speed: 0.9, up: 1.2, life: 0.7 });
         if (s.lane === 1) {
           lines([COPY.ownSlop], 3.6);
+          setTimeout(() => s.state === "none" && throwStone(traveler, s), 1000);
+          setTimeout(() => game.ch === 1 && walkTo(traveler, 2, 6), 2300);
         } else if (!byLight && !game.saidSlop) {
           game.saidSlop = true;
           setTimeout(() => speak(s.by || helpers.wren, COPY.wrenOops, 3), 400);
@@ -1424,25 +1410,12 @@
       }, 1400);
     }
 
-    // One: nobody's helping yet. You set your own stones across, and test each one.
+    // One: nobody's helping yet. You throw your own stones across, then test each one on the way over.
     const OWN = [[2, 3], [2, 4], [2, 5]];
     makeLane(OWN, 1);
-    function setOwnStone() {
-      const lane = stones.filter((t) => t.lane === 1);
-      if (lane.some((t) => t.state === "flying" || t.state === "rising")) return;
-      const s = lane.find((t) => t.state === "none");
-      if (!s) return;
-      // Stand on the bank, or on the stone before this one, testing it on the way if it's new.
-      const [sx, sz] = s.i ? OWN[s.i - 1] : [2, 2];
-      walkTo(traveler, sx, sz, () => {
-        if (traveler.x !== sx || traveler.z !== sz || s.state !== "none") return;
-        traveler.face = Math.atan2(s.x - sx, s.z - sz);
-        traveler.busy = {
-          t: 0, dur: 0.3,
-          anim: (k) => { traveler.inner.rotation.x = Math.sin(k * Math.PI) * 0.3; },
-          done: () => { traveler.inner.rotation.x = 0; throwStone(traveler, s); },
-        };
-      });
+    function setOwnStones() {
+      const open = stones.filter((t) => t.lane === 1 && t.state === "none");
+      open.forEach((s, i) => setTimeout(() => s.state === "none" && throwStone(traveler, s), i * 220));
     }
 
     // Two: you say where you're going, and Wren works out the way.
@@ -1599,7 +1572,7 @@
         return;
       }
       if (game.phase) return;
-      if (game.ch === 1 && o.userData.water) return setOwnStone();
+      if (game.ch === 1 && o.userData.water) return setOwnStones();
       if (o.userData.action === "lantern") {
         const n = neighborOf(4, 14);
         if (n) walkTo(traveler, n.x, n.z, () => {
@@ -1645,8 +1618,8 @@
     }
     darkQuery.addEventListener("change", applyPalette);
 
-    // A three-quarter view from low over the near shore, turned off the diagonal, so the crossing runs up and to the right.
-    const ISO = new V3(-0.62, 0.8, -1).normalize();
+    // An isometric view looking up the river crossing, so the way forward runs up and to the right.
+    const ISO = new V3(-1, 1.15, -1).normalize();
     const view = { target: new V3(2, 0, 1.5), halfH: 5, ahead: 2.2 };
     // The part of the screen the scene should sit in. Embedded, that's the space beside the hero text.
     function focusRect() {
@@ -1677,7 +1650,7 @@
       const aspect = W / H;
       // On tall views, turn so the crossing runs up the screen, and look further ahead.
       const tall = focus.w / focus.h < 1;
-      ISO.set(tall ? -0.42 : -0.62, tall ? 1.05 : 0.8, -1).normalize();
+      ISO.set(tall ? -0.42 : -1, tall ? 1.25 : 1.15, -1).normalize();
       view.ahead = tall ? 3.4 : 2.2;
       if (EMBED) {
         // World units per pixel, so the free area shows about nine tiles across.
@@ -1784,8 +1757,8 @@
 
       // Camera follows the traveler, a little ahead.
       const want = new V3(traveler.pos.x + 0.4, 0, traveler.pos.z + view.ahead);
-      if (game.ch === 4) want.set(3.5, 0, 23.5);
-      else if (game.phase === "goal" || game.phase === "planning") want.set(3.5, 0, 23.5);
+      if (game.ch === 4) want.set(3.5, 0, 22.5);
+      else if (game.phase === "goal" || game.phase === "planning") want.set(3.5, 0, 22);
       else if (game.phase === "point") want.set(3, 0, 18);
       view.target.lerp(want, Math.min(1, dt * (game.ch === 4 ? 0.8 : 1.8)));
       camera.position.copy(view.target).addScaledVector(ISO, 30);
@@ -1838,7 +1811,7 @@
     }
 
     // Hooks for automated checks of the page.
-    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, setOwnStone, setGoal, setWaypoint, lightLantern, begin, planRoute, nextTo };
+    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, setOwnStones, setGoal, setWaypoint, lightLantern, begin, planRoute, nextTo };
   </script>
 </body>
 </html>
