@@ -366,6 +366,7 @@
       mistBlocked: "Too misty out here to test anything.",
       mistNudge: "The lantern back on the island could light the way.",
       litLine: "The light checks every stone, whoever set it.",
+      lanternEarly: "Plenty of light out here for now.",
       fizzLit: "Oh! Now we can all see which ones won't hold.",
       wrenEnd: "Same time tomorrow?",
       endTitle: "The far shore",
@@ -541,7 +542,15 @@
         mat("groundSide"), mat("groundSide"), mat("ground"), mat("groundSide"), mat("groundSide"), mat("groundSide"),
       ], { receive: true });
       g.position.set((WORLD.x0 + WORLD.x1) / 2, GROUND_TOP - 1, (z0 + z1) / 2);
+      g.userData.ground = true;
       scene.add(g);
+      pickables.push(g);
+    }
+    // The grass along the far shoreline is walkable the whole width of the river, so a route ends the
+    // moment it reaches the shore and you step off onto it, instead of walking stones along the edge.
+    for (let x = -3; x <= 9; x++) {
+      if (tiles.has(key(x, 23))) continue;
+      tiles.set(key(x, 23), { x, z: 23, kind: "land", region: "far", top: GROUND_TOP, blocked: false });
     }
 
     // Water fills the whole channel. The top is a gentle flowing shader.
@@ -646,7 +655,7 @@
     tree(1, 13, "cone");
     tree(6, 25, "cone", 1.2);
     tree(1, 25, "ball", 1.1);
-    tree(6, 23, "ball");
+    tree(7.3, 24.4, "ball", 1, LAND_TOP - 0.15);
     // A few more out on the shores, so they read as land that goes on.
     for (const [x0, x1, z0, z1, n] of [[-9, 4, -7, 1.5, 8], [-9, 14, 23.5, 31, 12]]) {
       for (let i = 0; i < n; i++) {
@@ -1200,11 +1209,13 @@
     }
 
     function search(w, tx, tz, avoid, partial) {
-      const start = key(w.x, w.z);
+      // Plan from where they'll land if they're mid-hop, or the route starts a tile off and the next hop skips one.
+      const [sx, sz] = w.step ? [w.step.x, w.step.z] : [w.x, w.z];
+      const start = key(sx, sz);
       const goal = key(tx, tz);
       if (start === goal) return [];
       const prev = new Map([[start, null]]);
-      const q = [[w.x, w.z]];
+      const q = [[sx, sz]];
       while (q.length) {
         const [x, z] = q.shift();
         if (key(x, z) === goal) break;
@@ -1245,6 +1256,7 @@
     // first, shuffle across land. The helper, and any idle helpers between it and the nearest free land
     // tile, each move over one tile, off the mover's route if possible, never crossing anyone.
     // Out on a lane with no land in reach, it drops a passing stone in the water alongside and hops onto it.
+    // Someone standing on an island is never sent into the river: see squeeze() for that case.
     // Either way it never heads out across the stones ahead of you.
     function stepAside(h, mover) {
       const route = new Set(mover.path.map(([x, z]) => key(x, z)));
@@ -1281,27 +1293,75 @@
         movers.forEach((o, i) => { o.path = [cells[i + 1]]; });
         return true;
       }
+      if (tileAt(h.x, h.z)?.kind === "land") return false;
       for (const [dx, dz] of DIRS) {
         const x = h.x + dx;
         const z = h.z + dz;
         if (!isWater(x, z) || route.has(key(x, z))) continue;
-        makeLane([[x, z]], "passing");
-        const p = stones[stones.length - 1];
-        p.state = "sound";
-        p.mesh.visible = true;
-        p.mesh.position.y = STONE_TOP - 0.25;
-        p.text.visible = false;
-        p.check.visible = true;
-        p.topMat.color.set(pal.sound);
-        p.wobble = 1;
-        ring(new V3(x, 0.03, z), "ripple");
-        sfx.place();
+        passingStone(x, z);
         // Step back to where it was once you've gone by, unless it was already on its way somewhere.
         h.goal ||= [h.x, h.z];
         h.path = [[x, z]];
         return true;
       }
       return false;
+    }
+
+    // A stone a helper sets for itself to get around someone. It holds, since the helper is standing on it.
+    function passingStone(x, z) {
+      makeLane([[x, z]], "passing");
+      const p = stones[stones.length - 1];
+      p.state = "sound";
+      p.mesh.visible = true;
+      p.mesh.position.y = STONE_TOP - 0.25;
+      p.text.visible = false;
+      p.check.visible = true;
+      p.topMat.color.set(pal.sound);
+      p.wobble = 1;
+      ring(new V3(x, 0.03, z), "ripple");
+      sfx.place();
+    }
+
+    // A helper stuck behind you on the stones, with you standing still, sets a short detour around you:
+    // the cheapest way to where it's going, where each new stone costs more than an existing step.
+    function detour(h) {
+      const [gx, gz] = h.goal;
+      const start = key(h.x, h.z);
+      const cost = new Map([[start, 0]]);
+      const prev = new Map([[start, null]]);
+      const open = [[0, h.x, h.z]];
+      while (open.length) {
+        open.sort((a, b) => a[0] - b[0]);
+        const [c, x, z] = open.shift();
+        if (x === gx && z === gz) break;
+        if (c > cost.get(key(x, z))) continue;
+        for (const [dx, dz] of DIRS) {
+          const nx = x + dx;
+          const nz = z + dz;
+          const nk = key(nx, nz);
+          if (occupant(nx, nz, h)) continue;
+          const step = walkable(tileAt(nx, nz)) ? 1 : isWater(nx, nz) ? 5 : 0;
+          if (!step || c + step >= (cost.get(nk) ?? Infinity)) continue;
+          cost.set(nk, c + step);
+          prev.set(nk, key(x, z));
+          open.push([c + step, nx, nz]);
+        }
+      }
+      if (!prev.has(key(gx, gz))) return false;
+      const path = findPathKey(h, start, key(gx, gz), prev);
+      for (const [x, z] of path) if (!tileAt(x, z)) passingStone(x, z);
+      h.path = path;
+      return true;
+    }
+
+    // Two people who can't get out of each other's way swap tiles, each leaning out to one side,
+    // so they pass shoulder to shoulder instead of through each other.
+    function squeeze(w, o, nx, nz) {
+      w.path.shift();
+      w.face = Math.atan2(nx - w.x, nz - w.z);
+      o.face = Math.atan2(w.x - o.x, w.z - o.z);
+      w.step = { from: w.pos.clone(), to: new V3(nx, tileAt(nx, nz).top, nz), t: 0, dur: 0.45, x: nx, z: nz, side: 1 };
+      o.step = { from: o.pos.clone(), to: new V3(w.x, tileAt(w.x, w.z).top, w.z), t: 0, dur: 0.45, x: w.x, z: w.z, side: 1 };
     }
 
     function walkTo(w, tx, tz, onArrive) {
@@ -1331,6 +1391,15 @@
         const k = Math.min(1, w.step.t);
         w.pos.lerpVectors(w.step.from, w.step.to, k);
         w.pos.y += Math.sin(k * Math.PI) * 0.2;
+        if (w.step.side) {
+          // Leaning out while squeezing past: both lean to their own right, so they end up on opposite sides.
+          const dx = w.step.to.x - w.step.from.x;
+          const dz = w.step.to.z - w.step.from.z;
+          const len = Math.hypot(dx, dz) || 1;
+          const lean = Math.sin(k * Math.PI) * 0.34 * w.step.side;
+          w.pos.x += (-dz / len) * lean;
+          w.pos.z += (dx / len) * lean;
+        }
         if (k >= 1) {
           w.x = w.step.x;
           w.z = w.step.z;
@@ -1344,6 +1413,13 @@
         return;
       }
       const [nx, nz] = w.path[0];
+      // A route that doesn't start right next to them is stale, so plan it again from here rather than hop over someone.
+      const gap = Math.abs(nx - w.x) + Math.abs(nz - w.z);
+      if (gap !== 1) {
+        const [gx, gz] = w.path[w.path.length - 1];
+        w.path = gap === 0 ? w.path.slice(1) : findPath(w, gx, gz) || [];
+        return;
+      }
       const t = tileAt(nx, nz);
       if (!walkable(t)) { w.path = []; return; }
       // Nobody walks through anybody.
@@ -1358,14 +1434,18 @@
           return;
         }
         if (idle) {
-          // They move out of the way, or if they truly can't, you stop beside them.
-          if (other === traveler || !stepAside(other, w)) w.path = [];
+          if (stepAside(other, w)) return;
+          // Nowhere for them to go. If their tile was where you were headed, stop beside them.
+          // If you need to get past, squeeze by each other. A new stone you test first, then squeeze.
+          if (w.path.length === 1) { w.path = []; return; }
+          if (!(isTraveler && t.kind === "stone" && t.state === "placed")) { squeeze(w, other, nx, nz); return; }
+        }
+        if (!idle) {
+          // Someone's on the move there, so wait a moment for them, and if they're still there, stop short.
+          w.waited = (w.waited || 0) + dt;
+          if (w.waited > 2) { w.waited = 0; w.path = []; }
           return;
         }
-        // Someone's on the move there, so wait a moment for them, and if they're still there, stop short.
-        w.waited = (w.waited || 0) + dt;
-        if (w.waited > 2) { w.waited = 0; w.path = []; }
-        return;
       }
       w.waited = 0;
       // You test any stone you haven't seen tested, unless the lantern already has.
@@ -1649,10 +1729,10 @@
       }, 4200);
     }
 
-    // The water cell by the far shore closest to where you said you were going.
+    // Any water cell next to solid far shore. The route ends the moment it reaches land
+    // instead of running along the shoreline, and you walk the rest of the way on the shore.
     function shoreCell() {
-      const gx = Math.min(5, Math.max(1, game.goal ? game.goal.x : 3));
-      return (x, z) => z === 22 && x === gx;
+      return nextTo("far");
     }
 
     function setWaypoint(x, z) {
@@ -1672,13 +1752,14 @@
         clearPlan();
         for (const h of Object.values(helpers)) h.lane = 3;
         helpers.wren.interval = 1.2;
-        lanternHint = 0;
       }, 1500);
     }
     let lanternHint = -1;
 
     function lightLantern() {
       if (game.lit || game.ch !== 3 || game.phase) return;
+      // It's the mist that makes you need it, so it waits until the mist has turned you back.
+      if (mistSaidAt < 0) return lines([COPY.lanternEarly], 3, true);
       game.lit = true;
       sfx.lantern();
       lampMat.color.set(pal.lamp);
@@ -1700,6 +1781,8 @@
       game.ended = true;
       game.ch = 4;
       sfx.end();
+      // On to the garden you said you were going to, which also leaves the landing stone clear.
+      if (game.goal) walkTo(traveler, game.goal.x, game.goal.z);
       for (const h of Object.values(helpers)) h.lane = null;
       const spots = [[2, 23], [3, 24], [4, 24]];
       Object.values(helpers).forEach((h, i) => setTimeout(() => walkTo(h, spots[i][0], spots[i][1]), 600 + i * 500));
@@ -1764,7 +1847,8 @@
         });
         return;
       }
-      const t = o.userData.tile;
+      // Tapping open grass walks you there if it's somewhere you can stand.
+      const t = o.userData.tile || (o.userData.ground && tiles.get(key(Math.round(hit.point.x), Math.round(hit.point.z))));
       if (!t) return;
       if (walkTo(traveler, t.x, t.z)) ring(new V3(t.x, (t.top ?? 0) + 0.02, t.z), "ripple");
     }
@@ -1924,8 +2008,18 @@
         if (h.x === h.goal[0] && h.z === h.goal[1]) { h.goal = null; continue; }
         if (time - (h.retry || 0) < 1) continue;
         h.retry = time;
+        // Its goal is where you're standing, so it stays where it is.
+        if (traveler.x === h.goal[0] && traveler.z === h.goal[1] && !traveler.path.length) { h.goal = null; continue; }
         const p = findPath(h, h.goal[0], h.goal[1]);
-        if (p && p.length && !occupant(...p[0], h) && !traveler.path.some(([x, z]) => x === p[0][0] && z === p[0][1])) h.path = p;
+        const blocker = p && p.length && occupant(...p[0], h);
+        if (p && p.length && !blocker && !traveler.path.some(([x, z]) => x === p[0][0] && z === p[0][1])) {
+          h.path = p;
+          h.blocked = 0;
+        } else if (blocker === traveler && !traveler.path.length && !traveler.step && !traveler.busy) {
+          // You're standing still in its way. Give it a couple of seconds, then it goes around you.
+          h.blocked = (h.blocked || 0) + 1;
+          if (h.blocked >= 2 && detour(h)) h.blocked = 0;
+        }
       }
       updateThrows(dt);
       updateStones(dt);
