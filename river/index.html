@@ -1457,7 +1457,7 @@
     // A replacement is always sound, so failures never cascade.
     function scriptedSlop(s) {
       if (s.throws) return false;
-      if (s.lane === 1) return s.i === 1;
+      if (s.lane === 1) return s.i === 2;
       if (s.lane === 2) return s.i === 2;
       const lane = stones.filter((t) => t.lane === 3);
       const clear = lane.filter((t) => t.z < MIST_Z);
