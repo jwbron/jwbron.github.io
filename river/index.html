@@ -345,7 +345,7 @@
         "The river carries everything anyone made today.",
         "Some of it holds. Some of it is slop. From here it all looks the same.",
       ],
-      ch1Hint: "Tap the water to set stones, then walk across.",
+      ch1Hint: "Tap the water to set stones, then tap the island.",
       ownSlop: "That one was yours.",
       ch2: { num: "2", name: "Where to" },
       wrenAsk: "I can set stones for you! Where are we headed?",
@@ -381,7 +381,7 @@
     const PALETTES = {
       light: {
         top: "#fcf9ff", top2: "#f3edfa", side: "#e9d39c", side2: "#e9d39c", ground: "#9fd6c0", groundSide: "#86c4ac",
-        ink: "#261d38", mark: "#261d38", chip0: "#f2d58c", chip1: "#efb0c7", chip2: "#9fd6c0", chip3: "#fcf9ff",
+        ink: "#261d38", mark: "#261d38", trail: "#3a52e6", chip0: "#f2d58c", chip1: "#efb0c7", chip2: "#9fd6c0", chip3: "#fcf9ff",
         water: "#93a6ee", waterSide: "#7d92e4", rapids: "#7b8fe2", foam: "#c4cff7", mist: "#f1ecf7", ripple: "#fcf9ff",
         stone: "#f6f1fb", stoneSide: "#d6cbe8", sound: "#9fd6c0", slop: "#a99dba",
         trunk: "#c9a37f",
@@ -394,7 +394,7 @@
       },
       dark: {
         top: "#3b3257", top2: "#362e51", side: "#8a7aa8", side2: "#8a7aa8", ground: "#2a2240", groundSide: "#211a33",
-        ink: "#120d1c", mark: "#261d38", chip0: "#f2d58c", chip1: "#efb0c7", chip2: "#9fd6c0", chip3: "#ece4cd",
+        ink: "#120d1c", mark: "#261d38", trail: "#f2d58c", chip0: "#f2d58c", chip1: "#efb0c7", chip2: "#9fd6c0", chip3: "#ece4cd",
         water: "#5d6fd6", waterSide: "#4858b4", rapids: "#4b5bbd", foam: "#8090e6", mist: "#2b2340", ripple: "#ece4cd",
         stone: "#ece4cd", stoneSide: "#b9afcb", sound: "#9fd6c0", slop: "#8a7da3",
         trunk: "#a5866b",
@@ -1184,7 +1184,22 @@
 
     // ---------- walking ----------
 
+    // Who's on a tile. Someone mid-step counts only where they're headed.
+    function occupant(x, z, except) {
+      for (const o of [traveler, ...Object.values(helpers)]) {
+        if (o === except || !o.g.visible) continue;
+        const [ox, oz] = o.step ? [o.step.x, o.step.z] : [o.x, o.z];
+        if (ox === x && oz === z) return o;
+      }
+      return null;
+    }
+
+    // Go around anyone standing in the way if there's room, otherwise straight on and they'll step aside.
     function findPath(w, tx, tz) {
+      return search(w, tx, tz, true, false) || search(w, tx, tz, false, w.allowPartial);
+    }
+
+    function search(w, tx, tz, avoid, partial) {
       const start = key(w.x, w.z);
       const goal = key(tx, tz);
       if (start === goal) return [];
@@ -1199,12 +1214,13 @@
           const k = key(nx, nz);
           if (prev.has(k)) continue;
           if (!walkable(tileAt(nx, nz))) continue;
+          if (avoid && k !== goal && occupant(nx, nz, w)) continue;
           prev.set(k, key(x, z));
           q.push([nx, nz]);
         }
       }
       if (!prev.has(goal)) {
-        if (!w.allowPartial) return null;
+        if (!partial) return null;
         // Not reachable yet, so head for the reachable tile closest to where they tapped.
         let best = null;
         let bestD = Infinity;
@@ -1223,6 +1239,23 @@
       const out = [];
       for (let k = goal; k !== start; k = prev.get(k)) out.unshift(k.split(",").map(Number));
       return out;
+    }
+
+    // An idle helper moves to a free neighboring tile, off the mover's route if possible.
+    function stepAside(h, mover) {
+      const route = new Set(mover.path.map(([x, z]) => key(x, z)));
+      let best = null;
+      for (const [dx, dz] of DIRS) {
+        const x = h.x + dx;
+        const z = h.z + dz;
+        const t = tileAt(x, z);
+        if (!walkable(t) || occupant(x, z, h) || (x === mover.x && z === mover.z)) continue;
+        const score = (route.has(key(x, z)) ? 2 : 0) + (t.kind === "land" ? 0 : 1);
+        if (!best || score < best.score) best = { x, z, score };
+      }
+      if (!best) return false;
+      h.path = [[best.x, best.z]];
+      return true;
     }
 
     function walkTo(w, tx, tz, onArrive) {
@@ -1265,6 +1298,23 @@
       const [nx, nz] = w.path[0];
       const t = tileAt(nx, nz);
       if (!walkable(t)) { w.path = []; return; }
+      // Nobody walks through anybody.
+      const other = occupant(nx, nz, w);
+      if (other) {
+        const idle = !other.path.length && !other.busy;
+        if (other !== traveler && idle && stepAside(other, w)) return;
+        if (other === traveler && !isTraveler) {
+          // A helper finds another way around you, or stops where it is.
+          const [gx, gz] = w.path[w.path.length - 1];
+          const around = search(w, gx, gz, true, false);
+          w.path = around && around.length && !occupant(...around[0], w) ? around : [];
+          return;
+        }
+        // Someone's on the move there, so wait a moment, then slip past rather than stall.
+        w.waited = (w.waited || 0) + dt;
+        if (w.waited < 1.2) return;
+      }
+      w.waited = 0;
       // You test any stone you haven't seen tested, unless the lantern already has.
       if (isTraveler && t.kind === "stone" && t.state === "placed") {
         // Out in the mist you can't test anything by hand.
@@ -1282,6 +1332,26 @@
       w.path.shift();
       w.face = Math.atan2(nx - w.x, nz - w.z);
       w.step = { from: w.pos.clone(), to: new V3(nx, t.top, nz), t: 0, dur: 0.3, x: nx, z: nz };
+    }
+
+    // The whole route from one tap, as dots that go as you reach them, so it's clear you don't tap tile by tile.
+    const trailGeo = new THREE.CircleGeometry(0.11, 14);
+    let trail = [];
+    let trailKey = "";
+    function updateTrail() {
+      const cells = (traveler.step ? [[traveler.step.x, traveler.step.z]] : []).concat(traveler.path);
+      const k = cells.join(";");
+      if (k === trailKey) return;
+      trailKey = k;
+      for (const d of trail) scene.remove(d);
+      trail = cells.map(([x, z]) => {
+        const d = new THREE.Mesh(trailGeo, flat("trail"));
+        d.rotation.x = -Math.PI / 2;
+        d.position.set(x, (tileAt(x, z)?.top ?? 0) + 0.03, z);
+        d.renderOrder = 1;
+        scene.add(d);
+        return d;
+      });
     }
 
     function drawWalker(w, dt, time) {
@@ -1765,6 +1835,7 @@
       }
 
       updateWalker(traveler, dt, true);
+      updateTrail();
       for (const h of Object.values(helpers)) {
         if (h.appear !== undefined && h.appear < 1) {
           h.appear = Math.min(1, h.appear + dt * 2.2);
