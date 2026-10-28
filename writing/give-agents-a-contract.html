@@ -52,6 +52,12 @@
 
       <p>Every agent that joins the work starts from the contract, and every agent records its progress back into it as it goes, not in a burst at the end. The conversation is still how agents think. The contract is what everyone agreed to.</p>
 
+      <h2>How much of the path to spell out</h2>
+
+      <p>A contract isn't a full plan for the agent. Your part is mostly the goal: what done looks like, and how you'll check it. A lot of the implementation underneath doesn't matter to you, like which file a helper lives in or how a loop is written, as long as the result meets the criteria. Spelling those out costs you time and doesn't give you anything better to check.</p>
+
+      <p>The judgment is knowing where the path does matter, and whether the agent can find a reasonable one on its own. For a familiar kind of change in code it can read, it often can. For anything that touches a public API, a migration, security or someone else's work, or that depends on context the agent can't see, spell out the part that matters, or say what you'd object to. An out-of-scope list (no changes to the public API, no new dependencies, nothing that needs a migration) bounds the route without dictating it. And if a route reaches the goal in a way you wouldn't accept, the contract was missing something. Add it there, so the next agent reads it too, instead of correcting this one in chat.</p>
+
       <h2>Each role owns part of it, and only part</h2>
 
       <p>A shared document that anyone can edit isn't much of a contract. What makes it hold is that each role can change only the fields it owns, and the system enforces it, so no prompt has to.</p>
