@@ -813,12 +813,15 @@ body { line-height: 1.65; }
 .hero .kicker a { text-decoration: none; }
 .hero .byline { max-width: 34rem; font-weight: 400; font-size: 0.9rem; color: var(--ink-2); }
 .meter { display: grid; grid-template-columns: auto 1fr; gap: 0.7rem; align-items: center; font-size: 0.8rem; font-weight: 800; }
-.meter-track { height: 1rem; background: var(--bg); border: 2.5px solid var(--line-c); border-radius: 999px; overflow: hidden; }
+.meter-track { position: relative; height: 1rem; background: var(--bg); border: 2.5px solid var(--line-c); border-radius: 999px; overflow: hidden; }
+/* A second fill that only the next step animates, so two steps never drive the same width. */
+.meter-track .meter-next { display: none; position: absolute; inset: 0 auto 0 0; width: 0; }
+html.motion .meter-track .meter-next { display: block; }
 .meter-fill { height: 100%; width: 85%; background: var(--mint); }
 .lane-a .meter-fill { width: 18%; background: var(--coral); }
 
 .inbox { display: none; flex-wrap: wrap; gap: 0.4rem; }
-html.motion .inbox { display: flex; }
+html.motion .inbox { display: flex; overflow: hidden; }
 .inbox div, .bin span, .lane-flow span {
   padding: 0.3rem 0.6rem;
   font-size: 0.8rem;
@@ -915,7 +918,7 @@ html.motion .dots i { background: var(--coral); }
       <p data-step="3">Whatever does reach a person should be short. Each comment became two layers: a sentence or two written for a person, with the model's full reasoning collapsed underneath for any agent that picks up the work. Those changes shipped in about a day. The team that had switched the reviewer off later turned it back on.</p>
     </div>
     <div class="visual">
-      <div class="meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div></div></div>
+      <div class="meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div><div class="meter-fill meter-next"></div></div></div>
       <div class="inbox" aria-hidden="true">
         <div>blocking · auth check missing</div>
         <div>suggestion · test coverage</div>
@@ -1089,19 +1092,22 @@ html.motion .dots i { background: var(--coral); }
   const stories = {
     triage(story, q) {
       const chips = q(".inbox > div"), binItems = q(".bin span"), bins = q(".bin");
-      gsap.set(q(".meter-fill"), { width: "100%" });
+      gsap.set(q(".meter-fill:not(.meter-next)"), { width: "100%" });
+      gsap.set(q(".meter-next"), { width: "0%" });
       gsap.set([...chips, ...binItems, ...q(".layer")], { opacity: 0 });
       gsap.set(bins, { opacity: 0.35 });
       step(story, 1, (tl) => {
         tl.fromTo(chips, { y: -60, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.05, ease: "bounce.out", immediateRender: false });
-        tl.to(q(".meter-fill"), { width: "15%", backgroundColor: css("--coral") }, 0);
+        tl.to(q(".meter-fill:not(.meter-next)"), { width: "15%", backgroundColor: css("--coral") }, 0);
       });
+      // Step 1 owns the chips and the first fill. Step 2 only touches the inbox box and the
+      // second fill, so a fast scroll can't leave the two steps fighting over the same values.
       step(story, 2, (tl) => {
-        tl.to(chips, { y: 40, opacity: 0, stagger: 0.03, duration: 0.3 });
-        tl.to(q(".inbox"), { height: 0, marginBottom: 0, duration: 0.25 });
+        tl.to(q(".inbox"), { y: 40, opacity: 0, duration: 0.3 });
+        tl.to(q(".inbox"), { height: 0, marginBottom: 0, duration: 0.25 }, 0.25);
         tl.to(bins, { opacity: 1, duration: 0.2 }, 0.3);
         tl.fromTo(binItems, { y: -20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, immediateRender: false }, 0.35);
-        tl.to(q(".meter-fill"), { width: "85%", backgroundColor: css("--mint") }, 0.3);
+        tl.fromTo(q(".meter-next"), { width: "0%" }, { width: "85%", immediateRender: false }, 0.3);
       });
       step(story, 3, (tl) => tl.fromTo(q(".layer"), { y: 40, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false }));
     },
