@@ -664,6 +664,8 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 }
 
 .notes-panel[hidden] { display: none; }
+.notes-panel .cue { font-style: italic; color: #f2d58c; }
+.notes-panel .cue::before { content: "Note: "; font-weight: 800; font-style: normal; }
 
 .help {
   position: fixed;
@@ -889,7 +891,7 @@ body { line-height: 1.65; }
   <div class="prose-only">
     <p class="rise">I started with a written proposal, "more depth, less noise." It opened with what already worked in the existing design: a triage pass, focused sub-agents, and a validator that double-checked claims before posting. Then it described the gap. On the first PR I traced, the reviewer never raised an authorization question that the repo's own risk config rated High, because the prompts leaned so hard toward precision that it dropped anything uncertain.</p>
     <p class="rise">The proposal also asked who would own the reviewer as a product, since an internal tool nobody owns ends up maintained in people's spare time. I took it on.</p>
-    <p class="rise">Three groups had to agree. Technical leadership had to sign off on the direction, every change I made went through review, and cost was the main concern going in. Engineers had to want it on their PRs, and in the end that's what decided the switch. And it had to fit the budget. I owned AI spend and my manager approved increases, which was an easy conversation once the cost per PR was low enough to run on everything.</p>
+    <p class="rise">Three groups had to agree. Technical leadership had to sign off on the direction, every change I made went through review, and cost was the main concern going in. Engineers had to want it on their PRs, and in the end that's what decided the switch. And it had to fit the budget. We had to be careful not to overspend on AI, so the cost per PR had to be low enough that running it on everything was an easy case to make.</p>
   </div>
 </section>
 
