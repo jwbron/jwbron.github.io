@@ -666,6 +666,8 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 }
 
 .notes-panel[hidden] { display: none; }
+.notes-panel .cue { font-style: italic; color: #f2d58c; }
+.notes-panel .cue::before { content: "Note: "; font-weight: 800; font-style: normal; }
 
 .help {
   position: fixed;
@@ -943,7 +945,7 @@ html.motion .dots i { background: var(--coral); }
       <p class="small">Illustration, not measured data.</p>
     </div>
   </div>
-  <p class="pullquote rise">Comment six teaches people to skim, and they skim past the blocking finding too.</p>
+  <p class="pullquote rise">Too many comments teach people to skim, so they miss the feedback that matters.</p>
 </section>
 
 <section class="chapter">

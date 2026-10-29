@@ -807,16 +807,16 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
 <section class="slide" data-title="Proposal and buy-in" data-time="120">
   <div class="stage">
-    <span class="kicker rise">Shaping it</span>
+    <span class="kicker rise">The proposal</span>
     <div class="split">
       <div>
         <p class="quote rise">“More depth, less noise.”</p>
-        <p class="small rise">My written proposal</p>
+        <p class="small rise">A thorough first pass, not just pointers for reviewers</p>
         <ul class="ticks rise late">
-          <li>It credited what worked, then named the gap: a High-risk auth question went unasked</li>
-          <li>Four phases, cheapest first</li>
-          <li>Evals gate anything that can regress</li>
-          <li>It asked who would own the reviewer as a product, and I took that on</li>
+          <li>Specialists for each kind of risk, instead of a few agents covering everything</li>
+          <li>Ask the questions the prompts were tuned to skip</li>
+          <li>Cut the noise so people read what's left</li>
+          <li>Safe fixes first, evals on anything that can regress</li>
         </ul>
       </div>
       <div class="yes">
@@ -958,10 +958,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div class="card"><h3>A/B with a known noise floor</h3><p>Identical arms run side by side to measure variation</p></div>
       <div class="card"><h3>Releases gated</h3><p>Nothing that could regress shipped without the bench</p></div>
     </div>
-    <div class="grid two rise late">
-      <p><mark>Khan's own skills</mark> were the margin over a generic reviewer.</p>
-      <p><mark class="m2">The scorer needed checking too:</mark> in 28 runs the reviewer found the defect every time, but the scorer only accepted one source location.</p>
-    </div>
+    <p class="rise late"><mark>Khan's own skills</mark> caught things a generic reviewer missed.</p>
   </div>
   <span class="num"></span>
 </section>
@@ -982,7 +979,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     </div>
     <p class="small">Illustration of one PR's first push. Real catches that week included a cross-package compile break.</p>
     <p class="off step r3-1">The frontend infra team switched auto-review off</p>
-    <p class="quote step r3-2">“Comment six teaches people to skim, and they skim past the blocking finding too.”</p>
+    <p class="quote step r3-2">“Too many comments teach people to skim, so they miss the feedback that matters.”</p>
   </div>
   <span class="num"></span>
 </section>
