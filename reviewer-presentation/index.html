@@ -664,6 +664,8 @@ h2.wide { max-width: none; font-size: clamp(1.4rem, 2.6vw, 2.5rem); }
 }
 
 .notes-panel[hidden] { display: none; }
+.notes-panel .cue { font-style: italic; color: #f2d58c; }
+.notes-panel .cue::before { content: "Note: "; font-weight: 800; font-style: normal; }
 
 .help {
   position: fixed;
@@ -769,7 +771,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <ul class="ticks rise">
       <li>Every PR in Khan's frontend and backend monorepos got a first pass, on every push</li>
       <li>Default-on for about 120 engineers, with a human still approving every merge</li>
-      <li>The team that had switched it off turned it back on</li>
     </ul>
     <p class="small rise late">The rest is how it got there, and how strong the evidence is for each result.</p>
   </div>
@@ -1602,14 +1603,18 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
 
   const notesHtml = () => {
     const list = stops();
-    const slide = list[currentIndex(list)].slide;
+    const cur = currentIndex(list);
+    const slide = list[cur].slide;
     const i = slides.indexOf(slide);
     const planned = slides.slice(0, i + 1).reduce((t, s) => t + Number(s.dataset.time || 0), 0);
     const elapsed = started ? (Date.now() - started) / 1000 : 0;
     const over = started && elapsed > planned + 30;
     const next = slides[i + 1];
+    // counts down as the builds play
+    const presses = list.filter((st, k) => k > cur && st.slide === slide).length;
     return `<p style="font-weight:800;margin:0 0 .3rem">${i + 1}. ${slide.dataset.title} · ${fmt(Number(slide.dataset.time || 0))}</p>
       <p style="margin:0 0 .8rem;opacity:.85;color:${over ? "#f2d58c" : "inherit"}">elapsed ${fmt(elapsed)} · plan by end of slide ${fmt(planned)}${next ? ` · next: ${next.dataset.title}` : ""}</p>
+      <p class="cue">Arrow presses before the next slide: ${presses}</p>
       ${slide.querySelector(".notes")?.innerHTML ?? ""}`;
   };
 
@@ -1624,7 +1629,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     notesWin = window.open("", "deck-notes", "width=760,height=900");
     if (!notesWin) { if (panel) panel.hidden = !panel.hidden; renderNotes(); return; }
     notesWin.document.title = "Speaker notes";
-    notesWin.document.body.innerHTML = '<div id="n"></div>';
+    notesWin.document.body.innerHTML = '<style>.cue{font-style:italic;color:#f2d58c;border-left:4px solid #f2d58c;padding-left:.6em}.cue::before{content:"Note: ";font-weight:800;font-style:normal}</style><div id="n"></div>';
     notesWin.document.body.style.cssText = "font:22px/1.5 system-ui,sans-serif;padding:24px 32px;background:#251e37;color:#ece4cd";
     renderNotes();
   };
