@@ -1118,7 +1118,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <text x="1450" y="350" text-anchor="middle" class="t-b">Main reviewer</text>
         <text x="1450" y="382" text-anchor="middle" class="t-s">for a couple of months</text>
       </g>
-      <text class="tl-coda" x="800" y="500" text-anchor="middle" font-weight="700">And the frontend infra team turned auto-review back on.</text>
       <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
     </svg>
     <div class="phases">
@@ -1237,7 +1236,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <div><b>"Too many comments"</b><span>A comment budget: three inline, nitpicks never, the rest collapsed</span></div>
       <div><b>"It reads like a model wrote it"</b><span>Two-layer comments: a short one for people, full context collapsed for agents</span></div>
       <div><b>"A dozen reviewers will cost too much"</b><span>Dispatch moved into code, and a stronger model trialed on one role instead of five</span></div>
-      <div><b>A team switched it off</b><span>The first fixes shipped in about a day. After default-on, that team turned it back on.</span></div>
+      <div><b>A team switched it off</b><span>The first fixes shipped in about a day.</span></div>
       <div><b>Replies to the bot</b><span>A pipeline turned them into tickets, so nobody had to file anything</span></div>
     </div>
   </div>
@@ -1487,7 +1486,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         const [x0, x1] = segs[i];
         tl.from(node, { opacity: 0, scale: 0.4, transformOrigin: "50% 50%", ease: "back.out(2)", duration: 0.18 }, at(i + 1) + 0.7 * (x - x0) / (x1 - x0) - 0.1);
       });
-      tl.from(q(".tl-coda"), { opacity: 0, y: 20, duration: 0.2 }, at(3) + 0.55);
       tl.to(q(".diagram"), { opacity: 0.5, duration: 0.25 }, at(4));
       tl.from(q(".phases > div"), { y: 50, opacity: 0, stagger: 0.08, duration: 0.35 }, at(4) + 0.05);
       tl.from(q(".deferred"), { opacity: 0, x: -40, duration: 0.25 }, at(4) + 0.45);
