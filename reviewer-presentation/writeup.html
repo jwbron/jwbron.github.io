@@ -1018,7 +1018,7 @@ body { line-height: 1.65; }
     <div class="prose">
       <p data-step="1">I trialed it on my own team's PRs first, alongside the managed review, and anyone else could run it by commenting on a PR. In its first week with real users it caught real problems, including a cross-package compile break. The volume was the problem. One PR got seven non-blocking comments on a single push and five more two days later, and the recap re-listed every open thread each time.</p>
       <p data-step="2">Engineers said the nits and questions were the main issue, and the frontend infra team turned auto-review off.</p>
-      <p data-step="3">Attention was the thing to protect, and every extra comment spent some of it.</p>
+      <p data-step="3">We had to protect the author's attention as well as the reviewer's, and every extra comment spent some of it.</p>
       <p data-step="4">The fixes shipped within about a day. Blocking findings always post. Non-blocking ones are ranked and capped at three, nitpicks never post inline, and the rest go into a collapsed section, so nothing is lost and the notification stays short. Re-reviews only look at what changed.</p>
       <p data-step="5">The comments themselves changed too. Each one became two layers: a short comment written for a person, with the model's fuller reasoning collapsed underneath for agents. Scripts enforce that format, and a separate model grades the writing.</p>
     </div>
