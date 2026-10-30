@@ -898,16 +898,16 @@ body { line-height: 1.65; }
 <section class="chapter">
   <h2>The plan</h2>
   <div class="prose-only">
-    <p class="rise">The proposal split the work into four phases, cheapest first. Evals gated only the changes that could regress, so the cheap fixes shipped right away.</p>
+    <p class="rise">The proposal planned the work cheapest first, with evals gating only the changes that could regress. In practice the technical work came in four stretches, and the first week with real users reordered them.</p>
   </div>
   <div class="figure phases rise">
-    <div><b>Phase 1</b><span>Quick fixes that couldn't break anything, plus a feedback loop</span></div>
-    <div><b>Phase 2</b><span>A small benchmark, then noise controls</span></div>
-    <div><b>Phase 3</b><span>The full eval suite and deeper reviews</span></div>
-    <div><b>Phase 4</b><span>Hardening, then deciding on default-on</span></div>
+    <div><b>More depth</b><span>Specialists routed by code, the verdict computed in code</span></div>
+    <div><b>Real evals</b><span>Live A/B runs with a measured noise floor</span></div>
+    <div><b>Quieter comments</b><span>A comment budget, scoped re-reviews, two layers</span></div>
+    <div><b>Deterministic orchestration</b><span>Dispatch and checks moved into code</span></div>
   </div>
   <div class="prose-only">
-    <p class="rise">Some work was worth doing but not needed to launch, so I put it off: a weekly feedback report, gathering context across repos, unattended fixes, and moving off GitHub Agentic Workflows. That kept the launch small.</p>
+    <p class="rise">Some work was worth doing but not needed to launch, so I put it off: a weekly feedback report, gathering context across repos, and moving off GitHub Agentic Workflows. That kept the launch small.</p>
   </div>
 </section>
 
@@ -1021,7 +1021,6 @@ body { line-height: 1.65; }
       <p data-step="3">Attention was the thing to protect, and every extra comment spent some of it.</p>
       <p data-step="4">The fixes shipped within about a day. Blocking findings always post. Non-blocking ones are ranked and capped at three, nitpicks never post inline, and the rest go into a collapsed section, so nothing is lost and the notification stays short. Re-reviews only look at what changed.</p>
       <p data-step="5">The comments themselves changed too. Each one became two layers: a short comment written for a person, with the model's fuller reasoning collapsed underneath for agents. Scripts enforce that format, and a separate model grades the writing.</p>
-      <p data-step="6">Fixes only run when the author asks, by replying "ship" on the comment. Nobody had to install anything or change how they worked.</p>
     </div>
     <div class="visual">
       <div class="mini-wall" aria-label="Illustration: seven comments become three inline plus a collapsed section">
@@ -1040,10 +1039,6 @@ body { line-height: 1.65; }
         <p><b>issue (blocking):</b> the retry counter resets inside the loop, so this job never stops retrying.</p>
         <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
       </div>
-      <div class="mock reply">
-        <div class="who">author reply</div>
-        <p><code>ship</code> <span class="small">→ a fix commit lands on the branch</span></p>
-      </div>
     </div>
   </div>
   <p class="pullquote rise">Too many comments teach people to skim, so they miss the feedback that matters.</p>
@@ -1053,8 +1048,8 @@ body { line-height: 1.65; }
   <h2>Anything that could regress went through evals</h2>
   <div class="prose-only">
     <p class="rise">Changes that could regress went through an eval bench first: real PRs plus planted defects the reviewer had to catch, run as A/B comparisons. We also ran identical versions against each other to measure the noise, so we knew how big a difference had to be before it meant anything.</p>
-    <p class="rise">Against a generic reviewer on the same PR, all of our extra catches came from the audits against Khan's own skills, like a swallowed error and a fetch that loaded whole entities when it only needed keys. A reviewer that doesn't know the codebase can't catch those.</p>
-    <p class="rise">The eval itself needed checking too. One case looked flaky, so I read all 28 runs. The reviewer had found the defect in every one, and the scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer, which is why I read transcripts before trusting a score.</p>
+    <p class="rise">Repo knowledge helped too. In one head-to-head with Claude Code's built-in review on the same PR, our audits against Khan's best-practice skills caught issues the generic reviewer missed, like a swallowed error and a fetch that loaded whole entities when it only needed keys.</p>
+    <p class="rise">The eval itself needed checking too. One case kept looking flaky, so I read the transcripts. The reviewer had found the defect every time. A missing index can be flagged at the migration or at the slow query, and the scorer only accepted one of those. Fixing the scorer changed the numbers without changing the reviewer, which is why I read transcripts before trusting a score.</p>
   </div>
 </section>
 
@@ -1104,7 +1099,7 @@ body { line-height: 1.65; }
     <p class="rise">I built a panel of skeptic agents to double-check blocking claims, then took it out. An audit of every blocking review over about a week (90 PRs) found 12 false blocks, and only 2 were the kind another verification layer could catch. The rest were wrong severity calls and questions about what the author meant. Stricter claim validation, with no extra agents, handled it.</p>
     <p class="rise">I proposed a stronger model for five reviewer roles. Review pushback was that five was overkill, so I tried it on the correctness reviewer alone, where recall went from 82 to 89 percent on the eval set for 35 percent more cost.</p>
     <p class="rise">A cheaper model was worth testing. It caught 32 of 36 required findings against 36 of 36, and at our actual rates it didn't save money either. That's from one full repeat, so it isn't a benchmark, but it settled the question. The transcripts also showed that some apparent model failures were problems with the test setup: different hidden reasoning defaults, an eval that let the model go looking for answers, and scoring bugs.</p>
-    <p class="rise">Blocking merges was off the table, since compliance requires a human approval. Fixes ran only when an author asked, and each specialist stayed opt-in per repo until it earned its place in evals.</p>
+    <p class="rise">Auto-merge was off the table, since compliance requires a human approval, so the reviewer stayed advisory. Each specialist stayed opt-in per repo until it earned its place in evals.</p>
   </div>
 </section>
 
@@ -1239,14 +1234,28 @@ body { line-height: 1.65; }
   gsap.to(".progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
 
   const passes = new Map();
+  // On wide screens every step of a figure lives in one timeline, one time unit per step, and
+  // the paragraphs' scroll positions drive that timeline's time. Separate scrubbed timelines
+  // per step raced each other on fast scrolls: a lagging earlier step could finish after a
+  // later one and put back what the later step had hidden.
+  const masters = new Map();
+  const sync = (m) => {
+    let t = 0;
+    m.triggers.forEach((st, i) => { if (st.progress > 0) t = i + st.progress; });
+    gsap.to(m.tl, { time: t, duration: 0.6, ease: "power3", overwrite: true });
+  };
+  ScrollTrigger.addEventListener("refresh", () => masters.forEach(sync));
   const step = (story, k, build) => {
     if (wide) {
-      const para = story.querySelector(`[data-step="${k}"]`);
-      const tl = gsap.timeline({
-        defaults: { ease: "power2.inOut", duration: 0.5 },
-        scrollTrigger: { trigger: para, start: "top 72%", end: "top 38%", scrub: 0.6 },
-      });
+      if (!masters.has(story)) masters.set(story, { tl: gsap.timeline({ paused: true }), triggers: [] });
+      const m = masters.get(story);
+      const tl = gsap.timeline({ defaults: { ease: "power2.inOut", duration: 0.5 } });
       build(tl);
+      if (tl.duration()) tl.timeScale(tl.duration());
+      const i = m.triggers.length;
+      m.tl.add(tl, i).set({}, {}, i + 1);
+      const para = story.querySelector(`[data-step="${k}"]`);
+      m.triggers.push(ScrollTrigger.create({ trigger: para, start: "top 72%", end: "top 38%", onUpdate: () => sync(m) }));
       return;
     }
     if (!passes.has(story)) {
@@ -1305,18 +1314,20 @@ body { line-height: 1.65; }
 
     quiet(story, q) {
       const chips = q(".mini-wall > div:not(.fold)");
-      gsap.set([...chips, ...q(".fold"), ...q(".off"), ...q(".layer"), ...q(".reply")], { opacity: 0 });
+      gsap.set([...chips, ...q(".fold"), ...q(".off"), ...q(".layer")], { opacity: 0 });
       step(story, 1, (tl) => tl.fromTo(chips, { y: -120, rotation: (i) => [-7, 5, -3, 8, -6, 4, -5][i] }, { y: 0, rotation: 0, opacity: 1, stagger: 0.06, ease: "bounce.out", duration: 0.35, immediateRender: false }));
       step(story, 2, (tl) => tl.fromTo(q(".off"), { scale: 2.2, rotation: -14, opacity: 0 }, { scale: 1, rotation: 2, opacity: 1, ease: "back.out(1.8)", immediateRender: false }));
-      step(story, 3, (tl) => tl.to(chips, { opacity: 0.4, duration: 0.3 }));
+      // Scrubbed timelines record start values when the page loads, before earlier steps have
+      // run, so anything an earlier step already animated gets explicit fromTo start values.
+      step(story, 3, (tl) => tl.fromTo(chips, { opacity: 1 }, { opacity: 0.4, duration: 0.3, immediateRender: false }));
       step(story, 4, (tl) => {
-        tl.to(q(".off"), { opacity: 0, y: -20, duration: 0.25 });
-        tl.to(chips.slice(0, 3), { opacity: 1, duration: 0.2 }, 0);
-        tl.to(q(".mini-wall .extra"), { opacity: 0, scale: 0.4, width: 0, paddingLeft: 0, paddingRight: 0, borderWidth: 0, marginLeft: -6, stagger: 0.05, duration: 0.45 }, 0.1);
+        tl.fromTo(q(".off"), { opacity: 1, y: 0 }, { opacity: 0, y: -20, duration: 0.25, immediateRender: false });
+        tl.fromTo(chips.slice(0, 3), { opacity: 0.4 }, { opacity: 1, duration: 0.2, immediateRender: false }, 0);
+        tl.fromTo(q(".mini-wall .extra"), { opacity: 0.4 }, { opacity: 0, duration: 0.3, stagger: 0.05, immediateRender: false }, 0.1);
+        tl.to(q(".mini-wall .extra"), { scale: 0.4, width: 0, paddingLeft: 0, paddingRight: 0, borderWidth: 0, marginLeft: -6, stagger: 0.05, duration: 0.45 }, 0.1);
         tl.fromTo(q(".fold"), { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, immediateRender: false }, 0.4);
       });
       step(story, 5, (tl) => tl.fromTo(q(".layer"), { y: 50, opacity: 0 }, { y: 0, opacity: 1, immediateRender: false }));
-      step(story, 6, (tl) => tl.fromTo(q(".reply"), { x: 80, opacity: 0 }, { x: 0, opacity: 1, immediateRender: false }));
     },
 
     cost(story, q) {

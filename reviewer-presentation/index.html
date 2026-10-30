@@ -841,7 +841,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
           <li>About a dozen specialists, routed by code</li>
           <li>Dispatch, validation and the verdict moved into code</li>
           <li>Re-reviews that reconcile open threads</li>
-          <li>The comment budget, two-layer comments and <code>ship</code></li>
+          <li>The comment budget and two-layer comments</li>
           <li>The eval bench and the cost work</li>
           <li>The rollout, the launch brief and on call</li>
         </ul>
@@ -984,7 +984,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 4" data-steps="4" data-title="Quiet the human surface" data-time="90">
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="Quiet the human surface" data-time="90">
   <div class="stage">
     <span class="kicker">What changed</span>
     <h2>Fewer, shorter comments</h2>
@@ -993,7 +993,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
         <li>A comment budget: 3 inline, nitpicks never, the rest collapsed</li>
         <li>Re-reviews look at what changed</li>
         <li>Two layers in every comment, enforced by scripts and graded by a separate model</li>
-        <li>Fixes only when the author replies <code>ship</code></li>
       </ul>
       <div class="quiet-visual">
         <div class="mini-wall" aria-label="Illustration: seven comments become three inline plus a collapsed section">
@@ -1010,10 +1009,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
           <div class="who">review bot · illustration</div>
           <p><b>issue (blocking):</b> the retry counter resets inside the loop, so this job never stops retrying.</p>
           <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
-        </div>
-        <div class="mock reply">
-          <div class="who">author reply</div>
-          <p><code>ship</code> <span class="small">→ a fix commit lands on the branch</span></p>
         </div>
       </div>
     </div>
@@ -1066,13 +1061,11 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <div class="stage">
     <span class="kicker rise">Directions not taken</span>
     <h2 class="rise">Things I didn't build</h2>
-    <div class="grid rise">
+    <div class="grid two rise">
       <div class="card"><h3>A panel of skeptic agents</h3><p>Built, then removed. 12 false blocks in 90 PRs, only 2 it could catch.</p></div>
       <div class="card"><h3>A stronger model everywhere</h3><p>One role instead of five. Recall 82% → 89%, cost +35%.</p></div>
       <div class="card"><h3>Switching models</h3><p>32 of 36 required findings against 36 of 36, and no saving, from one full repeat.</p></div>
-      <div class="card"><h3>Blocking merges</h3><p>Compliance requires a human approval, so the reviewer stays advisory.</p></div>
-      <div class="card"><h3>Fixes nobody asked for</h3><p>Only when the author replies <code>ship</code>.</p></div>
-      <div class="card"><h3>An open source base</h3><p>Nothing was mature or flexible enough.</p></div>
+      <div class="card"><h3>Auto-merge</h3><p>Compliance requires a human approval, so the reviewer stays advisory.</p></div>
     </div>
   </div>
   <span class="num"></span>
@@ -1131,12 +1124,12 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       <circle class="runner tl-runner" cx="150" cy="280" r="13"/>
     </svg>
     <div class="phases">
-      <div><b>Phase 1</b><span>Quick fixes that couldn't break anything, plus a feedback loop</span></div>
-      <div><b>Phase 2</b><span>A smoke benchmark, then noise controls</span></div>
-      <div><b>Phase 3</b><span>The full eval suite and more depth</span></div>
-      <div><b>Phase 4</b><span>Hardening, then deciding on default-on</span></div>
+      <div><b>More depth</b><span>Specialists routed by code, the verdict computed in code</span></div>
+      <div><b>Real evals</b><span>Live A/B runs with a measured noise floor</span></div>
+      <div><b>Quieter comments</b><span>A comment budget, scoped re-reviews, two layers</span></div>
+      <div><b>Deterministic orchestration</b><span>Dispatch and checks moved into code</span></div>
     </div>
-    <p class="deferred"><b>Put off to keep the launch small:</b> a weekly feedback report, cross-repo context, unattended fixes, leaving gh-aw</p>
+    <p class="deferred"><b>Put off to keep the launch small:</b> a weekly feedback report, cross-repo context, leaving gh-aw</p>
   </div>
   <span class="num"></span>
 </section>
@@ -1448,8 +1441,6 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       tl.to(items[2], { opacity: 1, duration: 0.3 }, at(2));
       tl.to(q(".mini-wall"), { opacity: 0.4, duration: 0.3 }, at(2));
       tl.from(q(".layer"), { y: 50, opacity: 0, duration: 0.45 }, at(2) + 0.15);
-      tl.to(items[3], { opacity: 1, duration: 0.3 }, at(3));
-      tl.from(q(".reply"), { x: 80, opacity: 0, duration: 0.45 }, at(3) + 0.1);
     },
 
     "Cost ladder"(tl, q) {

@@ -1070,14 +1070,28 @@ html.motion .dots i { background: var(--coral); }
   gsap.to(".progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
 
   const passes = new Map();
+  // On wide screens every step of a figure lives in one timeline, one time unit per step, and
+  // the paragraphs' scroll positions drive that timeline's time. Separate scrubbed timelines
+  // per step raced each other on fast scrolls: a lagging earlier step could finish after a
+  // later one and put back what the later step had hidden.
+  const masters = new Map();
+  const sync = (m) => {
+    let t = 0;
+    m.triggers.forEach((st, i) => { if (st.progress > 0) t = i + st.progress; });
+    gsap.to(m.tl, { time: t, duration: 0.6, ease: "power3", overwrite: true });
+  };
+  ScrollTrigger.addEventListener("refresh", () => masters.forEach(sync));
   const step = (story, k, build) => {
     if (wide) {
-      const para = story.querySelector(`[data-step="${k}"]`);
-      const tl = gsap.timeline({
-        defaults: { ease: "power2.inOut", duration: 0.5 },
-        scrollTrigger: { trigger: para, start: "top 72%", end: "top 38%", scrub: 0.6 },
-      });
+      if (!masters.has(story)) masters.set(story, { tl: gsap.timeline({ paused: true }), triggers: [] });
+      const m = masters.get(story);
+      const tl = gsap.timeline({ defaults: { ease: "power2.inOut", duration: 0.5 } });
       build(tl);
+      if (tl.duration()) tl.timeScale(tl.duration());
+      const i = m.triggers.length;
+      m.tl.add(tl, i).set({}, {}, i + 1);
+      const para = story.querySelector(`[data-step="${k}"]`);
+      m.triggers.push(ScrollTrigger.create({ trigger: para, start: "top 72%", end: "top 38%", onUpdate: () => sync(m) }));
       return;
     }
     if (!passes.has(story)) {
