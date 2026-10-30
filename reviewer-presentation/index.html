@@ -962,9 +962,9 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
   <span class="num"></span>
 </section>
 
-<section class="slide build" style="--steps: 3" data-steps="3" data-title="Field week" data-time="120">
+<section class="slide build" style="--steps: 3" data-steps="3" data-title="First week" data-time="120">
   <div class="stage">
-    <span class="kicker">Field week</span>
+    <span class="kicker">First week</span>
     <h2>The first week: good catches, way too many comments</h2>
     <div class="wall" aria-label="Illustration: seven non-blocking comments on one push">
       <div><b>suggestion</b>test coverage</div>
@@ -1076,7 +1076,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
     <h2 class="wide">Rollout</h2>
     <svg class="diagram tl" viewBox="40 120 1520 400" role="img" aria-labelledby="tl-t tl-d">
       <title id="tl-t">Rollout timeline</title>
-      <desc id="tl-d">Triage bot in frontend. Written proposal. A trial of a few weeks on my team's PRs beside the managed review. A field week with too many comments. A quieter surface ships. The launch brief is approved. Default-on in the backend monorepo, then frontend. The main reviewer for a couple of months.</desc>
+      <desc id="tl-d">Triage bot in frontend. Written proposal. A trial of a few weeks on my team's PRs beside the managed review. A first week with too many comments. A quieter surface ships. The launch brief is approved. Default-on in the backend monorepo, then frontend. The main reviewer for a couple of months.</desc>
       <line class="track tl-track" x1="150" y1="280" x2="1450" y2="280"/>
       <g class="tl-node" data-x="150">
         <circle class="node" cx="150" cy="280" r="20"/>
@@ -1096,7 +1096,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       </g>
       <g class="tl-node" data-x="707">
         <circle class="node hot" cx="707" cy="280" r="20"/>
-        <text x="707" y="350" text-anchor="middle" class="t-b">Field week</text>
+        <text x="707" y="350" text-anchor="middle" class="t-b">First week</text>
         <text x="707" y="382" text-anchor="middle" class="t-s">right findings, too many</text>
       </g>
       <g class="tl-node" data-x="893">
@@ -1416,7 +1416,7 @@ html.motion .runs .skip { background: var(--mint); color: var(--on); }
       tl.to(q(".pr, .code-node, .w0, .w-post, .loop, .loop-label, .fan, .into"), { opacity: 0.3, duration: 0.4 }, at(5) + 0.1);
     },
 
-    "Field week"(tl, q) {
+    "First week"(tl, q) {
       // the pile lands while the slide scrolls in, so it's there on arrival
       gsap.from(q(".wall > div"), {
         y: -140, rotation: (i) => [-7, 5, -3, 8, -6, 4, -5, 6][i % 8], opacity: 0,
