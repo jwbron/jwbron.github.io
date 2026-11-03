@@ -1011,7 +1011,7 @@ html.motion .dots i { background: var(--coral); }
     <div class="prose">
       <p data-step="1">Trust in the measurements matters as much as trust in the agent. In one of the reviewer's evals, a case looked flaky, so I read all 28 runs.</p>
       <p data-step="2">The reviewer had found the defect every time. The scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer. A broken scorer looks just like a weak model, and an evaluator you just changed can't be the only evidence that its change helped.</p>
-      <p data-step="3">Monitors need the same treatment. One of the first monitors in my research systems ran a model over everything it saw and produced a stream of false alarms that people learned to ignore. Once people learn to ignore a monitor, they ignore the real alarm too. <a href="measure-the-system.html">Measure the system, not just the model</a> covers how to test the watchers.</p>
+      <p data-step="3">Monitors need the same treatment. One of the first monitors in my research systems ran a model over everything it saw and produced a stream of false alarms that people learned to ignore. Once people learn to ignore a monitor, they ignore the real alarm too. The fix is a labeled test set for the monitor itself: normal runs that must stay silent, and known failures that must raise the right alert.</p>
     </div>
     <div class="visual">
       <p class="grid-label"><span class="before">28 runs, scored as missed</span><span class="after">28 runs, defect found every time</span></p>
