@@ -548,7 +548,7 @@
       }
     }
     // The places you can walk, each a raised card with one outline around the whole thing.
-    const REGIONS = { bank: [0, 4, 0, 2], isle1: [1, 3, 6, 7], isle2: [1, 4, 13, 14], far: [1, 6, 23, 25] };
+    const REGIONS = { bank: [0, 4, 0, 2], isle1: [1, 3, 6, 7], isle2: [0, 4, 13, 14], far: [1, 6, 23, 25] };
     for (const [region, [x0, x1, z0, z1]] of Object.entries(REGIONS)) {
       addLand(x0, x1, z0, z1, region);
       const outline = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 1, 1.8, z1 - z0 + 1), inkMat);
@@ -666,7 +666,7 @@
     tree(0, 2, "ball");
     tree(1, 0, "ball", 0.9);
     tree(3, 6, "cone", 0.9);
-    tree(1, 13, "cone");
+    tree(0, 13, "cone");
     tree(6, 25, "cone", 1.2);
     tree(1, 25, "ball", 1.1);
     tree(7.3, 24.4, "ball", 1, LAND_TOP - 0.15);
@@ -1364,6 +1364,8 @@
     // A helper stuck behind you on the stones, with you standing still, sets a short detour around you:
     // the cheapest way to where it's going, where each new stone costs more than an existing step.
     function detour(h) {
+      // On an island it just waits: nobody builds stones around land to reach a spot on it.
+      if (tileAt(h.x, h.z)?.kind === "land") { h.goal = null; return false; }
       const [gx, gz] = h.goal;
       const start = key(h.x, h.z);
       const cost = new Map([[start, 0]]);
@@ -1388,6 +1390,8 @@
       }
       if (!prev.has(key(gx, gz))) return false;
       const path = findPathKey(h, start, key(gx, gz), prev);
+      // More than a couple of new stones isn't a detour, it's a second crossing.
+      if (path.filter(([x, z]) => !tileAt(x, z)).length > 2) { h.goal = null; return false; }
       for (const [x, z] of path) if (!tileAt(x, z)) passingStone(x, z);
       h.path = path;
       return true;
@@ -1403,12 +1407,22 @@
       o.step = { from: o.pos.clone(), to: new V3(w.x, tileAt(w.x, w.z).top, w.z), t: 0, dur: 0.45, x: w.x, z: w.z, side: 1 };
     }
 
+    // True while a stone is in the air or coming up, or a helper still has one to set.
+    function stonesComing() {
+      const helped = (s) => Object.values(helpers).some((h) => h.lane === s.lane && h.g.visible);
+      return stones.some((s) => s.state === "flying" || s.state === "rising" ||
+        ((s.state === "none" || s.state === "sinking") && helped(s)));
+    }
+
     function walkTo(w, tx, tz, onArrive) {
       // Helpers remember where they were going, so making way doesn't make them forget.
       if (w !== traveler) w.goal = [tx, tz];
       const path = findPath(w, tx, tz);
       if (!path) return false;
       w.path = path;
+      // Remember where you were headed, so you carry on as more stones land, and after a stone
+      // sinks and is replaced, instead of stopping at the last good one.
+      if (w === traveler) w.dest = [tx, tz];
       w.onArrive = onArrive || null;
       if (!path.length && onArrive) { w.onArrive = null; onArrive(); }
       return true;
@@ -1447,6 +1461,12 @@
         }
         return;
       }
+      if (!w.path.length && isTraveler && w.dest) {
+        const more = w.x === w.dest[0] && w.z === w.dest[1] ? null : findPath(w, ...w.dest);
+        if (more && more.length) w.path = more;
+        else if (!more || !stonesComing()) w.dest = null;
+        if (!w.path.length && w.dest) return;
+      }
       if (!w.path.length) {
         if (w.onArrive) { const f = w.onArrive; w.onArrive = null; f(); }
         return;
@@ -1476,13 +1496,13 @@
           if (stepAside(other, w)) return;
           // Nowhere for them to go. If their tile was where you were headed, stop beside them.
           // If you need to get past, squeeze by each other. A new stone you test first, then squeeze.
-          if (w.path.length === 1) { w.path = []; return; }
+          if (w.path.length === 1) { w.path = []; w.dest = null; return; }
           if (!(isTraveler && t.kind === "stone" && t.state === "placed")) { squeeze(w, other, nx, nz); return; }
         }
         if (!idle) {
           // Someone's on the move there, so wait a moment for them, and if they're still there, stop short.
           w.waited = (w.waited || 0) + dt;
-          if (w.waited > 2) { w.waited = 0; w.path = []; }
+          if (w.waited > 2) { w.waited = 0; w.path = []; w.dest = null; }
           return;
         }
       }
@@ -1490,7 +1510,7 @@
       // You test any stone you haven't seen tested, unless the lantern already has.
       if (isTraveler && t.kind === "stone" && t.state === "placed") {
         // Out in the mist you can't test anything by hand.
-        if (t.z >= MIST_Z && !game.lit) { w.path = []; mistBlocked(); return; }
+        if (t.z >= MIST_Z && !game.lit) { w.path = []; w.dest = null; mistBlocked(); return; }
         w.face = Math.atan2(nx - w.x, nz - w.z);
         w.busy = {
           t: 0, dur: 1.05,
@@ -2061,7 +2081,7 @@
       updateWalker(traveler, dt, true);
       updateTrail();
       // Walking and talking count as activity, so the hint only returns after a quiet, still stretch.
-      if (lineBusy || traveler.path.length || traveler.step || traveler.busy) lastTapAt = time;
+      if (lineBusy || traveler.path.length || traveler.step || traveler.busy || traveler.dest) lastTapAt = time;
       else if (time - lastTapAt > 9) {
         const hint = currentHint();
         if (hint) lines([hint], 4.5);
