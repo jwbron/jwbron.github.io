@@ -1,0 +1,78 @@
+<!doctype html>
+<!-- The social preview image. Open at 1200 by 630 and screenshot it to og-image.png. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:wght@400..800&display=swap">
+<style>
+  html, body { margin: 0; }
+  body {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    color: #ece4cd;
+    background: #251e37;
+    font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  }
+  .arc {
+    position: absolute;
+    left: 70px;
+    top: 70px;
+    width: 298px;
+    height: 298px;
+    box-sizing: border-box;
+    border: 34px solid #6f86ff;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-radius: 50%;
+    rotate: -45deg;
+  }
+  .name {
+    position: absolute;
+    left: 100px;
+    top: 212px;
+    margin: 0;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 97px;
+    line-height: 0.86;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+  .name span { display: block; }
+  .name span:first-child { color: transparent; -webkit-text-stroke: 2.5px #ece4cd; }
+  .tag {
+    position: absolute;
+    left: 104px;
+    top: 428px;
+    margin: 0;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+  }
+  .tag mark { padding: 0 0.2em; color: #261d38; background: #f2d58c; border-radius: 0.2em 0.6em 0.2em 0.6em; }
+  .where { position: absolute; left: 104px; top: 540px; margin: 0; font-size: 22px; color: #b9afcb; }
+  .dots {
+    position: absolute;
+    right: 76px;
+    top: 76px;
+    width: 260px;
+    height: 182px;
+    background: radial-gradient(circle, #f2d58c 0 6px, transparent 6.5px) 0 0 / 26px 26px;
+  }
+  .tri { position: absolute; left: 780px; top: 480px; width: 90px; height: 90px; background: #9fd6c0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .disc { position: absolute; left: 872px; top: 492px; width: 208px; height: 208px; box-sizing: border-box; background: #f2a28c; border: 4px solid #ece4cd; border-radius: 50%; }
+</style>
+</head>
+<body>
+  <span class="arc"></span>
+  <p class="name"><span>James</span><span>Wiesebron</span></p>
+  <p class="tag"><mark>Runtime alignment</mark> for AI agents</p>
+  <p class="where">jameswiesebron.com · South Lake Tahoe</p>
+  <span class="dots"></span>
+  <span class="tri"></span>
+  <span class="disc"></span>
+</body>
+</html>

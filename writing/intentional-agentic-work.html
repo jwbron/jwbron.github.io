@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="essay-page">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,20 +9,24 @@
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://jameswiesebron.com/writing/intentional-agentic-work.html">
+  <link rel="alternate" type="application/atom+xml" title="James Wiesebron" href="../feed.xml">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Runtime alignment and intentional agentic work · James Wiesebron">
   <meta property="og:description" content="Runtime alignment means keeping an agent doing what you intended while it runs. Intentional agentic work is how to get there: answer each predictable failure with structure.">
   <meta property="og:url" content="https://jameswiesebron.com/writing/intentional-agentic-work.html">
   <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta property="article:published_time" content="2026-10-22">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=b9ddf1dc">
+  <link rel="stylesheet" href="../style.css?v=0c2cd0ba">
+  <link rel="stylesheet" href="../essay.css?v=4c338137">
   <script src="../theme.js?v=a2d527c1"></script>
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
@@ -30,58 +34,93 @@
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
+      <a href="../#about">about</a>
       <a href="../#contact">contact</a>
     </nav>
   </header>
 
-  <main id="post" class="post">
-    <article>
-      <header class="post-head">
-        <p class="post-kicker">Intentional agentic work · Overview</p>
-        <h1>Runtime alignment</h1>
-        <p class="post-dek">Runtime alignment means keeping agents doing what you intended while they run. Here's how to build for it.</p>
-        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
-      </header>
+  <header class="essay-hero">
+    <span class="deco ring" style="top: 10%; right: 5vw; width: 13vw; aspect-ratio: 1"></span>
+    <span class="deco tri" style="top: 58%; right: 21vw; width: 4vw; aspect-ratio: 1"></span>
+    <span class="deco circle" style="bottom: 10%; right: 7vw; width: 7vw; aspect-ratio: 1"></span>
+    <p class="kicker rise">The series · Start here</p>
+    <h1 class="title rise">Runtime alignment</h1>
+    <p class="dek rise">Runtime alignment means keeping agents doing what you intended while they run. Here's how to build for it.</p>
+    <p class="byline rise">James Wiesebron · <time datetime="2026-10-22">October 22, 2026</time> · Examples from my personal research systems</p>
+  </header>
 
-      <p>Most agent work today is a conversation. You describe what you want, the agent goes off and does it, and you read what comes back. For small tasks that's fine. As the work gets longer, and as one agent becomes a team of them, the conversation stops being enough, and things go wrong in the same handful of ways every time.</p>
+  <main id="post">
 
-      <p>The agent drifts from what you actually asked for, because your intent lives only in a chat that keeps growing. It makes decisions that were yours to make, because asking is more work than deciding. A group of agents reviews the work and agrees it's done, and agreement turns out to say very little about whether it's right. Hours into a task, the details that mattered get summarized away. Agents wait on each other, poll, loop and stall. And somewhere along the way, one of them does something it was told not to do.</p>
+<section class="chapter">
+  <div class="prose-only">
+    <p>Most agent work today is a conversation. You describe what you want, the agent goes off and does it, and you read what comes back. For small tasks that's fine. As the work gets longer, and as one agent becomes a team of them, the conversation stops being enough, and things go wrong in the same handful of ways every time.</p>
+    <p>The agent <a href="give-agents-a-contract.html">drifts from what you actually asked for</a>, because your intent lives only in a chat that keeps growing. It <a href="nothing-to-decide-is-a-claim.html">makes decisions that were yours to make</a>, because asking is more work than deciding. A group of agents reviews the work and agrees it's done, and <a href="agreement-isnt-verification.html">agreement turns out to say very little about whether it's right</a>. Hours into a task, <a href="reseed-dont-compact.html">the details that mattered get summarized away</a>. Agents <a href="teams-not-swarms.html">wait on each other</a>, <a href="code-owns-the-clock.html">poll, loop and stall</a>. And somewhere along the way, one of them <a href="stop-telling-agents.html">does something it was told not to do</a>.</p>
+  </div>
+</section>
 
-      <h2>What I mean by it</h2>
+<section class="chapter">
+  <h2>What I mean by it</h2>
+  <div class="prose-only">
+    <p>Most conversations about alignment are about training, meaning what a model values and how it behaves before it ever ships. That work matters, and it's mostly the model makers' job. The problem I work on is different. I call it runtime alignment: keeping an agent doing what you actually intended while it runs, in your environment, on your work, over hours, alongside other agents.</p>
+    <p>A well-trained model can still drift from the task in front of it, settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
+  </div>
+  <p class="pullquote rise">Runtime alignment lives in the system around the model.</p>
+</section>
 
-      <p>Most conversations about alignment are about training, meaning what a model values and how it behaves before it ever ships. That work matters, and it's mostly the model makers' job. The problem I work on is different. I call it runtime alignment: keeping an agent doing what you actually intended while it runs, in your environment, on your work, over hours, alongside other agents.</p>
+<section class="chapter">
+  <h2>How to build for it</h2>
+  <div class="prose-only">
+    <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. It starts with a split. The person defines the goal, and steps into the path only when it matters. The agent's job is to reach that goal in a way the person would recognize as reasonable. Write the intent down somewhere the agent can't rewrite. Limit what the agent can do instead of asking it to behave. Check the work independently, against reality. Keep people at the decisions that are actually theirs. I think of this as intentional agentic work, and this series is how I approach each piece. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
+    <p>Most examples come from personal research systems I've built and run, primarily <a href="https://github.com/jwbron/egg">egg</a>, an open-source testbed for these ideas. <a href="attention-is-all-you-need-to-protect.html">Attention is all you need (to protect)</a> also draws on an AI code reviewer I built and ran in production. They come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
+  </div>
+  <figure class="sysmap">
+    <div class="sm-row">
+      <a class="sm-node you" href="nothing-to-decide-is-a-claim.html"><b>You</b><span>the goal, and the decisions that are yours</span></a>
+      <i aria-hidden="true">→</i>
+      <a class="sm-node" href="give-agents-a-contract.html"><b>Contract</b><span>intent, written where agents can't rewrite it</span></a>
+      <i aria-hidden="true">→</i>
+      <a class="sm-node" href="code-owns-the-clock.html"><b>Orchestrator</b><span>plain code owns sequencing and waiting</span></a>
+      <i aria-hidden="true">→</i>
+      <a class="sm-node" href="reseed-dont-compact.html"><b>Agents</b><span>each rebuilt from a small, protected core</span></a>
+      <i aria-hidden="true">→</i>
+      <a class="sm-node" href="stop-telling-agents.html"><b>Gateway</b><span>the only way out to tools and data</span></a>
+    </div>
+    <div class="sm-row under">
+      <a class="sm-node wide" href="agreement-isnt-verification.html"><b>Independent checks</b><span>the work is checked against reality, with evidence behind every finding</span></a>
+      <a class="sm-node wide" href="teams-not-swarms.html"><b>A team protocol</b><span>who reviews whom, and what has to be true before anyone says done</span></a>
+    </div>
+    <figcaption>How the pieces fit. Each box links to its essay.</figcaption>
+  </figure>
+</section>
 
-      <p>A well-trained model can still drift from the task in front of it, settle questions that weren't its to settle, or get talked into something by a document it reads. None of that is fixed by a better model alone. Runtime alignment lives in the system around the model. The agent works within limits it can't cross, and its work comes with evidence you can check.</p>
+<section class="chapter">
+  <h2 id="series">The series</h2>
+  <div class="prose-only">
+    <p><strong><a href="attention-is-all-you-need-to-protect.html">Why it matters: attention is all you need (to protect).</a></strong> Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did. Runtime alignment is how that trust gets earned.</p>
+    <p><strong><a href="give-agents-a-contract.html">Intent: give agents a contract, not a conversation.</a></strong> The work is defined in a structured document that lives outside the chat. Each role can change only its own part, and the plan gets checked before anyone starts working on it.</p>
+    <p><strong><a href="nothing-to-decide-is-a-claim.html">Decisions: "nothing to decide" is a claim.</a></strong> Agents settle questions that were yours when asking costs more than deciding. Every decision is tracked until a person answers it, and an agent that reports none has to list what it considered.</p>
+    <p><strong><a href="reseed-dont-compact.html">Memory: reseed, don't compact.</a></strong> Long, structured work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core of instructions that holds the intent, fetch everything else when it's needed, and rebuild from that core on purpose.</p>
+    <p><strong><a href="agreement-isnt-verification.html">Verification: agreement isn't verification.</a></strong> When agents agree, that shows their reasoning is consistent. It doesn't show the work is correct. Done means checked against reality, with findings backed by evidence and reviewers who form their own view before reading the author's.</p>
+    <p><strong><a href="teams-not-swarms.html">Coordination: teams, not swarms.</a></strong> A team of agents needs a protocol. That means deciding who reviews whom, how agreement converges and how to keep the team from deadlocking.</p>
+    <p><strong><a href="code-owns-the-clock.html">Control: the model owns judgment, code owns the clock.</a></strong> Waiting, sequencing and state belong in plain, predictable code. Models should only be asked to judge, never to keep the loop running.</p>
+    <p><strong><a href="stop-telling-agents.html">Boundaries: stop telling agents what not to do.</a></strong> A rule in a prompt is a suggestion. Take the capability away instead.</p>
+    <p><strong><a href="connectors-agents-cant-misuse.html">Boundaries in practice: connectors with enforceable boundaries.</a></strong> Agents get useful when they reach your real systems. Design those connections so a confused or manipulated agent can't do damage through them.</p>
+  </div>
+</section>
 
-      <h2>How to build for it</h2>
-
-      <p>None of the failures above is a model problem you can prompt your way out of. They're structural problems, and they have structural answers. It starts with a split. The person defines the goal, and steps into the path only when it matters. The agent's job is to reach that goal in a way the person would recognize as reasonable. Write the intent down somewhere the agent can't rewrite. Limit what the agent can do instead of asking it to behave. Check the work independently, against reality. Keep people at the decisions that are actually theirs. I think of this as intentional agentic work, and this series is how I approach each piece. It isn't about watching agents more closely. Done well, people make fewer decisions, and better ones.</p>
-
-      <p>Most examples come from personal research systems I've built and run, primarily <a href="https://github.com/jwbron/egg">egg</a>, an open-source testbed for these ideas. <a href="attention-is-all-you-need-to-protect.html">Attention is all you need (to protect)</a> also draws on an AI code reviewer I built and ran in production. They come from software, but the ideas apply to any knowledge work you'd hand to agents: research, drafting, analysis, review.</p>
-
-      <h2 id="series">The series</h2>
-
-      <p><strong><a href="attention-is-all-you-need-to-protect.html">Why it matters: attention is all you need (to protect).</a></strong> Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did. Runtime alignment is how that trust gets earned.</p>
-
-      <p><strong><a href="give-agents-a-contract.html">Intent: give agents a contract, not a conversation.</a></strong> The work is defined in a structured document that lives outside the chat. Each role can change only its own part, decisions owed to a person are tracked until they're answered, and the plan gets checked before anyone starts working on it.</p>
-
-      <p><strong><a href="reseed-dont-compact.html">Memory: reseed, don't compact.</a></strong> Long, structured work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core of instructions that holds the intent, fetch everything else when it's needed, and rebuild from that core on purpose.</p>
-
-      <p><strong><a href="agreement-isnt-verification.html">Verification: agreement isn't verification.</a></strong> When agents agree, that shows their reasoning is consistent. It doesn't show the work is correct. Done means checked against reality, with findings backed by evidence and reviewers who form their own view before reading the author's.</p>
-
-      <p><strong><a href="teams-not-swarms.html">Coordination: teams, not swarms.</a></strong> A team of agents needs a protocol. That means deciding who reviews whom, how agreement converges and how to keep the team from deadlocking.</p>
-
-      <p><strong><a href="code-owns-the-clock.html">Control: the model owns judgment, code owns the clock.</a></strong> Waiting, sequencing and state belong in plain, predictable code. Models should only be asked to judge, never to keep the loop running.</p>
-
-      <p><strong><a href="stop-telling-agents.html">Boundaries: stop telling agents what not to do.</a></strong> A rule in a prompt is a suggestion. Take the capability away instead, and give agents <a href="connectors-agents-cant-misuse.html">connections to your tools and data with enforceable boundaries</a>.</p>
-
-
-      <footer class="post-foot">
-        <p>I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
-        <p><a href="../#writing">← More writing</a></p>
-      </footer>
-    </article>
   </main>
 
+  <nav class="series-nav" aria-label="More in this series">
+    <a class="next" href="attention-is-all-you-need-to-protect.html"><span>Next</span><b>Attention is all you need (to protect)</b></a>
+  </nav>
+
+  <footer class="site-foot">
+    <p>This is the start of a series on runtime alignment. If you're working through something similar, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+    <p><a href="../#writing">All writing</a> · <a href="https://github.com/jwbron">GitHub</a> · <a href="https://www.linkedin.com/in/james-wiesebron/">LinkedIn</a> · <a href="../feed.xml">RSS</a></p>
+  </footer>
+
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../essay.js?v=7502a7b5" defer></script>
 </body>
 </html>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>James Wiesebron</title>
+  <subtitle>Essays on runtime alignment: keeping AI agents doing what you intended while they run.</subtitle>
+  <link href="https://jameswiesebron.com/"/>
+  <link rel="self" href="https://jameswiesebron.com/feed.xml"/>
+  <id>https://jameswiesebron.com/</id>
+  <updated>2026-11-15T00:00:00Z</updated>
+  <author><name>James Wiesebron</name></author>
+  <entry>
+    <title>&quot;Nothing to decide&quot; is a claim</title>
+    <link href="https://jameswiesebron.com/writing/nothing-to-decide-is-a-claim.html"/>
+    <id>https://jameswiesebron.com/writing/nothing-to-decide-is-a-claim.html</id>
+    <published>2026-11-15T00:00:00Z</published>
+    <updated>2026-11-15T00:00:00Z</updated>
+    <summary>Agents settle questions that were yours when asking costs more than deciding. Track every decision until a person answers it, and make an agent that reports none list what it considered.</summary>
+  </entry>
+  <entry>
+    <title>Attention is all you need (to protect)</title>
+    <link href="https://jameswiesebron.com/writing/attention-is-all-you-need-to-protect.html"/>
+    <id>https://jameswiesebron.com/writing/attention-is-all-you-need-to-protect.html</id>
+    <published>2026-10-27T00:00:00Z</published>
+    <updated>2026-10-27T00:00:00Z</updated>
+    <summary>Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did.</summary>
+  </entry>
+  <entry>
+    <title>Runtime alignment</title>
+    <link href="https://jameswiesebron.com/writing/intentional-agentic-work.html"/>
+    <id>https://jameswiesebron.com/writing/intentional-agentic-work.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>Runtime alignment means keeping an agent doing what you intended while it runs. Intentional agentic work is how to get there: answer each predictable failure with structure.</summary>
+  </entry>
+  <entry>
+    <title>Give agents a contract, not a conversation</title>
+    <link href="https://jameswiesebron.com/writing/give-agents-a-contract.html"/>
+    <id>https://jameswiesebron.com/writing/give-agents-a-contract.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>When intent lives in a chat, agents drift. A contract that each role can only partly edit keeps agent work aligned and makes &quot;done&quot; mean something.</summary>
+  </entry>
+  <entry>
+    <title>Reseed, don&#x27;t compact</title>
+    <link href="https://jameswiesebron.com/writing/reseed-dont-compact.html"/>
+    <id>https://jameswiesebron.com/writing/reseed-dont-compact.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>Long agent work shouldn&#x27;t depend on a summarizer deciding what to forget. Keep a small, fixed core that holds the intent, and rebuild from it on purpose.</summary>
+  </entry>
+  <entry>
+    <title>Agreement isn&#x27;t verification</title>
+    <link href="https://jameswiesebron.com/writing/agreement-isnt-verification.html"/>
+    <id>https://jameswiesebron.com/writing/agreement-isnt-verification.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>When AI reviewers agree, that tells you their reasoning hangs together, not that the work is right. How to build review that checks the work.</summary>
+  </entry>
+  <entry>
+    <title>Teams, not swarms</title>
+    <link href="https://jameswiesebron.com/writing/teams-not-swarms.html"/>
+    <id>https://jameswiesebron.com/writing/teams-not-swarms.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>A group of agents in a shared chat is a swarm. A team needs a protocol: who reviews whom, how approvals stay current, and checks that turn known deadlocks into rules.</summary>
+  </entry>
+  <entry>
+    <title>The model owns judgment, code owns the clock</title>
+    <link href="https://jameswiesebron.com/writing/code-owns-the-clock.html"/>
+    <id>https://jameswiesebron.com/writing/code-owns-the-clock.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>Models are good at judgment and unreliable at bookkeeping. Let plain code run the loop, and call the model only when there&#x27;s something to decide.</summary>
+  </entry>
+  <entry>
+    <title>Stop telling AI agents what not to do</title>
+    <link href="https://jameswiesebron.com/writing/stop-telling-agents.html"/>
+    <id>https://jameswiesebron.com/writing/stop-telling-agents.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>A prompt that says &quot;don&#x27;t&quot; is a suggestion. The safer move is to take the capability away, and let the wall explain itself.</summary>
+  </entry>
+  <entry>
+    <title>Connectors with enforceable boundaries</title>
+    <link href="https://jameswiesebron.com/writing/connectors-agents-cant-misuse.html"/>
+    <id>https://jameswiesebron.com/writing/connectors-agents-cant-misuse.html</id>
+    <published>2026-10-22T00:00:00Z</published>
+    <updated>2026-10-22T00:00:00Z</updated>
+    <summary>Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can&#x27;t be misused, even by a confused or manipulated agent.</summary>
+  </entry>
+</feed>

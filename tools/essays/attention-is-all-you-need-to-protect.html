@@ -1,0 +1,144 @@
+<!--
+{
+  "description": "Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did.",
+  "date": "2026-10-27",
+  "title": "Attention is all you need (to protect)",
+  "kicker": "Attention",
+  "dek": "Human attention is the scarcest resource in AI-assisted work. AI output can spend it or save it, and people can only choose where to spend it once they trust what the agent did.",
+  "examples": "Examples from an AI code reviewer I built and ran in production, and from my personal research systems",
+  "tall": true
+}
+-->
+
+<section class="chapter">
+  <div class="prose-only">
+    <p class="rise">The first week an AI code reviewer I built ran on real pull requests, it caught real problems, including a compile break across packages. It also left one PR seven non-blocking comments on a single push and five more two days later. The team that owned that repo turned it off.</p>
+    <p class="rise">The findings held up. What the reviewer got wrong was how much of people's attention it spent.</p>
+    <p class="rise">Every AI tool makes that trade. It can take load off people or add to it, and accuracy alone doesn't decide which. That depends on how carefully the tool spends attention, and on whether people trust its work enough to stop checking all of it. The second is what I mean by <a href="intentional-agentic-work.html">runtime alignment</a>, keeping an agent doing what you intended while it runs, with evidence you can check.</p>
+    <p class="rise">The same trade shows up whenever AI reviews or produces work for people. An assistant that flags every possible issue in a contract, drafts dozens of support replies, or summarizes a week of research can bury the one thing a person needed to see. I've seen it most clearly in developer tooling, so that's where the examples here come from.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Every output spends attention</h2>
+  <div class="story" data-story="triage">
+    <div class="prose">
+      <p data-step="1">A comment, a summary, a notification, a request for approval. Each one asks a person to read, decide and maybe act, and each one costs something even when it's right.</p>
+      <p data-step="2">The fix is attention triage. For every output, decide whether it needs a person now, later, or never, and route it there. In the reviewer, blocking findings always post. Other findings are ranked, only a few post inline, and the rest go into a collapsed section. Nitpicks never post inline.</p>
+      <p data-step="3">Whatever does reach a person should be short. Each comment became two layers: a sentence or two written for a person, with the model's full reasoning collapsed underneath for any agent that picks up the work. The first fixes shipped within about a day and the rest over the next few weeks.</p>
+    </div>
+    <div class="visual">
+      <div class="meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div><div class="meter-fill meter-next"></div></div></div>
+      <div class="inbox" aria-hidden="true">
+        <div>blocking · auth check missing</div>
+        <div>suggestion · test coverage</div>
+        <div>question · naming</div>
+        <div>nitpick · comment wording</div>
+        <div>suggestion · test coverage</div>
+        <div>note · style</div>
+        <div>question · edge case</div>
+        <div>nitpick · import order</div>
+      </div>
+      <div class="bins">
+        <div class="bin now"><b>Now</b><span>blocking · auth check missing</span><span>question · edge case</span></div>
+        <div class="bin later"><b>Later</b><span>suggestion · test coverage</span><span>▸ 3 more, collapsed</span></div>
+        <div class="bin never"><b>Never</b><span>nitpicks dropped</span></div>
+      </div>
+      <div class="mock layer">
+        <div class="who">review comment · illustration</div>
+        <p><b>issue (blocking):</b> this endpoint skips the permission check the others run.</p>
+        <details><summary>Context for agents</summary>The full reasoning, evidence and suggested fix, collapsed.</details>
+      </div>
+      <p class="small">Illustration, not measured data.</p>
+    </div>
+  </div>
+  <p class="pullquote rise">Too many comments teach people to skim, so they miss the feedback that matters.</p>
+</section>
+
+<section class="chapter">
+  <h2>Supervision is the hidden cost</h2>
+  <div class="story" data-story="lanes">
+    <div class="prose">
+      <p data-step="1">The other way AI spends attention is quieter. If you can't tell whether an agent stayed within what you asked, you check everything it did. At that point delegation saves you nothing, because you've traded doing the work for re-reading it.</p>
+      <p data-step="2">What changes that is evidence you can check quickly. The work arrives with what was done, how it was validated, anything that departs from what was agreed, and what's still uncertain. Decisions that belong to you arrive as decisions, with the options, a recommendation and the evidence, while everything else the agent is allowed to do keeps moving. Your attention goes to judgment instead of reconstruction.</p>
+      <p data-step="3">In my research systems, an agent that wants to report there's nothing for a person to decide has to list the questions it considered and say why each one isn't theirs. That list is what gets confirmed, so the person checks specific reasoning instead of waving through a paragraph. <a href="nothing-to-decide-is-a-claim.html">"Nothing to decide" is a claim</a> goes into how that works.</p>
+    </div>
+    <div class="visual">
+      <div class="lane-row lane-a">
+        <b class="lane-title">Output with no evidence</b>
+        <div class="lane-flow"><span>Agent output</span><i>→</i><span>Re-read everything</span><i>→</i><span>Re-run the checks</span><i>→</i><span>Decide</span></div>
+        <div class="meter small-meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div></div></div>
+      </div>
+      <div class="lane-row lane-b">
+        <b class="lane-title">Output with evidence attached</b>
+        <div class="lane-flow"><span>Agent output</span><i>→</i><span>What ran, what's uncertain</span><i>→</i><span>Decide what's yours</span></div>
+        <div class="meter small-meter" aria-hidden="true"><span>Attention left</span><div class="meter-track"><div class="meter-fill"></div></div></div>
+      </div>
+      <p class="small">Illustration.</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Trust has to be earned while the agent runs</h2>
+  <div class="story" data-story="chain">
+    <div class="prose">
+      <p data-step="1">Trust that actually saves attention can't come from a good prompt or a good model alone. It comes from structure around the model, checked while the work happens. Start with intent written down somewhere the agent can't rewrite.</p>
+      <p data-step="2">Then check each handoff against it: the plan against the original request, the implementation against the plan with no unexpected additions, and the docs against the implementation. Agents wrote the reviewer's code, checks like these ran at every handoff, and I read the sensitive parts myself.</p>
+      <p data-step="3">Enforce limits outside the prompt. The reviewer's agents held no credentials. They read what the pipeline gave them and wrote results back, and the pipeline did the posting. Opening a PR, merging it and rolling it out are separate permissions, and handing work to another agent shouldn't widen them. <a href="stop-telling-agents.html">Stop telling agents what not to do</a> has more on this.</p>
+      <p data-step="4">And put required steps in code. The reviewer's orchestrating model was told to dispatch its specialist reviewers before posting. In a seeded trial, all five runs posted a review that looked fine, and two of them had skipped dispatch and written the review themselves. Dispatch moved into code, the model kept the judgment calls, and the orchestrator went from about 80 percent of a review's cost to about a quarter.</p>
+    </div>
+    <div class="visual">
+      <div class="align-chain">
+        <div class="node-box intent"><b>Intent</b><span>written down</span></div>
+        <div class="check"><i>✓</i><span>checked against</span></div>
+        <div class="fence-box">
+          <span class="fence-tag">agents · no credentials</span>
+          <div class="node-box"><b>Plan</b></div>
+          <div class="check"><i>✓</i><span>checked against</span></div>
+          <div class="node-box"><b>Code</b></div>
+        </div>
+        <div class="check"><i>✓</i><span>checked against</span></div>
+        <div class="node-box"><b>Docs</b></div>
+      </div>
+      <div class="runs before" aria-label="Seeded trial: five runs all posted a review, two had skipped dispatch">
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skipped"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+      <div class="ok"><span class="look">review posted</span><span class="truth">dispatched</span></div>
+      <div class="skipped"><i class="hatch"></i><span class="look">review posted</span><span class="truth">skipped, still looked fine</span></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Check the checkers</h2>
+  <div class="story" data-story="checker">
+    <div class="prose">
+      <p data-step="1">Trust in the measurements matters as much as trust in the agent. In one of the reviewer's evals, a case looked flaky, so I read all 28 runs.</p>
+      <p data-step="2">The reviewer had found the defect every time. The scorer only accepted one source location. Fixing the scorer changed the numbers without changing the reviewer. A broken scorer looks just like a weak model, and an evaluator you just changed can't be the only evidence that its change helped.</p>
+      <p data-step="3">Monitors need the same treatment. One of the first monitors in my research systems ran a model over everything it saw and produced a stream of false alarms that people learned to ignore. Once people learn to ignore a monitor, they ignore the real alarm too. The fix is a labeled test set for the monitor itself: normal runs that must stay silent, and known failures that must raise the right alert.</p>
+    </div>
+    <div class="visual">
+      <p class="grid-label"><span class="before">28 runs, scored as missed</span><span class="after">28 runs, defect found every time</span></p>
+      <div class="dots" aria-label="28 runs of one eval case">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p class="pill scorer">The scorer was wrong, not the reviewer</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Follow through, and give the tool an owner</h2>
+  <div class="prose-only">
+    <p class="rise">A correct finding still leaves someone to interpret it, make the fix, and check that it worked. A tool that stops at the finding has handed most of the job back to a person.</p>
+    <p class="rise">The version I'd build toward routes findings to a fixing agent, sends the result to independent review so the fixer can't declare its own work done, and checks after deploy whether the fix actually worked. A result nobody could verify goes back to triage instead of counting as done because a PR merged.</p>
+    <p class="rise">Feedback deserves the same treatment. A pipeline read every reply to the reviewer's comments, decided whether it pointed at a real problem, and opened or updated a ticket, so engineers never had to file anything.</p>
+    <p class="rise">Most internal AI tooling starts as somebody's side project and ends up maintained in their spare time. Regressions sit, people stop trusting the tool, and they go back to checking everything themselves.</p>
+    <p class="rise">Shared tools need an owner who keeps them working, tracks what they cost, and decides what to keep, change or stop based on feedback and evidence. That owner should also prefer existing tools when they meet the need, and accept that a fix without AI is sometimes the right answer. The evidence that counts is whether other teams keep using it.</p>
+    <p class="rise">Each of these protects the same thing. A person's attention should go to the decisions that need them, and a tool earns that by finishing the job and staying trustworthy.</p>
+  </div>
+</section>

@@ -1,0 +1,63 @@
+<!--
+{
+  "description": "When intent lives in a chat, agents drift. A contract that each role can only partly edit keeps agent work aligned and makes \"done\" mean something.",
+  "date": "2026-10-22",
+  "title": "Give agents a contract, not a conversation",
+  "kicker": "Intent",
+  "dek": "When intent lives in a chat, agents drift. Write it down somewhere they can't rewrite.",
+  "examples": "Examples from my personal research systems"
+}
+-->
+
+<section class="chapter">
+  <div class="prose-only">
+    <p>In most agent setups, the only record of what you asked for is the conversation. The agent's understanding of the task lives in its context window, which grows, gets summarized and eventually gets replaced. Another agent can't read it. You can't audit it. And when the agent decides partway through that the task really means something slightly different, nothing anywhere disagrees with it.</p>
+    <p>That's fine for a quick question. For real work, the intent needs to live somewhere that outlasts a chat, somewhere the agents read from, report back to, and can't rewrite. I call that place a contract.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>What goes in it</h2>
+  <div class="prose-only">
+    <p>A contract is a structured document that sits outside any agent's conversation. It holds the goal and the phases the work moves through. It breaks each phase into tasks, and every task carries acceptance criteria and the areas of the work it expects to touch. It also lists every decision that belongs to a person, along with that person's answer once there is one. <a href="nothing-to-decide-is-a-claim.html">"Nothing to decide" is a claim</a> covers how those decisions get raised and tracked.</p>
+    <p>Every agent that joins the work starts from the contract, and every agent records its progress back into it as it goes, not in a burst at the end. The conversation is still how agents think. The contract is what everyone agreed to.</p>
+  </div>
+  <p class="pullquote rise">The conversation is still how agents think. The contract is what everyone agreed to.</p>
+</section>
+
+<section class="chapter">
+  <h2>How much of the path to spell out</h2>
+  <div class="prose-only">
+    <p>A contract isn't a full plan for the agent. Your part is mostly the goal: what done looks like, and how you'll check it. A lot of the implementation underneath doesn't matter to you, like which file a helper lives in or how a loop is written, as long as the result meets the criteria. Spelling those out costs you time and doesn't give you anything better to check.</p>
+    <p>The judgment is knowing where the path does matter, and whether the agent can find a reasonable one on its own. For a familiar kind of change in code it can read, it often can. For anything that touches a public API, a migration, security or someone else's work, or that depends on context the agent can't see, spell out the part that matters, or say what you'd object to. An out-of-scope list (no changes to the public API, no new dependencies, nothing that needs a migration) bounds the route without dictating it. And if a route reaches the goal in a way you wouldn't accept, the contract was missing something. Add it there, so the next agent reads it too, instead of correcting this one in chat.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Each role owns part of it, and only part</h2>
+  <div class="prose-only">
+    <p>A shared document that anyone can edit isn't much of a contract. What makes it hold is that each role can change only the fields it owns, and the system enforces it, so no prompt has to.</p>
+    <p>The agent doing the work can record what it did, link the change to its task and leave notes. It can't mark its own task complete. A reviewer can mark tasks and phases done, but it can't touch the work itself. Only a person can resolve a decision. Once the contract is created, nobody can go back and rewrite its scaffolding. An agent can't edit the plan it's in the middle of executing.</p>
+    <p>This is the same idea as removing capabilities instead of writing rules. "Don't approve your own work" is a suggestion. An implementer that has no way to set a task's status doesn't need to be told.</p>
+  </div>
+  <div class="figure rise">
+    <div class="mock">
+      <div class="who">a contract, and who can change each part · illustration</div>
+      <ul class="fields">
+        <li><span>Goal, phases, tasks and acceptance criteria</span><em class="own-locked">nobody, once it's created</em></li>
+        <li><span>Progress notes and links to the work</span><em class="own-impl">the agent doing the work</em></li>
+        <li><span>Whether a task or phase is done</span><em class="own-rev">a reviewer</em></li>
+        <li><span>The answer to a decision</span><em>a person</em></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Catch it at the plan</h2>
+  <div class="prose-only">
+    <p>The contract is also where you catch mistakes while they're cheap. Redirecting an agent before it starts costs minutes. Redirecting it after a day of implementation costs a day.</p>
+    <p>That's why the plan is a phase with its own gate, and why plan reviewers do more than read for sense. They check that everything the plan depends on actually exists, in the place where the work will run. A plan can be perfectly reasonable on paper and still assume a tool, a data source or a permission the executing agent will never have. The more you constrain agents, the more important this check becomes, because the planner can't see the walls unless someone looks for them. I've watched a confident plan burn most of a day of agent time on that, when one quick search during planning would have caught it.</p>
+    <p>When alignment depends on the conversation, it lasts only as long as the context does. A contract doesn't guarantee the agent reads it correctly or notices every question that should go to a person. What it does is make drift visible and bounded. Fields have owners, decisions are itemized, plans get checked against reality, and divergence surfaces at a gate instead of at the end. That's a big part of what I mean by runtime alignment.</p>
+  </div>
+</section>

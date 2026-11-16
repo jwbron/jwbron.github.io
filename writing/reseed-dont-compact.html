@@ -1,28 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="essay-page">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reseed, don't compact · James Wiesebron</title>
-  <meta name="description" content="Long agent work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core that holds the intent, and rebuild from it on purpose.">
+  <title>Reseed, don&#x27;t compact · James Wiesebron</title>
+  <meta name="description" content="Long agent work shouldn&#x27;t depend on a summarizer deciding what to forget. Keep a small, fixed core that holds the intent, and rebuild from it on purpose.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://jameswiesebron.com/writing/reseed-dont-compact.html">
+  <link rel="alternate" type="application/atom+xml" title="James Wiesebron" href="../feed.xml">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Reseed, don&#x27;t compact · James Wiesebron">
-  <meta property="og:description" content="Long agent work shouldn't depend on a summarizer deciding what to forget. Keep a small, fixed core that holds the intent, and rebuild from it on purpose.">
+  <meta property="og:description" content="Long agent work shouldn&#x27;t depend on a summarizer deciding what to forget. Keep a small, fixed core that holds the intent, and rebuild from it on purpose.">
   <meta property="og:url" content="https://jameswiesebron.com/writing/reseed-dont-compact.html">
   <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta property="article:published_time" content="2026-10-22">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=b9ddf1dc">
+  <link rel="stylesheet" href="../style.css?v=0c2cd0ba">
+  <link rel="stylesheet" href="../essay.css?v=4c338137">
   <script src="../theme.js?v=a2d527c1"></script>
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
@@ -30,63 +34,107 @@
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
+      <a href="../#about">about</a>
       <a href="../#contact">contact</a>
     </nav>
   </header>
 
-  <main id="post" class="post">
-    <article>
-      <header class="post-head">
-        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Memory</p>
-        <h1>Reseed, don't compact</h1>
-        <p class="post-dek">Long agent work shouldn't depend on a summarizer deciding what to forget.</p>
-        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
-      </header>
+  <header class="essay-hero">
+    <span class="deco circle" style="top: 12%; right: 9vw; width: 9vw; aspect-ratio: 1"></span>
+    <span class="deco diamond" style="top: 62%; right: 20vw; width: 3.2vw; aspect-ratio: 1"></span>
+    <span class="deco ring" style="bottom: -7vw; right: 4vw; width: 13vw; aspect-ratio: 1"></span>
+    <p class="kicker rise"><a href="intentional-agentic-work.html">Runtime alignment</a> · Memory</p>
+    <h1 class="title rise">Reseed, don't compact</h1>
+    <p class="dek rise">Long agent work shouldn't depend on a summarizer deciding what to forget.</p>
+    <p class="byline rise">James Wiesebron · <time datetime="2026-10-22">October 22, 2026</time> · Examples from my personal research systems</p>
+  </header>
 
-      <p>Every long-running agent eventually fills its context window. What happens next is usually automatic. As the window nears full, the harness summarizes the conversation and carries on with the summary.</p>
+  <main id="post">
 
-      <p>The trouble is what it forgets, and it's one of the most common runtime alignment failures there is. A summary keeps the gist and drops the specifics, and in structured work the specifics are what matters. Which version did I last review? Which objections are still open? What conditions did I attach to my approval? Those are the details a summarizer treats as noise, and losing them doesn't raise an error. The agent just keeps working, slightly wrong. Long before that point, a nearly full window has already started to dull the agent's judgment.</p>
+<section class="chapter">
+  <div class="story" data-story="reseed">
+    <div class="prose">
+      <p data-step="1">Every long-running agent eventually fills its context window. What happens next is usually automatic. As the window nears full, the harness summarizes the conversation and carries on with the summary.</p>
+      <p data-step="2">The trouble is what it forgets, and it's one of the most common runtime alignment failures there is. A summary keeps the gist and drops the specifics, and in structured work the specifics are what matters. Which version did I last review? Which objections are still open? What conditions did I attach to my approval? Those are the details a summarizer treats as noise, and losing them doesn't raise an error. The agent just keeps working, slightly wrong. Long before that point, a nearly full window has already started to dull the agent's judgment.</p>
+      <p data-step="3">The usual answer is a bigger window. That only moves the cliff. The better answer is to decide up front what must never be lost, and to make keeping it a property of the system instead of something you hope survives a summary.</p>
+    </div>
+    <div class="visual">
+      <div class="win-row compact">
+        <b class="lane-title">Compact when full</b>
+        <div class="win"><div class="win-fill"><i class="stripes"></i></div><span class="mark cliff">auto-summary</span></div>
+        <div class="keep"><span class="lost">last version reviewed</span><span class="lost">open objections</span><span class="lost">conditions on approval</span><span class="gist">the gist</span></div>
+      </div>
+      <div class="win-row reseed">
+        <b class="lane-title">Rebuild from a core</b>
+        <div class="win"><div class="win-core">core</div><div class="win-fill"></div><span class="mark thresh">rebuild</span><span class="mark cliff">auto-summary</span></div>
+        <div class="keep"><span>last version reviewed</span><span>open objections</span><span>conditions on approval</span></div>
+      </div>
+      <p class="small">Illustration.</p>
+    </div>
+  </div>
+  <p class="pullquote rise">The usual answer is a bigger window. That only moves the cliff.</p>
+</section>
 
-      <p>The usual answer is a bigger window. That only moves the cliff. The better answer is to decide up front what must never be lost, and to make keeping it a property of the system instead of something you hope survives a summary.</p>
+<section class="chapter">
+  <h2>A small, fixed core</h2>
+  <div class="prose-only">
+    <p>In the design I use, every agent works from a protected core that stays resident the whole time. It's small, and it holds only what the agent can't afford to lose. That means the role's job, the task as the person actually stated it, the binding instructions that came with it, and the current state of the work: what was last reviewed, which objections are open and what conditions are outstanding.</p>
+    <p>The core is never written by the agent. The state section is derived mechanically from the record of what actually happened, so it can't drift from reality the way an agent's own recollection can. It's also byte-stable. The same inputs always produce the same text, with fixed ordering, capped sections and no timestamps. That makes the core a stable prefix the model provider can cache, and in my measurements it was served from cache on nearly every call. It also means rebuilding the agent from the core always gives you the same starting point.</p>
+  </div>
+</section>
 
-      <h2>A small, fixed core</h2>
+<section class="chapter">
+  <h2>Everything else, on demand</h2>
+  <div class="prose-only">
+    <p>The bulky material, like the actual changes to review and the history of the discussion, doesn't get pasted into the core. The core holds pointers to it instead, meaning the exact query to run or the exact place to read, and the agent pulls what it needs for the task in front of it.</p>
+    <p>Pulling material on demand doesn't keep the window from filling. Whatever the agent pulls stays in context until it's cleared. What it buys is a smaller permanent footprint and, more importantly, the ability to pull it all again. The reseed keeps the window bounded, and the pointers make the reseed cheap.</p>
+  </div>
+</section>
 
-      <p>In the design I use, every agent works from a protected core that stays resident the whole time. It's small, and it holds only what the agent can't afford to lose. That means the role's job, the task as the person actually stated it, the binding instructions that came with it, and the current state of the work: what was last reviewed, which objections are open and what conditions are outstanding.</p>
+<section class="chapter">
+  <h2>Rebuild on purpose</h2>
+  <div class="prose-only">
+    <p>Before each new piece of work, the agent's context gets measured. If it's still comfortably under a threshold, the agent picks up where it left off with its warm context intact. If it's past the threshold, set well below the point where the automatic summary would kick in, the agent doesn't resume at all. It starts fresh from the core and pulls what it needs again.</p>
+    <p>The measurement has to be how full the window actually is, not how many tokens you were billed for, because cached tokens are cheap to pay for but still take up room. And any uncertainty should tip toward rebuilding. A fresh start only costs some recent detail, because everything that matters lives in the core. A wrong resume can carry an overfull window straight into the summarizer and lose what the core was protecting.</p>
+  </div>
+</section>
 
-      <p>The core is never written by the agent. The state section is derived mechanically from the record of what actually happened, so it can't drift from reality the way an agent's own recollection can. It's also byte-stable. The same inputs always produce the same text, with fixed ordering, capped sections and no timestamps. That makes the core a stable prefix the model provider can cache, and in my measurements it was served from cache on nearly every call. It also means rebuilding the agent from the core always gives you the same starting point.</p>
+<section class="chapter">
+  <h2>An agent's notes are claims</h2>
+  <div class="prose-only">
+    <p>Agents write things down as they work, like summaries of what they've reviewed or assessments of a colleague's progress. Those notes are useful, but they're claims. In that design, each note is stamped with the version of the work it describes, and when the work moves on, the note is marked stale and checked again against the actual changes rather than trusted. Memory is kept short, too. The running log of decisions is capped and condensed as it's written, so it never turns into a second, unbounded history.</p>
+    <p>There's also an escape hatch. Sometimes a resumed session carries a wrong conclusion, like believing it's still blocked on a question that was answered an hour ago, and it will faithfully repeat that every time it wakes up. An operator can evict that session so the next start rebuilds from the true state of the work.</p>
+  </div>
+</section>
 
-      <h2>Everything else, on demand</h2>
+<section class="chapter">
+  <h2>Why not sub-agents?</h2>
+  <div class="prose-only">
+    <p>The other way to keep a window from filling is to split the work across sub-agents, each with its own throwaway context, and only pass back what they found. That keeps the main agent's window small, though each sub-agent can still fill its own. I don't make it the default because it adds latency, means more prompts to keep cacheable, and introduces a new kind of error in how the work gets divided. In this design it's an escalation for the rare task that's too big for one context.</p>
+  </div>
+</section>
 
-      <p>The bulky material, like the actual changes to review and the history of the discussion, doesn't get pasted into the core. The core holds pointers to it instead, meaning the exact query to run or the exact place to read, and the agent pulls what it needs for the task in front of it.</p>
+<section class="chapter">
+  <h2>Why this needs structure</h2>
+  <div class="prose-only">
+    <p>This only works because there's something stable to rebuild from. In <a href="intentional-agentic-work.html">intentional agentic work</a>, the intent lives in a <a href="give-agents-a-contract.html">contract</a> and the state of the work lives in a record, so the core can be derived from them at any time. In a free-form chat, the only record of what matters is the chat itself, and that's the thing the summarizer is about to compress.</p>
+  </div>
+</section>
 
-      <p>Pulling material on demand doesn't keep the window from filling. Whatever the agent pulls stays in context until it's cleared. What it buys is a smaller permanent footprint and, more importantly, the ability to pull it all again. The reseed keeps the window bounded, and the pointers make the reseed cheap.</p>
-
-      <h2>Rebuild on purpose</h2>
-
-      <p>Before each new piece of work, the agent's context gets measured. If it's still comfortably under a threshold, the agent picks up where it left off with its warm context intact. If it's past the threshold, set well below the point where the automatic summary would kick in, the agent doesn't resume at all. It starts fresh from the core and pulls what it needs again.</p>
-
-      <p>The measurement has to be how full the window actually is, not how many tokens you were billed for, because cached tokens are cheap to pay for but still take up room. And any uncertainty should tip toward rebuilding. A fresh start only costs some recent detail, because everything that matters lives in the core. A wrong resume can carry an overfull window straight into the summarizer and lose what the core was protecting.</p>
-
-      <h2>An agent's notes are claims</h2>
-
-      <p>Agents write things down as they work, like summaries of what they've reviewed or assessments of a colleague's progress. Those notes are useful, but they're claims. In that design, each note is stamped with the version of the work it describes, and when the work moves on, the note is marked stale and checked again against the actual changes rather than trusted. Memory is kept short, too. The running log of decisions is capped and condensed as it's written, so it never turns into a second, unbounded history.</p>
-
-      <p>There's also an escape hatch. Sometimes a resumed session carries a wrong conclusion, like believing it's still blocked on a question that was answered an hour ago, and it will faithfully repeat that every time it wakes up. An operator can evict that session so the next start rebuilds from the true state of the work.</p>
-
-      <h2>Why not sub-agents?</h2>
-
-      <p>The other way to keep a window from filling is to split the work across sub-agents, each with its own throwaway context, and only pass back what they found. That keeps the main agent's window small, though each sub-agent can still fill its own. I don't make it the default because it adds latency, means more prompts to keep cacheable, and introduces a new kind of error in how the work gets divided. In this design it's an escalation for the rare task that's too big for one context.</p>
-
-      <h2>Why this needs structure</h2>
-
-      <p>This only works because there's something stable to rebuild from. In <a href="give-agents-a-contract.html">intentional agentic work</a>, the intent lives in a contract and the state of the work lives in a record, so the core can be derived from them at any time. In a free-form chat, the only record of what matters is the chat itself, and that's the thing the summarizer is about to compress.</p>
-
-      <footer class="post-foot">
-        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
-        <p><a href="../#writing">← More writing</a></p>
-      </footer>
-    </article>
   </main>
 
+  <nav class="series-nav" aria-label="More in this series">
+    <a class="prev" href="nothing-to-decide-is-a-claim.html"><span>Previous</span><b>"Nothing to decide" is a claim</b></a>
+    <a class="next" href="agreement-isnt-verification.html"><span>Next</span><b>Agreement isn't verification</b></a>
+  </nav>
+
+  <footer class="site-foot">
+    <p>Part of a series on <a href="intentional-agentic-work.html">runtime alignment</a>. If you're working through something similar, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+    <p><a href="../#writing">All writing</a> · <a href="https://github.com/jwbron">GitHub</a> · <a href="https://www.linkedin.com/in/james-wiesebron/">LinkedIn</a> · <a href="../feed.xml">RSS</a></p>
+  </footer>
+
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../essay.js?v=7502a7b5" defer></script>
 </body>
 </html>

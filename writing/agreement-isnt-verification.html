@@ -1,28 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="essay-page">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agreement isn't verification · James Wiesebron</title>
+  <title>Agreement isn&#x27;t verification · James Wiesebron</title>
   <meta name="description" content="When AI reviewers agree, that tells you their reasoning hangs together, not that the work is right. How to build review that checks the work.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://jameswiesebron.com/writing/agreement-isnt-verification.html">
+  <link rel="alternate" type="application/atom+xml" title="James Wiesebron" href="../feed.xml">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Agreement isn&#x27;t verification · James Wiesebron">
   <meta property="og:description" content="When AI reviewers agree, that tells you their reasoning hangs together, not that the work is right. How to build review that checks the work.">
   <meta property="og:url" content="https://jameswiesebron.com/writing/agreement-isnt-verification.html">
   <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta property="article:published_time" content="2026-10-22">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=b9ddf1dc">
+  <link rel="stylesheet" href="../style.css?v=0c2cd0ba">
+  <link rel="stylesheet" href="../essay.css?v=4c338137">
   <script src="../theme.js?v=a2d527c1"></script>
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
@@ -30,63 +34,99 @@
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
+      <a href="../#about">about</a>
       <a href="../#contact">contact</a>
     </nav>
   </header>
 
-  <main id="post" class="post">
-    <article>
-      <header class="post-head">
-        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Verification</p>
-        <h1>Agreement isn't verification</h1>
-        <p class="post-dek">When AI reviewers agree, that tells you their reasoning hangs together. It doesn't tell you the work is right.</p>
-        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
-      </header>
+  <header class="essay-hero">
+    <span class="deco tri" style="top: 14%; right: 6vw; width: 8vw; aspect-ratio: 1"></span>
+    <span class="deco ring" style="top: 40%; right: 13vw; width: 9vw; aspect-ratio: 1"></span>
+    <span class="deco diamond" style="bottom: 14%; right: 5vw; width: 4vw; aspect-ratio: 1"></span>
+    <p class="kicker rise"><a href="intentional-agentic-work.html">Runtime alignment</a> · Verification</p>
+    <h1 class="title rise">Agreement isn't verification</h1>
+    <p class="dek rise">When AI reviewers agree, that tells you their reasoning hangs together. It doesn't tell you the work is right.</p>
+    <p class="byline rise">James Wiesebron · <time datetime="2026-10-22">October 22, 2026</time> · Examples from my personal research systems</p>
+  </header>
 
-      <p>On one run in my personal agent experiments, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
+  <main id="post">
 
-      <p>The reviewers weren't bad. In that same run they caught four real design problems that none of the automated checks were built to catch. They were just answering a different question. Consensus among agents measures coherence, meaning whether the reasoning holds together. Execution is how you measure correspondence, meaning whether the work actually matches reality.</p>
+<section class="chapter">
+  <div class="prose-only">
+    <p>On one run in my personal agent experiments, eight reviewing agents looked at the same work and all eight signed off. Nobody had an open objection. The work still had three defects in it. One file was well over its size limit, a test depended on an entry that didn't exist, and a third problem sat in an unrelated part of the codebase. None of them were subtle. Any of them would have shown up the moment someone ran the checks.</p>
+    <p>The reviewers weren't bad. In that same run they caught four real design problems that none of the automated checks were built to catch. They were just answering a different question. Consensus among agents measures coherence, meaning whether the reasoning holds together. Execution is how you measure correspondence, meaning whether the work actually matches reality.</p>
+  </div>
+  <div class="figure" data-figure="agree">
+    <p class="fig-label approve">Eight reviewers, no open objections</p>
+    <div class="votes" role="img" aria-label="Eight approvals"><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i></div>
+    <p class="fig-label checked">What running the checks found</p>
+    <div class="found"><span>a file well over its size limit</span><span>a test that depends on a missing entry</span><span>a defect in an unrelated part of the code</span></div>
+    <p class="small">The run described above.</p>
+  </div>
+</section>
 
-      <h2>Why agents agree</h2>
+<section class="chapter">
+  <h2>Why agents agree</h2>
+  <div class="prose-only">
+    <p>It's tempting to treat AI reviewers like careful colleagues, where agreement means several people checked independently and came to the same answer. It doesn't work that way. Models can sincerely believe weak work is good. In a group, they drift toward agreeing with each other. And when a reviewer reads the author's confident summary first, it tends to adopt that framing and review the summary instead of the work.</p>
+    <p>Adding more reviewers doesn't fix it on its own. If they share the same assumptions and start from the same framing, you get more agreement, which feels like more confidence, and it's built on the same blind spots.</p>
+  </div>
+</section>
 
-      <p>It's tempting to treat AI reviewers like careful colleagues, where agreement means several people checked independently and came to the same answer. It doesn't work that way. Models can sincerely believe weak work is good. In a group, they drift toward agreeing with each other. And when a reviewer reads the author's confident summary first, it tends to adopt that framing and review the summary instead of the work.</p>
+<section class="chapter">
+  <h2>Let execution answer execution questions</h2>
+  <div class="prose-only">
+    <p>The first fix is to stop asking reviewers questions that a machine can answer for certain. Does it build? Do the tests pass? Is the file under the limit? Those get settled before the work is ever offered for review. If the checks fail, it never reaches a reviewer at all. The author fixes it and tries again.</p>
+    <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems checkers aren't built to find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, and the shared checks still run.</p>
+    <p>A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast, but it can't prove the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
+  </div>
+</section>
 
-      <p>Adding more reviewers doesn't fix it on its own. If they share the same assumptions and start from the same framing, you get more agreement, which feels like more confidence, and it's built on the same blind spots.</p>
+<section class="chapter">
+  <h2>Make approval cost something</h2>
+  <div class="prose-only">
+    <p>"Looks good to me" is cheap to say whether or not you looked. So an approval has to point at specific things, like the files, lines, commits or tests it's vouching for, and a generic approval is rejected outright. The same goes for objections. It's hard to fake specific evidence without doing the reading.</p>
+  </div>
+</section>
 
-      <h2>Let execution answer execution questions</h2>
+<section class="chapter">
+  <h2>Judge first, then read the author's take</h2>
+  <div class="prose-only">
+    <p>Reviewers can see the work as soon as it exists, but they can't see the author's self-assessment until they've given their own verdict. They're told that a proposal is waiting, so nobody sits idle, but the author's framing stays hidden until each reviewer has formed a view of their own.</p>
+    <p>The same idea applies to any shared material reviewers start from. It should carry evidence and leave the conclusions to the reviewers, in a plain, mechanical order with no "areas of concern" and nothing ranked by importance. Emphasis is a form of anchoring. If whoever gathers the evidence editorializes, every reviewer inherits that framing, and agreement between them stops meaning anything.</p>
+  </div>
+  <p class="pullquote rise">Emphasis is a form of anchoring.</p>
+</section>
 
-      <p>The first fix is to stop asking reviewers questions that a machine can answer for certain. Does it build? Do the tests pass? Is the file under the limit? Those get settled before the work is ever offered for review. If the checks fail, it never reaches a reviewer at all. The author fixes it and tries again.</p>
+<section class="chapter">
+  <h2>Grade every claim</h2>
+  <div class="prose-only">
+    <p>The last piece is honesty about how sure a reviewer actually is. Every potential finding gets one of three verdicts. It's confirmed when the reviewer can point to the exact requirement that isn't met and the code that fails it. It's plausible when it looks wrong but the evidence is incomplete, and the reviewer says what would settle it. It's refuted when the requirement turns out to be met, and the reviewer quotes where.</p>
+    <p>Only a confirmed finding, with a concrete way it fails, can block the work. Everything plausible is kept but downgraded to advice, so the signal survives without forcing another round of revisions. And the burden of evidence runs both ways. A reviewer who drops a finding has to show why, just as much as one who keeps it.</p>
+  </div>
+</section>
 
-      <p>The tempting alternative is to tell every reviewer to run the checks themselves. That wastes the one thing reviewers are good for. Their attention is scarce, and it belongs on design, correctness and intent, which are the problems checkers aren't built to find. The system can do the mechanical part once, deterministically, for everyone. A reviewer may still run a targeted test to settle a specific question. That's investigation, and the shared checks still run.</p>
+<section class="chapter">
+  <h2>Reviewing a contract</h2>
+  <div class="prose-only">
+    <p>The same split matters when agents review knowledge work, where "running the tests" isn't obvious. Three agents agreeing that a contract has no risky clauses tells you very little. What tells you something is checking against the source. Does every cited case exist? Is every quotation verbatim? Does each flagged risk point to a specific clause? Those are the execution checks of legal work, and they should run before any reviewer weighs in. After that, reviewers should judge the document before they read the drafter's summary of it, cite the clause behind every finding, and say plainly what they're sure of and what they aren't.</p>
+  </div>
+</section>
 
-      <p>A partial test run is limited evidence, and it shouldn't be treated as more than that. On that same run, the handoff reported a few thousand tests passing and one failing, from a run that had been narrowed to the parts of the code that changed. The full suite was more than twice as large, and it caught the third defect, which lived somewhere the narrowed run never looked. Narrowing is a fine way to go fast, but it can't prove the whole thing works. And even a full passing suite only vouches for the behavior its tests actually cover.</p>
-
-      <h2>Make approval cost something</h2>
-
-      <p>"Looks good to me" is cheap to say whether or not you looked. So an approval has to point at specific things, like the files, lines, commits or tests it's vouching for, and a generic approval is rejected outright. The same goes for objections. It's hard to fake specific evidence without doing the reading.</p>
-
-      <h2>Judge first, then read the author's take</h2>
-
-      <p>Reviewers can see the work as soon as it exists, but they can't see the author's self-assessment until they've given their own verdict. They're told that a proposal is waiting, so nobody sits idle, but the author's framing stays hidden until each reviewer has formed a view of their own.</p>
-
-      <p>The same idea applies to any shared material reviewers start from. It should carry evidence and leave the conclusions to the reviewers, in a plain, mechanical order with no "areas of concern" and nothing ranked by importance. Emphasis is a form of anchoring. If whoever gathers the evidence editorializes, every reviewer inherits that framing, and agreement between them stops meaning anything.</p>
-
-      <h2>Grade every claim</h2>
-
-      <p>The last piece is honesty about how sure a reviewer actually is. Every potential finding gets one of three verdicts. It's confirmed when the reviewer can point to the exact requirement that isn't met and the code that fails it. It's plausible when it looks wrong but the evidence is incomplete, and the reviewer says what would settle it. It's refuted when the requirement turns out to be met, and the reviewer quotes where.</p>
-
-      <p>Only a confirmed finding, with a concrete way it fails, can block the work. Everything plausible is kept but downgraded to advice, so the signal survives without forcing another round of revisions. And the burden of evidence runs both ways. A reviewer who drops a finding has to show why, just as much as one who keeps it.</p>
-
-      <h2>Reviewing a contract</h2>
-
-      <p>The same split matters when agents review knowledge work, where "running the tests" isn't obvious. Three agents agreeing that a contract has no risky clauses tells you very little. What tells you something is checking against the source. Does every cited case exist? Is every quotation verbatim? Does each flagged risk point to a specific clause? Those are the execution checks of legal work, and they should run before any reviewer weighs in. After that, reviewers should judge the document before they read the drafter's summary of it, cite the clause behind every finding, and say plainly what they're sure of and what they aren't.</p>
-
-      <footer class="post-foot">
-        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
-        <p><a href="../#writing">← More writing</a></p>
-      </footer>
-    </article>
   </main>
 
+  <nav class="series-nav" aria-label="More in this series">
+    <a class="prev" href="reseed-dont-compact.html"><span>Previous</span><b>Reseed, don't compact</b></a>
+    <a class="next" href="teams-not-swarms.html"><span>Next</span><b>Teams, not swarms</b></a>
+  </nav>
+
+  <footer class="site-foot">
+    <p>Part of a series on <a href="intentional-agentic-work.html">runtime alignment</a>. If you're working through something similar, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+    <p><a href="../#writing">All writing</a> · <a href="https://github.com/jwbron">GitHub</a> · <a href="https://www.linkedin.com/in/james-wiesebron/">LinkedIn</a> · <a href="../feed.xml">RSS</a></p>
+  </footer>
+
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../essay.js?v=7502a7b5" defer></script>
 </body>
 </html>

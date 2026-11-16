@@ -216,6 +216,14 @@
     }
 
     .cover { cursor: pointer; }
+    /* The title sits on a card, so it stays readable over the scene behind it. */
+    .cover > div {
+      padding: 1.5rem 1.9rem 1.4rem;
+      background: var(--card);
+      border: var(--line);
+      border-radius: 0.8rem 1.8rem 0.8rem 1.8rem;
+      box-shadow: 6px 6px 0 var(--line-c);
+    }
     .cover[hidden], .end[hidden] { display: none; }
 
     .cover h1, .end h2 {
@@ -250,7 +258,9 @@
 
     .end h2 { font-size: clamp(1.6rem, 7vw, 2.2rem); }
     .end p { margin: 0 0 0.8rem; text-wrap: balance; }
-    .end .note { font-size: 0.9rem; color: var(--ink-2); }
+    .end .card { max-height: 100%; overflow-y: auto; }
+    .end ul { display: grid; gap: 0.5rem; margin: 0 0 0.4rem; padding: 0; list-style: none; text-align: left; font-size: 0.9rem; }
+    .end li a { margin-left: 0.2rem; font-weight: 700; white-space: nowrap; color: inherit; text-decoration-thickness: 2px; text-underline-offset: 0.22em; text-decoration-color: var(--cobalt); }
 
     .actions {
       display: flex;
@@ -302,7 +312,7 @@
 
   <header class="bar">
     <a class="pill home" href="../">← home</a>
-    <button class="pill" id="mute" type="button" aria-pressed="false">sound on</button>
+    <button class="pill" id="mute" type="button" aria-pressed="false">sound: on</button>
   </header>
 
   <div class="lines" id="lines" aria-live="polite"></div>
@@ -358,6 +368,11 @@
         "Every stone looks the same from here, so you test each one.",
       ],
       wrenOops: "Oops. That one looked fine to me too.",
+      walkHint: "Tap where you want to go. You test each new stone on the way.",
+      agreeWren: "That one looks fine.",
+      agreeMoss: "Looks fine to me!",
+      agreeFizz: "Agreed!",
+      agreedLine: "All three agreed. None of them had tested it.",
       ch2Done: "Testing every stone got you here.",
       ch3: { num: "3", name: "The rapids" },
       mossHello: "Leave it to me! Fastest way across.",
@@ -372,11 +387,17 @@
       fizzLit: "Oh! Now we can all see which ones won't hold.",
       wrenEnd: "Same time tomorrow?",
       endTitle: "The far shore",
-      endBody: [],
-      endNote: "This little walk is the idea behind my writing on runtime alignment.",
+      endLead: "That walk is how I think about working with AI agents.",
+      // Each beat of the walk, and the essay it comes from.
+      endBeats: [
+        ["You told Wren where you were going.", "Intent", "give-agents-a-contract"],
+        ["Moss picked the route. You pointed once.", "Decisions", "nothing-to-decide-is-a-claim"],
+        ["Three helpers agreed on a stone nobody had tested.", "Verification", "agreement-isnt-verification"],
+        ["The lantern checked every stone, so you didn't have to.", "Attention", "attention-is-all-you-need-to-protect"],
+      ],
       again: "Walk it again",
-      soundOn: "sound on",
-      soundOff: "sound off",
+      soundOn: "sound: on",
+      soundOff: "sound: off",
     };
 
     // ---------- palette ----------
@@ -988,6 +1009,14 @@
     let muted = false;
     let master = null;
     let echo = null;
+    // Out of view (scrolled past, or in a background tab) the music fades out and stops adding notes.
+    let away = false;
+    function setAway(v) {
+      if (v === away) return;
+      away = v;
+      if (master) master.gain.setTargetAtTime(away || muted ? 0 : 1, audio.currentTime, 0.25);
+    }
+    document.addEventListener("visibilitychange", () => setAway(document.hidden || paused));
     function wakeAudio() {
       if (!audio) {
         try { audio = new AudioContext(); } catch { return; }
@@ -1065,6 +1094,7 @@
       let chord = 0;
       let beat = 0;
       const tick = () => {
+        if (away) return;
         const now = audio.currentTime + 0.05;
         if (beat % 8 === 0) {
           chord = (chord + (beat ? 1 : 0)) % CHORDS.length;
@@ -1110,7 +1140,7 @@
       $("mute").setAttribute("aria-pressed", String(muted));
       wakeAudio();
       startMusic();
-      if (master) master.gain.value = muted ? 0 : 1;
+      if (master) master.gain.setTargetAtTime(muted || away ? 0 : 1, audio.currentTime, 0.05);
     });
 
     // ---------- words on screen ----------
@@ -1516,6 +1546,8 @@
         burst(new V3(s.x, STONE_TOP, s.z), ["slop"], 8, { speed: 0.9, up: 1.2, life: 0.7 });
         if (s.lane === 1) {
           lines([COPY.ownSlop], 3.6, true);
+        } else if (s.agreed && !byLight) {
+          lines([COPY.agreedLine], 4.2, true);
         } else if (!byLight && !game.saidSlop) {
           game.saidSlop = true;
           setTimeout(() => speak(s.by || helpers.wren, COPY.wrenOops, 3), 400);
@@ -1546,6 +1578,15 @@
             sfx.place();
             ring(new V3(s.x, 0.03, s.z), "ripple");
             if (game.lit && s.lane === 3) reveal(s, true);
+            // The first stone on the long stretch that won't hold: everyone says it looks fine.
+            else if (s.lane === 3 && s.slop && s.z < MIST_Z && !game.saidAgree) {
+              game.saidAgree = true;
+              s.agreed = true;
+              // One at a time, so the bubbles don't pile up over the traveler.
+              speak(helpers.wren, COPY.agreeWren, 1.2);
+              setTimeout(() => speak(helpers.moss, COPY.agreeMoss, 1.2), 1300);
+              setTimeout(() => speak(helpers.fizz, COPY.agreeFizz, 1.5), 2600);
+            }
           }
         } else if (s.state === "sinking") {
           s.t += dt / 0.9;
@@ -1654,6 +1695,7 @@
     function begin() {
       if (game.started) return;
       game.started = true;
+      lastTapAt = time;
       wakeAudio();
       startMusic();
       if (EMBED) clearBubbles();
@@ -1748,6 +1790,8 @@
       const plan = planRoute("isle2", shoreCell(), { avoid: true, via: [x, z] });
       if (!plan) return;
       game.phase = null;
+      // You've pointed, so the hint asking you to point is no longer wanted.
+      dropLine(COPY.pointHint);
       ring(new V3(x, 0.05, z), "lamp");
       speak(helpers.moss, COPY.mossOk, 2.4);
       acceptRoute(plan);
@@ -1798,9 +1842,17 @@
       setTimeout(() => speak(helpers.wren, COPY.wrenEnd, 3.4), 4200);
       setTimeout(() => {
         $("end-title").textContent = COPY.endTitle;
-        $("end-body").innerHTML = COPY.endBody.map((t) => `<p>${t}</p>`).join("") + `<p class="note">${COPY.endNote}</p>`;
+        $("end-body").innerHTML = `<p class="note">${COPY.endLead}</p><ul>` +
+          COPY.endBeats.map(([t, name, slug]) => `<li>${t} <a href="../writing/${slug}.html" target="_top">${name}</a></li>`).join("") + "</ul>";
         $("again").textContent = COPY.again;
         $("end").hidden = false;
+        // The walk is over, so the chapter label goes.
+        titleEl.classList.remove("on", "pop");
+        const card = document.querySelector(".end .card");
+        if (EMBED && card.scrollHeight > card.clientHeight + 1) {
+          game.endFull = true;
+          Object.assign($("end").style, { left: "0", top: "0", width: "100%", height: "100%" });
+        }
         $("again").focus({ preventScroll: true });
       }, 8000);
     }
@@ -1819,6 +1871,17 @@
       }
       return best;
     }
+    // What to do next, for a player who has stopped. Shown again after a quiet stretch.
+    let lastTapAt = 0;
+    function currentHint() {
+      if (!game.started || game.ended) return null;
+      if (game.phase === "goal") return COPY.pickGoal;
+      if (game.phase === "point") return COPY.pointHint;
+      if (game.phase) return null;
+      if (game.ch === 1) return COPY.ch1Hint;
+      if (game.ch === 3 && !game.lit && mistSaidAt >= 0) return COPY.mistNudge;
+      return COPY.walkHint;
+    }
     let downAt = null;
     canvas.addEventListener("pointerdown", (e) => { downAt = { x: e.clientX, y: e.clientY, t: performance.now() }; });
     canvas.addEventListener("pointerup", (e) => {
@@ -1827,6 +1890,7 @@
       onTap(e);
     });
     function onTap(e) {
+      lastTapAt = time;
       if (EMBED && !game.started) return begin();
       if (!game.started || game.ended || traveler.busy) return;
       wakeAudio();
@@ -1962,9 +2026,12 @@
         linesEl2.style.left = `${cx}px`;
         linesEl2.style.top = `${focus.y + 52}px`;
         linesEl2.style.width = `${Math.min(focus.w - 32, 420)}px`;
-        Object.assign($("end").style, { left: `${focus.x}px`, top: `${focus.y}px`, width: `${focus.w}px`, height: `${focus.h}px` });
+        // The ending normally sits where the game does. If its card can't fit there, it gets the whole frame.
+        const area = game.endFull ? { x: 0, y: 0, w: W, h: H } : focus;
+        Object.assign($("end").style, { left: `${area.x}px`, top: `${area.y}px`, width: `${area.w}px`, height: `${area.h}px` });
         Object.assign($("title").style, { left: `${cx}px`, top: `${focus.y + 10}px` });
-        Object.assign(document.querySelector(".bar").style, { top: `${focus.y + 10}px`, right: "10px" });
+        // Low in the corner, clear of the page's own controls above the hero.
+        Object.assign(document.querySelector(".bar").style, { top: "auto", bottom: "4.6rem", right: "12px" });
       }
     }
     addEventListener("resize", resize);
@@ -1993,6 +2060,13 @@
 
       updateWalker(traveler, dt, true);
       updateTrail();
+      // Walking and talking count as activity, so the hint only returns after a quiet, still stretch.
+      if (lineBusy || traveler.path.length || traveler.step || traveler.busy) lastTapAt = time;
+      else if (time - lastTapAt > 9) {
+        const hint = currentHint();
+        if (hint) lines([hint], 4.5);
+        lastTapAt = time;
+      }
       for (const h of Object.values(helpers)) {
         if (h.appear !== undefined && h.appear < 1) {
           h.appear = Math.min(1, h.appear + dt * 2.2);
@@ -2110,13 +2184,14 @@
           const r = frameElement.getBoundingClientRect();
           paused = r.bottom < 0 || r.top > parent.innerHeight;
         } catch { paused = false; }
+        setAway(paused || document.hidden);
       }, 500);
       addEventListener("resize", () => setTimeout(resize, 50));
       setTimeout(resize, 300);
     }
 
     // Hooks for automated checks of the page.
-    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, setOwnStones, setGoal, setWaypoint, lightLantern, begin, planRoute, nextTo };
+    window.__river = { game, traveler, helpers, stones, tiles, camera, walkTo, findPath, setOwnStones, setGoal, setWaypoint, lightLantern, begin, planRoute, nextTo, finale, enterCh3, reveal, sound: () => ({ away, gain: master ? master.gain.value : null }) };
   </script>
 </body>
 </html>

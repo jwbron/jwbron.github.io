@@ -1,0 +1,71 @@
+<!--
+{
+  "description": "Models are good at judgment and unreliable at bookkeeping. Let plain code run the loop, and call the model only when there's something to decide.",
+  "date": "2026-10-22",
+  "title": "The model owns judgment, code owns the clock",
+  "kicker": "Control",
+  "dek": "Models are good at judgment and unreliable at bookkeeping. Give each job to the thing that's good at it.",
+  "examples": "Examples from my personal research systems"
+}
+-->
+
+<section class="chapter">
+  <div class="prose-only">
+    <p>Agents in a real workflow spend a lot of their time waiting. They wait for a review, for another agent's work, or for a person to answer a question. Left to manage that themselves, models improvise, and they improvise from whatever their training data suggests, which means sleeps, polling loops and repeated status checks.</p>
+    <p>In early versions of one of my research systems, where agents owned their own waiting, all of these showed up. One agent announced it was finished more than twenty times in a minute and a half. Another polled on a fixed schedule and missed an objection that had been sitting there for several minutes. Another waited for a signal that only its own next action could produce, and sat deadlocked for about half an hour. None of these are reasoning failures. The model was being asked to do bookkeeping, and bookkeeping is the thing it's worst at.</p>
+  </div>
+  <p class="pullquote rise">The model was being asked to do bookkeeping, and bookkeeping is the thing it's worst at.</p>
+</section>
+
+<section class="chapter">
+  <h2>When the model ends the loop</h2>
+  <div class="prose-only">
+    <p>If an agent has to hold a waiting loop and re-enter it after every step, then every re-entry is a point where it can stop. It writes a final message, and the loop is over. One model would reliably come back. Another model, given the same instructions, often didn't. You can tune a prompt until a particular model behaves, but you've only fixed it for that model, and only until the next release.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Turn it inside out</h2>
+  <div class="story" data-story="clock">
+    <div class="prose">
+      <p data-step="1">The fix is to stop asking the model to run the loop at all. Instead, a plain, deterministic orchestrator owns sequencing. It reads the current state of the work, works out what should happen next for each role, and waits when nothing needs doing. When something does, like a proposal to review or an objection to answer, it starts a fresh agent for that one event. The agent does its job, records its judgment and exits.</p>
+      <p data-step="2">A role is finished when the orchestrator records that it's finished. The orchestrator schedules the next step itself, so it works the same way whichever model is running.</p>
+      <p data-step="3">Before acting, each agent checks once more that its event is still current, so if someone else already handled it, it skips. At most one agent runs per event. And continuity doesn't come from a long-running session. It comes from a short memory file for each role plus the protected core described in <a href="reseed-dont-compact.html">Reseed, don't compact</a>, so a brand-new agent can pick up a review cycle where the last one left off.</p>
+    </div>
+    <div class="visual">
+      <div class="lane-row loop-a">
+        <b class="lane-title">The model runs the loop</b>
+        <div class="lane-flow"><span>work</span><span>"done"</span><span>poll</span><span>"done"</span><span>poll</span><span>"done"</span><span class="stall">stalled</span></div>
+      </div>
+      <div class="lane-row loop-b">
+        <b class="lane-title">Code runs the loop</b>
+        <div class="orch">
+          <span class="orch-label">orchestrator, in plain code</span>
+          <div class="orch-track"></div>
+          <div class="events">
+            <div class="ev"><span class="ev-name">a proposal to review</span><span class="agent">a fresh agent judges it and exits</span><i class="ev-done">✓</i></div>
+            <div class="ev"><span class="ev-name">an objection to answer</span><span class="agent">a fresh agent answers it and exits</span><i class="ev-done">✓</i></div>
+            <div class="ev"><span class="ev-name">a new version to review</span><span class="agent">a fresh agent judges it and exits</span><i class="ev-done">✓</i></div>
+          </div>
+          <p class="mem">Each new agent starts from a short memory file and the protected core.</p>
+        </div>
+      </div>
+      <p class="small">Illustration.</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>When nothing happens for a while</h2>
+  <div class="prose-only">
+    <p>Once the orchestrator owns the clock, it also has to decide what to do when nothing happens for a while. The obvious answer, which is to restart things a few times and then give up, turned out to be wrong. Some phases are legitimately quiet for a long stretch, and a restart cap would eventually kill perfectly healthy work. So idleness doesn't fail anything. Past a time budget, the orchestrator alerts a person, raises the priority if it keeps going, and keeps running. A person decides whether quiet means stuck.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Monitoring follows the same rule</h2>
+  <div class="prose-only">
+    <p>My first monitor for this ran a model over every observation. It was loud, with a steady stream of high-priority alerts that weren't real, including one where it mistook its own startup for an attack. People learned to ignore it. It was also useless at the moment it mattered, since real deadlocks showed up as vague alerts, or not at all.</p>
+    <p>The rebuilt version splits the job three ways. Deterministic detectors watch for problems they can prove, and the vast majority of observations end there, with no model involved. A model is only consulted on the ambiguous minority, and it advises rather than acts. A separate control plane carries out its advice, choosing from a short, fixed list of actions: nudge an agent, restart a group, or ask a person. Every action is deduplicated, rate-limited and logged. The advising agent can't open a decision on a person's behalf. Only the control plane can, through a path that's bounded and audited.</p>
+  </div>
+</section>

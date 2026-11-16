@@ -1,0 +1,739 @@
+/* Essay pages. Tokens, the masthead and link styles come from style.css.
+   An essay is a hero, then chapters. A chapter is either plain prose or a story:
+   prose beside a sticky figure that changes as each paragraph scrolls past.
+   essay.js drives every animation from the natural layout, so reduced motion or a
+   failed script leaves the complete static page. */
+
+html.essay-page {
+  --gutter: clamp(1rem, 4.5vw, 5.5rem);
+  font-size: clamp(16px, 0.55vw + 0.62rem, 21px);
+  scroll-behavior: auto;
+}
+
+.essay-page body {
+  line-height: 1.65;
+}
+
+.essay-page code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+/* a reading-progress line across the top, shown once the script is running */
+.progress {
+  display: none;
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: 6px;
+  background: var(--cobalt);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+html.motion .progress { display: block; }
+
+/* ---------- hero ---------- */
+
+.essay-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.3rem;
+  padding: clamp(3rem, 7vw, 5rem) var(--gutter) clamp(3rem, 6vw, 4.5rem);
+  border-bottom: var(--line);
+  overflow: clip;
+
+  &.tall { min-height: 82vh; }
+  & > p,
+  & > h1 { margin: 0; }
+}
+
+.kicker {
+  align-self: flex-start;
+  padding: 0.15rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 999px;
+
+  & a { text-decoration: none; }
+}
+
+.title {
+  /* stops short of the decorative shapes on the right */
+  max-width: min(17ch, 68vw);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5.2vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  overflow-wrap: break-word;
+}
+
+.essay-hero.tall .title { font-size: clamp(2.4rem, 6vw, 5.6rem); }
+
+.dek {
+  max-width: 36rem;
+  font-size: 1.25rem;
+  color: var(--ink-2);
+}
+
+.essay-hero .byline {
+  max-width: 34rem;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+/* decorative shapes, never data */
+.deco {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: var(--line);
+
+  &.circle { border-radius: 50%; background: var(--coral); }
+  &.diamond { background: var(--butter); rotate: 45deg; }
+  &.tri { border: 0; background: var(--peri); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  &.ring {
+    background: none;
+    border: clamp(0.8rem, 1.4vw, 1.4rem) solid var(--cobalt);
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    rotate: -45deg;
+  }
+}
+
+/* ---------- chapters ---------- */
+
+.chapter {
+  padding: clamp(3rem, 6vw, 5rem) var(--gutter) clamp(2rem, 4vw, 3rem);
+  border-bottom: var(--line);
+
+  &:nth-of-type(even) { background: var(--bg-2); }
+
+  & > h2,
+  & > .prose-only {
+    max-width: 40rem;
+    margin-inline: auto;
+  }
+
+  & > h2 {
+    margin-top: 0;
+    margin-bottom: 1.4rem;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  &:has(.story) > h2 { max-width: 92rem; }
+
+  & p {
+    margin: 0 0 1.15rem;
+    font-size: 1.12rem;
+  }
+
+  & .prose-only > p:last-child { margin-bottom: 0; }
+}
+
+.pullquote {
+  /* the same column as the prose, so it lines up with the text around it */
+  max-width: 40rem;
+  margin: 2.6rem auto !important;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem) !important;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 6px;
+    margin-bottom: 1rem;
+    background: var(--coral);
+  }
+}
+
+/* ---------- a story: prose beside a sticky figure ---------- */
+
+.story {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.45fr);
+  gap: 3rem;
+  max-width: 92rem;
+  margin: 0 auto;
+
+  & .prose { padding-bottom: 20vh; }
+}
+
+@media (min-width: 901px) {
+  html.motion .story .prose p[data-step] { padding-block: 26vh; margin: 0; }
+  html.motion .story .prose p[data-step]:first-child { padding-top: 4vh; }
+}
+
+.story .visual {
+  position: sticky;
+  top: 8vh;
+  height: 84vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 6px 36px 6px 6px;
+  overflow: clip;
+
+  & p { margin: 0; }
+}
+
+@media (max-width: 900px) {
+  .story { grid-template-columns: 1fr; gap: 1rem; }
+  .story .visual { order: -1; position: static; height: auto; min-height: 0; }
+  .story .prose { padding-bottom: 0; }
+  .essay-hero .deco { display: none; }
+  .title { max-width: 17ch; }
+}
+
+/* ---------- figure parts ---------- */
+
+.small { font-size: 0.9rem !important; color: var(--ink-2); }
+
+.pill {
+  align-self: flex-start;
+  padding: 0.35rem 1rem;
+  font-weight: 700;
+  color: var(--contrast-fg);
+  background: var(--contrast-bg);
+  border-radius: 999px;
+}
+
+.mock {
+  padding: 0.9rem 1.1rem;
+  font-size: 0.95rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 4px;
+
+  & p { font-size: 0.95rem; }
+  & .who { margin-bottom: 0.3rem; font-weight: 800; font-size: 0.8rem; color: var(--ink-2); }
+  & details { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px dashed var(--ink-2); color: var(--ink-2); }
+  & summary { font-weight: 700; cursor: pointer; }
+}
+
+.meter {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.meter-track {
+  position: relative;
+  height: 1.3rem;
+  background: var(--bg);
+  border: 2.5px solid var(--line-c);
+  border-radius: 999px;
+  overflow: hidden;
+
+  /* A second fill that only the next step animates, so two steps never drive the same width. */
+  & .meter-next { display: none; position: absolute; inset: 0 auto 0 0; width: 0; }
+}
+
+html.motion .meter-track .meter-next { display: block; }
+.meter-fill { height: 100%; width: 85%; background: var(--mint); }
+.lane-a .meter-fill { width: 18%; background: var(--coral); }
+
+.inbox { display: none; flex-wrap: wrap; gap: 0.4rem; }
+html.motion .inbox { display: flex; overflow: hidden; }
+
+.inbox div,
+.bin span,
+.lane-flow span {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: var(--card);
+  border: 2.5px solid var(--line-c);
+  border-radius: 4px 12px 4px 4px;
+}
+
+.bins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+
+.bin {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+  padding: 0.7rem;
+  border: var(--line);
+  border-radius: 6px;
+
+  & b { font-family: var(--display); font-weight: 600; font-size: 1.1rem; }
+  & span { font-size: 0.85rem; color: var(--ink); }
+  &.now { color: var(--on); background: var(--coral); }
+  &.later { color: var(--on); background: var(--butter); }
+  &.never { background: var(--card); border-style: dashed; }
+}
+
+.lane-row { display: grid; gap: 0.6rem; padding: 0.9rem 1rem; border: var(--line); border-radius: 6px; }
+.lane-title { font-family: var(--display); font-weight: 600; font-size: 1.1rem; }
+.lane-flow { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.lane-flow i { font-style: normal; font-weight: 800; }
+.lane-b { background: color-mix(in srgb, var(--mint) 25%, transparent); }
+
+.align-chain { display: flex; gap: 0.4rem; align-items: center; }
+@media (max-width: 900px) { .align-chain { flex-wrap: wrap; } }
+
+.node-box {
+  padding: 0.7rem 0.9rem;
+  background: var(--card);
+  border: var(--line);
+  border-radius: 6px;
+
+  & b { display: block; font-family: var(--display); font-weight: 600; font-size: 1.1rem; }
+  & span { font-size: 0.75rem; color: var(--ink-2); }
+  &.intent { color: var(--on); background: var(--butter); }
+  &.intent span { color: var(--on); }
+}
+
+.check {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-2);
+
+  & i {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    font-style: normal;
+    font-weight: 800;
+    color: var(--on);
+    background: var(--mint);
+    border: 2.5px solid var(--line-c);
+    border-radius: 50%;
+  }
+}
+
+.fence-box {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 1.7rem 0.7rem 0.7rem;
+  border: 3px dashed var(--cobalt);
+  border-radius: 14px;
+}
+
+.fence-tag { position: absolute; top: 0.35rem; left: 0.8rem; font-size: 0.8rem; font-weight: 800; color: var(--cobalt); }
+
+/* five trial runs. Each shows what it looked like, then what actually happened. */
+.runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  & > div {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 7rem;
+    height: 7rem;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border: var(--line);
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  & > div > span { position: relative; grid-area: 1 / 1; }
+  & .ok { color: var(--on); background: var(--mint); }
+  & .skipped { background: var(--card); }
+  & .hatch { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, var(--coral) 0 8px, var(--card) 8px 16px); }
+  & .look { display: none; }
+  & .truth { color: var(--ink); }
+  & .ok .truth { color: var(--on); }
+}
+
+html.motion .runs .look { display: block; }
+html.motion .runs .skipped { color: var(--on); background: var(--mint); }
+
+.grid-label { font-family: var(--display); font-weight: 600; font-size: 1.25rem !important; }
+.grid-label .before { display: none; }
+html.motion .grid-label .before { display: inline; }
+html.motion .grid-label .after { display: none; }
+
+.dots {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 0.6rem;
+
+  & i { aspect-ratio: 1; background: var(--mint); border: 2.5px solid var(--line-c); border-radius: 50%; }
+}
+
+html.motion .dots i { background: var(--coral); }
+
+/* ---------- figures outside a story: centered in the text column ---------- */
+
+.figure {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 44rem;
+  margin: 2.4rem auto 0;
+  padding: 0;
+
+  & p { margin: 0; }
+}
+
+.fig-label {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1rem !important;
+  letter-spacing: -0.01em;
+}
+
+/* small labeled chips, shared by several figures */
+.keep,
+.found,
+.verbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.keep span,
+.found span,
+.verbs > span {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: var(--card);
+  border: 2.5px solid var(--line-c);
+  border-radius: 4px 12px 4px 4px;
+}
+
+/* reseed: a context window as a bar, compacted or rebuilt from a core */
+.win-row { display: grid; gap: 0.7rem; padding: 0.9rem 1rem; border: var(--line); border-radius: 6px; }
+.win-row.reseed { background: color-mix(in srgb, var(--mint) 25%, transparent); }
+
+.win {
+  position: relative;
+  display: flex;
+  height: 2rem;
+  margin-top: 1.3rem;
+  background: var(--bg);
+  border: 2.5px solid var(--line-c);
+  border-radius: 6px;
+}
+
+.win-fill { flex: none; height: 100%; background: var(--peri); }
+.win-row.compact .win-fill { width: 28%; }
+.win-row.reseed .win-fill { width: 14%; }
+.stripes { display: block; height: 100%; background: repeating-linear-gradient(-45deg, transparent 0 6px, var(--card) 6px 12px); }
+
+.win-core {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--on);
+  background: var(--butter);
+  border-right: 2.5px solid var(--line-c);
+}
+
+/* a marker on the window: a label above a dashed line through the bar */
+.mark {
+  position: absolute;
+  top: -1.35rem;
+  translate: -50% 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 1rem;
+    height: 2.7rem;
+    border-left: 3px dashed var(--line-c);
+  }
+
+  /* the label hangs to the left of its line, so it never runs off a narrow figure */
+  &.cliff { left: 92%; translate: calc(-100% + 3px) 0; }
+  &.cliff::after { left: auto; right: 0; }
+  &.thresh { left: 60%; color: var(--cobalt); }
+  &.thresh::after { border-color: var(--cobalt); }
+}
+/* on a phone the two labels need more room between them */
+@media (max-width: 900px) { .mark.thresh { left: 42%; } }
+
+.keep .lost { opacity: 0.35; text-decoration: line-through; }
+.keep .gist { color: var(--on); background: var(--butter); }
+
+/* teams: who reviews whom, as a drawing */
+.teamsmap { width: 100%; height: auto; max-height: 100%; }
+.teamsmap text { font-family: var(--text); font-size: 20px; font-weight: 700; fill: var(--ink); }
+.teamsmap .tm-node rect { fill: var(--card); stroke: var(--line-c); stroke-width: 2.5; }
+.teamsmap .tm-node.maker rect { fill: var(--butter); }
+.teamsmap .tm-node.maker text { fill: #261d38; }
+.teamsmap .tm-all { stroke: var(--ink); stroke-width: 1.5; opacity: 0.08; }
+.teamsmap .tm-kept { stroke: var(--cobalt); stroke-width: 3.5; stroke-linecap: round; }
+.teamsmap .tm-obj line { stroke: var(--coral); stroke-width: 6; stroke-linecap: round; }
+.teamsmap .tm-obj rect { fill: var(--coral); stroke: var(--line-c); stroke-width: 2.5; }
+.teamsmap .tm-obj text { fill: #261d38; font-size: 17px; }
+.teamsmap .tm-count { font-family: var(--display); font-size: 21px; font-weight: 600; }
+.teamsmap .tm-count-all { display: none; }
+/* the drawing shrinks on a phone, so its lettering grows to stay readable */
+@media (max-width: 900px) {
+  .teamsmap text { font-size: 25px; }
+  .teamsmap .tm-obj text { font-size: 19px; }
+  .teamsmap .tm-count { font-size: 24px; }
+}
+html.motion .teamsmap .tm-count-all { display: inline; }
+
+/* clock: the model running the loop, beside code running it */
+.orch { display: grid; gap: 0.6rem; }
+.orch-label { font-size: 0.8rem; font-weight: 800; color: var(--cobalt); }
+.orch-track { height: 0.5rem; background: var(--cobalt); border-radius: 999px; }
+.events { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+@media (max-width: 900px) { .events { grid-template-columns: 1fr; gap: 0.9rem; } }
+
+.ev {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  padding: 0.6rem 0.7rem;
+  background: var(--card);
+  border: 2.5px solid var(--line-c);
+  border-radius: 4px 14px 4px 4px;
+
+  & .ev-name { font-weight: 800; font-size: 0.9rem; line-height: 1.25; }
+  & .agent { font-size: 0.8rem; line-height: 1.3; color: var(--ink-2); }
+}
+
+.ev-done {
+  position: absolute;
+  top: -0.7rem;
+  right: -0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--on);
+  background: var(--mint);
+  border: 2.5px solid var(--line-c);
+  border-radius: 50%;
+}
+
+.mem { font-size: 0.85rem !important; font-weight: 700; color: var(--ink-2); }
+.lane-flow .stall { color: var(--on); background: var(--coral); }
+
+/* agreement: eight approvals, then what the checks found */
+/* on a phone the eight marks shrink to stay on one row */
+@media (max-width: 900px) { .votes { gap: 0.3rem !important; } .votes i { width: 2.15rem !important; height: 2.15rem !important; } }
+.votes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  & i {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    font-style: normal;
+    font-weight: 800;
+    color: var(--on);
+    background: var(--mint);
+    border: 2.5px solid var(--line-c);
+    border-radius: 50%;
+  }
+}
+
+.found { margin-top: 0.6rem; }
+.found span { color: var(--on); background: var(--coral); }
+
+/* rows of "this thing, and who it belongs to": the contract's fields, and a list of questions considered */
+.fields,
+.considered {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  & li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.8rem;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 0.45rem;
+    border-top: 2px dashed var(--ink-2);
+  }
+
+  & span { font-weight: 700; }
+
+  & em {
+    padding: 0.05rem 0.6rem;
+    font-style: normal;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--on);
+    background: var(--butter);
+    border: 2px solid var(--line-c);
+    border-radius: 999px;
+  }
+
+  & .own-locked { color: var(--ink); background: var(--bg-2); }
+  & .own-impl { background: var(--mint); }
+  & .own-rev { background: var(--peri); }
+  & .mine { background: var(--mint); }
+}
+
+.cons { overflow: hidden; }
+.cons-head { margin-top: 0.7rem !important; font-size: 0.9rem !important; color: var(--ink-2); }
+.cons .pill { display: inline-block; margin-top: 0.8rem !important; font-size: 0.9rem !important; }
+
+/* boundaries: the gateway's actions, with merge simply not among them */
+.verbs > .slot { display: inline-grid; padding: 0; background: none; border: 0; }
+.slot > * { grid-area: 1 / 1; padding: 0.3rem 0.6rem; font-size: 0.95rem; font-weight: 700; border-radius: 4px 12px 4px 4px; }
+.verb-merge { display: none; color: var(--on); background: var(--coral); border: 2.5px solid var(--line-c); }
+.verb-merge em { font-weight: 400; }
+html.motion .verb-merge { display: block; }
+.verb-gone { color: var(--ink-2); border: 2.5px dashed var(--ink-2); }
+
+/* connectors: access granted a step at a time */
+.ladder { gap: 0.5rem; }
+
+.rung {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  width: var(--w);
+  min-width: min(100%, 15rem);
+  padding: 0.6rem 0.9rem;
+  font-weight: 700;
+  color: var(--on);
+  border: var(--line);
+  border-radius: 4px 18px 4px 4px;
+
+  & b { font-family: var(--display); font-weight: 800; }
+  &:nth-child(1) { --w: 46%; color: var(--ink); background: var(--card); border-style: dashed; }
+  &:nth-child(2) { --w: 64%; background: var(--mint); }
+  &:nth-child(3) { --w: 82%; background: var(--butter); }
+  &:nth-child(4) { --w: 100%; background: var(--coral); }
+}
+
+/* the first and last essays have one link, which keeps to its own side */
+@media (min-width: 40rem) {
+  .series-nav:has(a:only-child) { grid-template-columns: 1fr 1fr; }
+  .series-nav a.next:only-child { grid-column: 2; }
+}
+
+/* ---------- a map of the series: boxes in a row, each a link to its essay ---------- */
+
+.sysmap {
+  max-width: 72rem;
+  margin: 2.4rem auto 0;
+  padding: 0;
+
+  & .sm-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  & .sm-row.under { margin-top: 0.9rem; gap: 0.9rem; }
+
+  & i {
+    align-self: center;
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  & .sm-node {
+    flex: 1 1 0;
+    display: grid;
+    gap: 0.3rem;
+    align-content: start;
+    padding: 0.8rem 0.9rem;
+    text-decoration: none;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 4px 18px 4px 4px;
+    transition: translate 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  & .sm-node:hover { translate: -2px -2px; box-shadow: 4px 4px 0 var(--line-c); }
+  & .sm-node.you { color: var(--on); background: var(--butter); }
+  & .sm-node.wide { background: color-mix(in srgb, var(--mint) 30%, var(--card)); border-style: dashed; }
+  & b { font-family: var(--display); font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; }
+  & span { font-size: 0.85rem; line-height: 1.35; color: var(--ink-2); }
+  & .you span { color: var(--on); }
+
+  & figcaption {
+    margin-top: 0.9rem;
+    font-size: 0.85rem;
+    color: var(--ink-2);
+    text-align: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .sysmap .sm-row { flex-direction: column; }
+  .sysmap i { rotate: 90deg; }
+}
+
+/* ---------- the end of an essay ---------- */
+
+.series-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) 0;
+
+  & a {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1rem 1.2rem;
+    text-decoration: none;
+    background: var(--card);
+    border: var(--line);
+    border-radius: 4px 22px 4px 4px;
+    box-shadow: 4px 4px 0 var(--line-c);
+    transition: translate 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  & a:hover { translate: -2px -2px; box-shadow: 6px 6px 0 var(--line-c); }
+  & .next { text-align: right; border-radius: 22px 4px 4px 4px; }
+  & span { font-weight: 700; font-size: 0.8rem; color: var(--ink-2); }
+  & b { font-family: var(--display); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+}

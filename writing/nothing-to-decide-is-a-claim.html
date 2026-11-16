@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" class="essay-page">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>&quot;Nothing to decide&quot; is a claim · James Wiesebron</title>
+  <meta name="description" content="Agents settle questions that were yours when asking costs more than deciding. Track every decision until a person answers it, and make an agent that reports none list what it considered.">
+  <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://jameswiesebron.com/writing/nothing-to-decide-is-a-claim.html">
+  <link rel="alternate" type="application/atom+xml" title="James Wiesebron" href="../feed.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="&quot;Nothing to decide&quot; is a claim · James Wiesebron">
+  <meta property="og:description" content="Agents settle questions that were yours when asking costs more than deciding. Track every decision until a person answers it, and make an agent that reports none list what it considered.">
+  <meta property="og:url" content="https://jameswiesebron.com/writing/nothing-to-decide-is-a-claim.html">
+  <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta property="article:published_time" content="2026-11-15">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
+  <link rel="stylesheet" href="../style.css?v=0c2cd0ba">
+  <link rel="stylesheet" href="../essay.css?v=4c338137">
+  <script src="../theme.js?v=a2d527c1"></script>
+</head>
+<body>
+  <a class="skip" href="#post">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <a class="home" href="../" aria-label="James Wiesebron, home">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="mark-name">James Wiesebron</span>
+    </a>
+    <nav aria-label="Site">
+      <a href="../#writing">writing</a>
+      <a href="../#about">about</a>
+      <a href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <header class="essay-hero">
+    <span class="deco ring" style="top: 10%; right: 5vw; width: 13vw; aspect-ratio: 1"></span>
+    <span class="deco tri" style="top: 58%; right: 21vw; width: 4vw; aspect-ratio: 1"></span>
+    <span class="deco circle" style="bottom: 10%; right: 7vw; width: 7vw; aspect-ratio: 1"></span>
+    <p class="kicker rise"><a href="intentional-agentic-work.html">Runtime alignment</a> · Decisions</p>
+    <h1 class="title rise">"Nothing to decide" is a claim</h1>
+    <p class="dek rise">Agents settle questions that were yours, because asking is more work than deciding. Make every decision visible, including the ones they chose not to bring you.</p>
+    <p class="byline rise">James Wiesebron · <time datetime="2026-11-15">November 15, 2026</time> · Examples from my personal research systems</p>
+  </header>
+
+  <main id="post">
+
+<section class="chapter">
+  <div class="prose-only">
+    <p>In one of my research systems, agents raise a decision whenever they hit a choice that belongs to a person. For a while they could also report that a phase had no such choices, with a short written reason. Before long they were bringing me almost nothing.</p>
+    <p>The work hadn't become simpler. "Nothing here needs you" had become the cheapest thing an agent could say, and a paragraph of reasoning was easy to produce whether or not anyone had looked. The choices were still being made. The agents were making them.</p>
+    <p>This is one of the most common ways agent work goes wrong. The agent makes decisions that were yours to make, because asking is more work than deciding.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Decisions are part of the contract</h2>
+  <div class="prose-only">
+    <p>The most important thing a contract tracks is which questions are yours. When an agent hits a real choice, like a scope question, a tradeoff or anything a reasonable person would want a say in, it adds a decision to the <a href="give-agents-a-contract.html">contract</a> instead of resolving it in its head.</p>
+    <p>Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so a decision that's already been made isn't asked again. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, rather than a push forward with open questions.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>A decision should arrive ready to answer</h2>
+  <div class="prose-only">
+    <p>A decision reaches you as a question, with the options laid out, a recommendation and the evidence behind it. Everything else the agent is allowed to do keeps moving while you answer. Your attention goes to judgment instead of reconstruction.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>"Nothing to decide" is a claim</h2>
+  <div class="prose-only">
+    <p>Agents look for the path of least resistance, and the easiest decision to make is the one you never mention. If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
+    <p>So an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning instead of a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff.</p>
+    <p>Reviewers have a job here too. A draft that commits to a choice that belongs to a person gets sent back, even if the choice it made is a good one.</p>
+  </div>
+  <div class="figure" data-figure="decide">
+    <div class="mock">
+      <div class="who">an agent's report at the end of a phase · illustration</div>
+      <p><b>Decisions for you:</b> none.</p>
+      <div class="cons">
+        <p class="cons-head">What I considered, and why none of it needs you yet:</p>
+        <ul class="considered">
+          <li><span>Which cache should this use?</span><em class="mine">mine to make, a design call</em></li>
+          <li><span>Should the old endpoint go away?</span><em>yours, and better asked once there's a plan</em></li>
+          <li><span>What should the new flag be called?</span><em class="mine">mine to make, a naming call</em></li>
+        </ul>
+        <p class="pill">Confirm this list?</p>
+      </div>
+    </div>
+  </div>
+  <p class="pullquote rise">If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
+</section>
+
+<section class="chapter">
+  <h2>Watch for the quiet</h2>
+  <div class="prose-only">
+    <p>I only noticed the questions had stopped when I went back and looked. Quiet is easy to mistake for things going well. So what each phase raised, what it claimed didn't need me and what it considered are all kept on the record, where a slow drift toward silence is something I can see.</p>
+    <p>None of this is about being asked more often. Done well, people make fewer decisions, and better ones. The point is that the questions that are yours reach you, and you can see the ones that didn't.</p>
+  </div>
+</section>
+
+  </main>
+
+  <nav class="series-nav" aria-label="More in this series">
+    <a class="prev" href="give-agents-a-contract.html"><span>Previous</span><b>Give agents a contract, not a conversation</b></a>
+    <a class="next" href="reseed-dont-compact.html"><span>Next</span><b>Reseed, don't compact</b></a>
+  </nav>
+
+  <footer class="site-foot">
+    <p>Part of a series on <a href="intentional-agentic-work.html">runtime alignment</a>. If you're working through something similar, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+    <p><a href="../#writing">All writing</a> · <a href="https://github.com/jwbron">GitHub</a> · <a href="https://www.linkedin.com/in/james-wiesebron/">LinkedIn</a> · <a href="../feed.xml">RSS</a></p>
+  </footer>
+
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../essay.js?v=7502a7b5" defer></script>
+</body>
+</html>

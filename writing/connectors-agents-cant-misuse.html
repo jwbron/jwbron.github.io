@@ -1,28 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="essay-page">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Connectors with enforceable boundaries · James Wiesebron</title>
-  <meta name="description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can't be misused, even by a confused or manipulated agent.">
+  <meta name="description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can&#x27;t be misused, even by a confused or manipulated agent.">
   <meta name="theme-color" content="#f1ecf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://jameswiesebron.com/writing/connectors-agents-cant-misuse.html">
+  <link rel="alternate" type="application/atom+xml" title="James Wiesebron" href="../feed.xml">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Connectors with enforceable boundaries · James Wiesebron">
-  <meta property="og:description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can't be misused, even by a confused or manipulated agent.">
+  <meta property="og:description" content="Agents get useful when they connect to your tickets, wikis, documents and email. How to design those connections so they can&#x27;t be misused, even by a confused or manipulated agent.">
   <meta property="og:url" content="https://jameswiesebron.com/writing/connectors-agents-cant-misuse.html">
   <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta property="article:published_time" content="2026-10-22">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=b9ddf1dc">
+  <link rel="stylesheet" href="../style.css?v=0c2cd0ba">
+  <link rel="stylesheet" href="../essay.css?v=4c338137">
   <script src="../theme.js?v=a2d527c1"></script>
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
@@ -30,70 +34,110 @@
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
+      <a href="../#about">about</a>
       <a href="../#contact">contact</a>
     </nav>
   </header>
 
-  <main id="post" class="post">
-    <article>
-      <header class="post-head">
-        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Boundaries</p>
-        <h1>Connectors with enforceable boundaries</h1>
-        <p class="post-dek">Agents get useful when they reach your real systems. Design those connections so a confused or manipulated agent can't do damage through them.</p>
-        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
-      </header>
+  <header class="essay-hero">
+    <span class="deco ring" style="top: 10%; right: 5vw; width: 13vw; aspect-ratio: 1"></span>
+    <span class="deco tri" style="top: 58%; right: 21vw; width: 4vw; aspect-ratio: 1"></span>
+    <span class="deco circle" style="bottom: 10%; right: 7vw; width: 7vw; aspect-ratio: 1"></span>
+    <p class="kicker rise"><a href="intentional-agentic-work.html">Runtime alignment</a> · Boundaries</p>
+    <h1 class="title rise">Connectors with enforceable boundaries</h1>
+    <p class="dek rise">Agents get useful when they reach your real systems. Design those connections so a confused or manipulated agent can't do damage through them.</p>
+    <p class="byline rise">James Wiesebron · <time datetime="2026-10-22">October 22, 2026</time> · Examples from my personal research systems</p>
+  </header>
 
-      <p>An agent that can only see its own scratch space isn't worth much. The value shows up when it can read your tickets, search your wiki, pull documents and draft replies. That's also where the risk shows up, because every connection is a path for data to leave, for the wrong thing to change, or for someone else's instructions to get in.</p>
+  <main id="post">
 
-      <p>In <a href="stop-telling-agents.html">Stop telling AI agents what not to do</a>, I argued for taking capabilities away instead of writing rules about them. This is the same idea applied to the connections themselves. In the systems I design, the agent never holds credentials for any service. It asks a gateway, and the gateway holds the credentials, enforces policy and keeps the record. What follows is how that gateway decides what to allow.</p>
+<section class="chapter">
+  <div class="prose-only">
+    <p>An agent that can only see its own scratch space isn't worth much. The value shows up when it can read your tickets, search your wiki, pull documents and draft replies. That's also where the risk shows up, because every connection is a path for data to leave, for the wrong thing to change, or for someone else's instructions to get in.</p>
+    <p>In <a href="stop-telling-agents.html">Stop telling AI agents what not to do</a>, I argued for taking capabilities away instead of writing rules about them. This is the same idea applied to the connections themselves. In the systems I design, the agent never holds credentials for any service. It asks a gateway, and the gateway holds the credentials, enforces policy and keeps the record. What follows is how that gateway decides what to allow.</p>
+  </div>
+</section>
 
-      <h2>Permissions from the vendor aren't enough</h2>
+<section class="chapter">
+  <h2>Permissions from the vendor aren't enough</h2>
+  <div class="prose-only">
+    <p>The first instinct is to make a narrowly scoped token and call it done. It rarely works. Vendor permissions follow the vendor's idea of a role, which rarely matches yours. On GitHub, an agent that can push code and open pull requests already holds enough permission to merge them. In Jira or Confluence, a bot account may see things a human in the same role wouldn't, or the other way around. "Only these projects" or "only this team's tickets" is usually not something a token can express at all.</p>
+    <p>So the scope has to be enforced in front of the service, by something that understands what you actually mean.</p>
+  </div>
+</section>
 
-      <p>The first instinct is to make a narrowly scoped token and call it done. It rarely works. Vendor permissions follow the vendor's idea of a role, which rarely matches yours. On GitHub, an agent that can push code and open pull requests already holds enough permission to merge them. In Jira or Confluence, a bot account may see things a human in the same role wouldn't, or the other way around. "Only these projects" or "only this team's tickets" is usually not something a token can express at all.</p>
+<section class="chapter">
+  <h2>Deny on ambiguity</h2>
+  <div class="prose-only">
+    <p>Search is the hardest case, because a query language is a small programming language, and an agent, or anyone who has influenced it, can be creative. A good gateway doesn't try to sanitize arbitrary queries. It reads each query and accepts it only if it can prove the query stays inside the allowed projects. The shape has to be simple, with the project restriction at the top and nothing that could widen it. Anything it can't prove gets refused, including queries that would probably have been fine.</p>
+    <p>A false refusal costs the agent one retry with a simpler query. A false acceptance costs a leak. So when in doubt, the gateway refuses.</p>
+    <p>The same thinking applies elsewhere. When the agent asks for a page, the gateway checks which space it came from before handing it over, so an out-of-scope page never reaches the agent. When the agent lists what's available, it only sees what it's allowed to touch, so it can't map the rest of the system. A new connector starts with an empty allowlist, so it's installed but does nothing until someone turns it on. The ticket an agent was asked to work on is recorded for context, but it never grants access by itself.</p>
+  </div>
+  <p class="pullquote rise">A false refusal costs the agent one retry with a simpler query. A false acceptance costs a leak.</p>
+</section>
 
-      <p>So the scope has to be enforced in front of the service, by something that understands what you actually mean.</p>
+<section class="chapter">
+  <h2>A few narrow verbs</h2>
+  <div class="prose-only">
+    <p>Writes get even more care. Instead of exposing the vendor's whole API, the connector offers a handful of specific actions, like create a ticket, edit one, comment on one and link two together. Some actions are permanently off the table. Deleting things and moving them through a workflow aren't available at all. The line mostly follows what can be undone. A comment can be edited and a ticket can be closed again, so an agent can do those on its own. A delete, a sent message or a status change that starts someone else's work can't be taken back, so either the verb doesn't exist or a person approves it. Every write is checked against an allowlist of fields, so an agent can't smuggle changes in through obscure custom fields. Notifications default to off, so an agent's edits don't email half the company unless someone asks for that.</p>
+  </div>
+</section>
 
-      <h2>Deny on ambiguity</h2>
+<section class="chapter">
+  <h2>What scoping doesn't stop</h2>
+  <div class="prose-only">
+    <p>Scoping limits where an agent can reach. It doesn't stop misuse of the actions that are allowed. Inside an allowed project, an agent can still file noisy tickets, edit a description into something misleading, or leave a comment nobody should act on. Those risks are bounded rather than eliminated. Destructive operations aren't available at all, notifications stay quiet unless asked for, writes are rate-limited, every action is logged, and anything that matters still passes a person before it counts.</p>
+  </div>
+</section>
 
-      <p>Search is the hardest case, because a query language is a small programming language, and an agent, or anyone who has influenced it, can be creative. A good gateway doesn't try to sanitize arbitrary queries. It reads each query and accepts it only if it can prove the query stays inside the allowed projects. The shape has to be simple, with the project restriction at the top and nothing that could widen it. Anything it can't prove gets refused, including queries that would probably have been fine.</p>
+<section class="chapter">
+  <h2>Safe retries</h2>
+  <div class="prose-only">
+    <p>Agents retry. Networks fail, services time out, and an agent that isn't sure whether its write went through will try again. That's how you get three identical tickets. The fix is an idempotency key, but the detail that matters is how it's chosen. The key has to identify the logical operation, like "file the follow-up for this specific finding," and the same key has to be reused on every retry of that operation. Deriving it from the request's meaning makes that easy. A random key works too, as long as it's generated once and reused. What doesn't work is a fresh key on each retry, because then every retry looks new.</p>
+  </div>
+</section>
 
-      <p>A false refusal costs the agent one retry with a simpler query. A false acceptance costs a leak. So when in doubt, the gateway refuses.</p>
+<section class="chapter">
+  <h2>Log the shape of each call</h2>
+  <div class="prose-only">
+    <p>Every call through the gateway is logged, with who made it, which role, what project, which action and what happened. What's never logged is the content. Ticket text, page bodies and comments stay out of the audit trail, and only their size and structure are recorded. An audit log that copies every confidential document it touches becomes a liability of its own.</p>
+    <p>The gateway also records who did what in a way the agent can't fake. When several agents work on the same branch, it notes which role created each change at the moment the change passes through, rather than trusting what the agent says about itself.</p>
+  </div>
+</section>
 
-      <p>The same thinking applies elsewhere. When the agent asks for a page, the gateway checks which space it came from before handing it over, so an out-of-scope page never reaches the agent. When the agent lists what's available, it only sees what it's allowed to touch, so it can't map the rest of the system. A new connector starts with an empty allowlist, so it's installed but does nothing until someone turns it on. The ticket an agent was asked to work on is recorded for context, but it never grants access by itself.</p>
+<section class="chapter">
+  <h2>Treat what comes back as data</h2>
+  <div class="prose-only">
+    <p>Everything a connector returns, whether a wiki page, a ticket or an email, was written by someone, and increasingly by other bots. Some of it will contain instructions aimed at whatever agent reads it. Connectors should hand that material over as information to work with, and the rest of the system should treat it that way. A better prompt won't defend against that. What does is that even a convinced agent can only use the narrow, scoped, logged actions the connector offers.</p>
+  </div>
+</section>
 
-      <h2>A few narrow verbs</h2>
+<section class="chapter">
+  <h2>Grow access in stages</h2>
+  <div class="prose-only">
+    <p>For a team just starting out, the most useful habit is to grow access on purpose instead of all at once. Start with no outside access at all. Then let agents read public material, then your own systems read-only, and only then let them write, through connectors like these. Learn how agents behave at each level before granting the next one, and treat every new destination as a decision someone made, never something that happens because an agent asked.</p>
+  </div>
+  <div class="figure ladder rise" role="img" aria-label="Four stages of access, each wider than the last">
+    <div class="rung"><b>1</b><span>No outside access</span></div>
+    <div class="rung"><b>2</b><span>Read public material</span></div>
+    <div class="rung"><b>3</b><span>Read your own systems</span></div>
+    <div class="rung"><b>4</b><span>Write, through narrow connectors</span></div>
+  </div>
+</section>
 
-      <p>Writes get even more care. Instead of exposing the vendor's whole API, the connector offers a handful of specific actions, like create a ticket, edit one, comment on one and link two together. Some actions are permanently off the table. Deleting things and moving them through a workflow aren't available at all. The line mostly follows what can be undone. A comment can be edited and a ticket can be closed again, so an agent can do those on its own. A delete, a sent message or a status change that starts someone else's work can't be taken back, so either the verb doesn't exist or a person approves it. Every write is checked against an allowlist of fields, so an agent can't smuggle changes in through obscure custom fields. Notifications default to off, so an agent's edits don't email half the company unless someone asks for that.</p>
-
-      <h2>What scoping doesn't stop</h2>
-
-      <p>Scoping limits where an agent can reach. It doesn't stop misuse of the actions that are allowed. Inside an allowed project, an agent can still file noisy tickets, edit a description into something misleading, or leave a comment nobody should act on. Those risks are bounded rather than eliminated. Destructive operations aren't available at all, notifications stay quiet unless asked for, writes are rate-limited, every action is logged, and anything that matters still passes a person before it counts.</p>
-
-      <h2>Safe retries</h2>
-
-      <p>Agents retry. Networks fail, services time out, and an agent that isn't sure whether its write went through will try again. That's how you get three identical tickets. The fix is an idempotency key, but the detail that matters is how it's chosen. The key has to identify the logical operation, like "file the follow-up for this specific finding," and the same key has to be reused on every retry of that operation. Deriving it from the request's meaning makes that easy. A random key works too, as long as it's generated once and reused. What doesn't work is a fresh key on each retry, because then every retry looks new.</p>
-
-      <h2>Log the shape of each call</h2>
-
-      <p>Every call through the gateway is logged, with who made it, which role, what project, which action and what happened. What's never logged is the content. Ticket text, page bodies and comments stay out of the audit trail, and only their size and structure are recorded. An audit log that copies every confidential document it touches becomes a liability of its own.</p>
-
-      <p>The gateway also records who did what in a way the agent can't fake. When several agents work on the same branch, it notes which role created each change at the moment the change passes through, rather than trusting what the agent says about itself.</p>
-
-      <h2>Treat what comes back as data</h2>
-
-      <p>Everything a connector returns, whether a wiki page, a ticket or an email, was written by someone, and increasingly by other bots. Some of it will contain instructions aimed at whatever agent reads it. Connectors should hand that material over as information to work with, and the rest of the system should treat it that way. A better prompt won't defend against that. What does is that even a convinced agent can only use the narrow, scoped, logged actions the connector offers.</p>
-
-      <h2>Grow access in stages</h2>
-
-      <p>For a team just starting out, the most useful habit is to grow access on purpose instead of all at once. Start with no outside access at all. Then let agents read public material, then your own systems read-only, and only then let them write, through connectors like these. Learn how agents behave at each level before granting the next one, and treat every new destination as a decision someone made, never something that happens because an agent asked.</p>
-
-
-      <footer class="post-foot">
-        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
-        <p><a href="../#writing">← More writing</a></p>
-      </footer>
-    </article>
   </main>
 
+  <nav class="series-nav" aria-label="More in this series">
+    <a class="prev" href="stop-telling-agents.html"><span>Previous</span><b>Stop telling AI agents what not to do</b></a>
+  </nav>
+
+  <footer class="site-foot">
+    <p>Part of a series on <a href="intentional-agentic-work.html">runtime alignment</a>. If you're working through something similar, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+    <p><a href="../#writing">All writing</a> · <a href="https://github.com/jwbron">GitHub</a> · <a href="https://www.linkedin.com/in/james-wiesebron/">LinkedIn</a> · <a href="../feed.xml">RSS</a></p>
+  </footer>
+
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../essay.js?v=7502a7b5" defer></script>
 </body>
 </html>

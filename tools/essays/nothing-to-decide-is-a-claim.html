@@ -1,0 +1,66 @@
+<!--
+{
+  "description": "Agents settle questions that were yours when asking costs more than deciding. Track every decision until a person answers it, and make an agent that reports none list what it considered.",
+  "date": "2026-11-15",
+  "title": "\"Nothing to decide\" is a claim",
+  "kicker": "Decisions",
+  "dek": "Agents settle questions that were yours, because asking is more work than deciding. Make every decision visible, including the ones they chose not to bring you.",
+  "examples": "Examples from my personal research systems"
+}
+-->
+
+<section class="chapter">
+  <div class="prose-only">
+    <p>In one of my research systems, agents raise a decision whenever they hit a choice that belongs to a person. For a while they could also report that a phase had no such choices, with a short written reason. Before long they were bringing me almost nothing.</p>
+    <p>The work hadn't become simpler. "Nothing here needs you" had become the cheapest thing an agent could say, and a paragraph of reasoning was easy to produce whether or not anyone had looked. The choices were still being made. The agents were making them.</p>
+    <p>This is one of the most common ways agent work goes wrong. The agent makes decisions that were yours to make, because asking is more work than deciding.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>Decisions are part of the contract</h2>
+  <div class="prose-only">
+    <p>The most important thing a contract tracks is which questions are yours. When an agent hits a real choice, like a scope question, a tradeoff or anything a reasonable person would want a say in, it adds a decision to the <a href="give-agents-a-contract.html">contract</a> instead of resolving it in its head.</p>
+    <p>Decisions can be added but never overwritten. A phase can't close while any of its decisions are open. When an answer changes the picture, the phase runs again with that answer in hand, and it only moves forward on a pass that raises nothing new and that a person approves. Answers carry forward, so a decision that's already been made isn't asked again. There's no automatic "advance after three rounds" fallback either. If the work genuinely won't converge, that's worth an alert and a human look, rather than a push forward with open questions.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>A decision should arrive ready to answer</h2>
+  <div class="prose-only">
+    <p>A decision reaches you as a question, with the options laid out, a recommendation and the evidence behind it. Everything else the agent is allowed to do keeps moving while you answer. Your attention goes to judgment instead of reconstruction.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <h2>"Nothing to decide" is a claim</h2>
+  <div class="prose-only">
+    <p>Agents look for the path of least resistance, and the easiest decision to make is the one you never mention. If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
+    <p>So an empty list of decisions has to be backed up. The agent lists the questions it considered and says, for each one, why it isn't yours to make or why it's better asked later. That itemized list is what you confirm, so you're checking specific reasoning instead of a paragraph. Anything deferred travels with the work into the next phase, which has to either bring it to you or explicitly set it aside. Putting something off becomes a handoff.</p>
+    <p>Reviewers have a job here too. A draft that commits to a choice that belongs to a person gets sent back, even if the choice it made is a good one.</p>
+  </div>
+  <div class="figure" data-figure="decide">
+    <div class="mock">
+      <div class="who">an agent's report at the end of a phase · illustration</div>
+      <p><b>Decisions for you:</b> none.</p>
+      <div class="cons">
+        <p class="cons-head">What I considered, and why none of it needs you yet:</p>
+        <ul class="considered">
+          <li><span>Which cache should this use?</span><em class="mine">mine to make, a design call</em></li>
+          <li><span>Should the old endpoint go away?</span><em>yours, and better asked once there's a plan</em></li>
+          <li><span>What should the new flag be called?</span><em class="mine">mine to make, a naming call</em></li>
+        </ul>
+        <p class="pill">Confirm this list?</p>
+      </div>
+    </div>
+  </div>
+  <p class="pullquote rise">If "there's nothing here for you to decide" costs one sentence, you'll get that sentence a lot.</p>
+</section>
+
+<section class="chapter">
+  <h2>Watch for the quiet</h2>
+  <div class="prose-only">
+    <p>I only noticed the questions had stopped when I went back and looked. Quiet is easy to mistake for things going well. So what each phase raised, what it claimed didn't need me and what it considered are all kept on the record, where a slow drift toward silence is something I can see.</p>
+    <p>None of this is about being asked more often. Done well, people make fewer decisions, and better ones. The point is that the questions that are yours reach you, and you can see the ones that didn't.</p>
+  </div>
+</section>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="essay-page">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,20 +9,24 @@
   <meta name="theme-color" content="#251e37" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://jameswiesebron.com/writing/teams-not-swarms.html">
+  <link rel="alternate" type="application/atom+xml" title="James Wiesebron" href="../feed.xml">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Teams, not swarms · James Wiesebron">
   <meta property="og:description" content="A group of agents in a shared chat is a swarm. A team needs a protocol: who reviews whom, how approvals stay current, and checks that turn known deadlocks into rules.">
   <meta property="og:url" content="https://jameswiesebron.com/writing/teams-not-swarms.html">
   <meta property="og:image" content="https://jameswiesebron.com/og-image.png">
+  <meta property="article:published_time" content="2026-10-22">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..600&display=swap">
-  <link rel="stylesheet" href="../style.css?v=b9ddf1dc">
+  <link rel="stylesheet" href="../style.css?v=0c2cd0ba">
+  <link rel="stylesheet" href="../essay.css?v=4c338137">
   <script src="../theme.js?v=a2d527c1"></script>
 </head>
 <body>
   <a class="skip" href="#post">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
 
   <header class="masthead">
     <a class="home" href="../" aria-label="James Wiesebron, home">
@@ -30,60 +34,98 @@
     </a>
     <nav aria-label="Site">
       <a href="../#writing">writing</a>
+      <a href="../#about">about</a>
       <a href="../#contact">contact</a>
     </nav>
   </header>
 
-  <main id="post" class="post">
-    <article>
-      <header class="post-head">
-        <p class="post-kicker"><a href="intentional-agentic-work.html">Intentional agentic work</a> · Coordination</p>
-        <h1>Teams, not swarms</h1>
-        <p class="post-dek">A group of agents in a shared chat is a swarm. A team needs a protocol.</p>
-        <p class="byline">James Wiesebron · October 2026 · Examples from my personal research systems</p>
-      </header>
+  <header class="essay-hero">
+    <span class="deco ring" style="top: 10%; right: 5vw; width: 13vw; aspect-ratio: 1"></span>
+    <span class="deco tri" style="top: 58%; right: 21vw; width: 4vw; aspect-ratio: 1"></span>
+    <span class="deco circle" style="bottom: 10%; right: 7vw; width: 7vw; aspect-ratio: 1"></span>
+    <p class="kicker rise"><a href="intentional-agentic-work.html">Runtime alignment</a> · Coordination</p>
+    <h1 class="title rise">Teams, not swarms</h1>
+    <p class="dek rise">A group of agents in a shared chat is a swarm. A team needs a protocol.</p>
+    <p class="byline rise">James Wiesebron · <time datetime="2026-10-22">October 22, 2026</time> · Examples from my personal research systems</p>
+  </header>
 
-      <p>The easy way to use several agents is to put them in a room and let them talk. A few write, a few review, everyone reads everyone else's messages, and eventually they agree they're done. It feels collaborative, and on small tasks it can work.</p>
+  <main id="post">
 
-      <p>At any real scale it falls apart in familiar ways. Everyone reviews everyone, so the number of conversations explodes. Approvals go stale the moment the work changes. One agent declares victory while another is still objecting. Two agents end up waiting on each other forever. These are coordination problems, and coordination problems have well-understood solutions. A team of agents needs a protocol, and that protocol has more in common with a distributed system than with a group chat.</p>
+<section class="chapter">
+  <div class="prose-only">
+    <p>The easy way to use several agents is to put them in a room and let them talk. A few write, a few review, everyone reads everyone else's messages, and eventually they agree they're done. It feels collaborative, and on small tasks it can work.</p>
+    <p>At any real scale it falls apart in familiar ways. Everyone reviews everyone, so the number of conversations explodes. Approvals go stale the moment the work changes. One agent declares victory while another is still objecting. Two agents end up waiting on each other forever. These are coordination problems, and coordination problems have well-understood solutions. A team of agents needs a protocol, and that protocol has more in common with a distributed system than with a group chat.</p>
+  </div>
+</section>
 
-      <h2>Decide who reviews whom</h2>
+<section class="chapter">
+  <h2>Decide who reviews whom</h2>
+  <div class="story" data-story="teams">
+    <div class="prose">
+      <p data-step="1">In a well-run agent team, agents have roles. Producers make things, like the code, the tests and the docs. Reviewers judge them, and each reviewer has a specific lens: correctness, overall design, security, concurrency, or whether the work actually meets the plan. Producers don't approve reviews of their own work. When a reviewer objects, the producer responds by fixing the work and proposing it again, never by arguing until the reviewer gives up.</p>
+      <p data-step="2">The review relationships are chosen on purpose. For a typical implementation phase that's around a dozen review relationships instead of the fifty-plus you'd get if all of them reviewed each other. Every relationship that exists is one that's worth having.</p>
+      <p data-step="3">Some roles do double duty. The tester both writes tests and actively tries to break the implementation, and when it finds a bug, it reports it as a failing test. An objection that comes with a failing test is hard to argue with.</p>
+    </div>
+    <div class="visual">
+      <svg class="teamsmap" viewBox="0 0 640 560" role="img" aria-label="Three producers and five reviewers. Everyone reviewing everyone is more than fifty relationships. About a dozen chosen ones remain, and one objection arrives with a failing test.">
+        <line class="tm-all" x1="320" y1="57" x2="465" y2="117"/><line class="tm-all" x1="320" y1="57" x2="525" y2="262"/><line class="tm-all" x1="320" y1="57" x2="465" y2="407"/><line class="tm-all" x1="320" y1="57" x2="320" y2="467"/><line class="tm-all" x1="320" y1="57" x2="175" y2="407"/><line class="tm-all" x1="320" y1="57" x2="115" y2="262"/><line class="tm-all" x1="320" y1="57" x2="175" y2="117"/><line class="tm-all" x1="465" y1="117" x2="525" y2="262"/><line class="tm-all" x1="465" y1="117" x2="465" y2="407"/><line class="tm-all" x1="465" y1="117" x2="320" y2="467"/><line class="tm-all" x1="465" y1="117" x2="175" y2="407"/><line class="tm-all" x1="465" y1="117" x2="115" y2="262"/><line class="tm-all" x1="465" y1="117" x2="175" y2="117"/><line class="tm-all" x1="525" y1="262" x2="465" y2="407"/><line class="tm-all" x1="525" y1="262" x2="320" y2="467"/><line class="tm-all" x1="525" y1="262" x2="175" y2="407"/><line class="tm-all" x1="525" y1="262" x2="115" y2="262"/><line class="tm-all" x1="525" y1="262" x2="175" y2="117"/><line class="tm-all" x1="465" y1="407" x2="320" y2="467"/><line class="tm-all" x1="465" y1="407" x2="175" y2="407"/><line class="tm-all" x1="465" y1="407" x2="115" y2="262"/><line class="tm-all" x1="465" y1="407" x2="175" y2="117"/><line class="tm-all" x1="320" y1="467" x2="175" y2="407"/><line class="tm-all" x1="320" y1="467" x2="115" y2="262"/><line class="tm-all" x1="320" y1="467" x2="175" y2="117"/><line class="tm-all" x1="175" y1="407" x2="115" y2="262"/><line class="tm-all" x1="175" y1="407" x2="175" y2="117"/><line class="tm-all" x1="115" y1="262" x2="175" y2="117"/>
+        <line class="tm-kept" x1="465" y1="117" x2="320" y2="57"/><line class="tm-kept" x1="525" y1="262" x2="320" y2="57"/><line class="tm-kept" x1="320" y1="467" x2="320" y2="57"/><line class="tm-kept" x1="175" y1="407" x2="320" y2="57"/><line class="tm-kept" x1="175" y1="117" x2="320" y2="57"/><line class="tm-kept" x1="465" y1="117" x2="465" y2="407"/><line class="tm-kept" x1="175" y1="117" x2="465" y2="407"/><line class="tm-kept" x1="320" y1="467" x2="465" y2="407"/><line class="tm-kept" x1="525" y1="262" x2="115" y2="262"/><line class="tm-kept" x1="175" y1="117" x2="115" y2="262"/><line class="tm-kept" x1="465" y1="117" x2="115" y2="262"/>
+        <g class="tm-obj"><line class="" x1="465" y1="407" x2="320" y2="57"/><rect x="213" y="143" width="300" height="38" rx="19"/><text x="363" y="168" text-anchor="middle">objection, with a failing test</text></g>
+        <g class="tm-node maker"><rect x="236" y="33" width="168" height="48" rx="9"/><text x="320" y="64" text-anchor="middle">Code</text></g><g class="tm-node"><rect x="381" y="93" width="168" height="48" rx="9"/><text x="465" y="124" text-anchor="middle">Correctness</text></g><g class="tm-node"><rect x="441" y="238" width="168" height="48" rx="9"/><text x="525" y="269" text-anchor="middle">Design</text></g><g class="tm-node maker"><rect x="381" y="383" width="168" height="48" rx="9"/><text x="465" y="414" text-anchor="middle">Tests</text></g><g class="tm-node"><rect x="236" y="443" width="168" height="48" rx="9"/><text x="320" y="474" text-anchor="middle">Security</text></g><g class="tm-node"><rect x="91" y="383" width="168" height="48" rx="9"/><text x="175" y="414" text-anchor="middle">Concurrency</text></g><g class="tm-node maker"><rect x="31" y="238" width="168" height="48" rx="9"/><text x="115" y="269" text-anchor="middle">Docs</text></g><g class="tm-node"><rect x="91" y="93" width="168" height="48" rx="9"/><text x="175" y="124" text-anchor="middle">The plan</text></g>
+        <text class="tm-count tm-count-all" x="320" y="540" text-anchor="middle">Everyone reviews everyone</text>
+        <text class="tm-count tm-count-kept" x="320" y="540" text-anchor="middle">About a dozen, chosen on purpose</text>
+      </svg>
+      <p class="small">Illustration. Producers are filled, reviewers are outlined.</p>
+    </div>
+  </div>
+  <p class="pullquote rise">An objection that comes with a failing test is hard to argue with.</p>
+</section>
 
-      <p>In a well-run agent team, agents have roles. Producers make things, like the code, the tests and the docs. Reviewers judge them, and each reviewer has a specific lens: correctness, overall design, security, concurrency, or whether the work actually meets the plan. Producers don't approve reviews of their own work. When a reviewer objects, the producer responds by fixing the work and proposing it again, never by arguing until the reviewer gives up.</p>
+<section class="chapter">
+  <h2>A small vocabulary, with versions</h2>
+  <div class="prose-only">
+    <p>Agents coordinate through a handful of explicit moves: propose, approve, object, withdraw and confirm. Every proposal carries a version, and every approval is tied to the exact version it looked at. When a producer proposes something new, every approval of the old version stops counting automatically. Nobody has to remember to re-check, because the protocol won't accept a stale approval.</p>
+    <p>Publishing work goes through the same door. The only way for a producer to push its work is to propose it, and a direct push is rejected. That closes a gap that's easy to miss, where work gets updated after reviewers looked at it and nobody notices. If it was published, it was proposed, and if it was proposed, reviewers saw it.</p>
+  </div>
+</section>
 
-      <p>The review relationships are chosen on purpose. For a typical implementation phase that's around a dozen review relationships instead of the fifty-plus you'd get if all of them reviewed each other. Every relationship that exists is one that's worth having.</p>
+<section class="chapter">
+  <h2>Collect every objection before revising</h2>
+  <div class="prose-only">
+    <p>When two reviewers object to the same version, the producer can't fix the first objection and immediately resubmit. The protocol makes it read every open objection first. Without that rule, the second reviewer just objects again to the same problem on the new version, and the team burns a whole round on something it already knew.</p>
+    <p>Withdrawing a proposal has rules too. It needs a reason, a short cooldown, and a limit on how many times a producer can flip back and forth. Churn is expensive, so the protocol limits it.</p>
+  </div>
+</section>
 
-      <p>Some roles do double duty. The tester both writes tests and actively tries to break the implementation, and when it finds a bug, it reports it as a failing test. An objection that comes with a failing test is hard to argue with.</p>
+<section class="chapter">
+  <h2>Turn every deadlock into a rule</h2>
+  <div class="prose-only">
+    <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. These rules stop a team from finishing in an invalid state. They don't guarantee it finishes, which is why a team that stops making progress gets escalated to a person rather than forced through. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything. That rule exists because one team "finished" without its main deliverable after a reviewer objected to an empty proposal and then moved on.</p>
+    <p>The older recovery patches, the ones that used to unstick these situations after the fact, are still there. They should never fire now, so each one counts how often it does. A count above zero means there's a gap in the rules, and that's the kind of signal you want: a count that shows the protocol has a hole.</p>
+  </div>
+</section>
 
-      <h2>A small vocabulary, with versions</h2>
+<section class="chapter">
+  <h2>Why not let them figure it out?</h2>
+  <div class="prose-only">
+    <p>Agents can coordinate on their own. They'll do it slowly, expensively, and a little differently every time, and the failures will look random because the coordination was improvised. A protocol makes efficiency and reliability properties of the system rather than of whichever model happens to be running. It also makes the team easy to inspect. You can look at the state of every proposal, approval and objection and know where things stand.</p>
+  </div>
+</section>
 
-      <p>Agents coordinate through a handful of explicit moves: propose, approve, object, withdraw and confirm. Every proposal carries a version, and every approval is tied to the exact version it looked at. When a producer proposes something new, every approval of the old version stops counting automatically. Nobody has to remember to re-check, because the protocol won't accept a stale approval.</p>
-
-      <p>Publishing work goes through the same door. The only way for a producer to push its work is to propose it, and a direct push is rejected. That closes a gap that's easy to miss, where work gets updated after reviewers looked at it and nobody notices. If it was published, it was proposed, and if it was proposed, reviewers saw it.</p>
-
-      <h2>Collect every objection before revising</h2>
-
-      <p>When two reviewers object to the same version, the producer can't fix the first objection and immediately resubmit. The protocol makes it read every open objection first. Without that rule, the second reviewer just objects again to the same problem on the new version, and the team burns a whole round on something it already knew.</p>
-
-      <p>Withdrawing a proposal has rules too. It needs a reason, a short cooldown, and a limit on how many times a producer can flip back and forth. Churn is expensive, so the protocol limits it.</p>
-
-      <h2>Turn every deadlock into a rule</h2>
-
-      <p>Every time the agent teams I've built got stuck, the cause went into a written rule that code checks before anyone is allowed to say they're done. These rules stop a team from finishing in an invalid state. They don't guarantee it finishes, which is why a team that stops making progress gets escalated to a person rather than forced through. No one can confirm while still holding an open objection. No reviewer can confirm on an approval of an outdated version. No one can confirm at all if a producer never delivered anything. That rule exists because one team "finished" without its main deliverable after a reviewer objected to an empty proposal and then moved on.</p>
-
-      <p>The older recovery patches, the ones that used to unstick these situations after the fact, are still there. They should never fire now, so each one counts how often it does. A count above zero means there's a gap in the rules, and that's the kind of signal you want: a count that shows the protocol has a hole.</p>
-
-      <h2>Why not let them figure it out?</h2>
-
-      <p>Agents can coordinate on their own. They'll do it slowly, expensively, and a little differently every time, and the failures will look random because the coordination was improvised. A protocol makes efficiency and reliability properties of the system rather than of whichever model happens to be running. It also makes the team easy to inspect. You can look at the state of every proposal, approval and objection and know where things stand.</p>
-
-
-      <footer class="post-foot">
-        <p>Part of a series on <a href="intentional-agentic-work.html">intentional agentic work</a>. I help teams put AI agents to work safely. If that's something you're working through, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
-        <p><a href="../#writing">← More writing</a></p>
-      </footer>
-    </article>
   </main>
 
+  <nav class="series-nav" aria-label="More in this series">
+    <a class="prev" href="agreement-isnt-verification.html"><span>Previous</span><b>Agreement isn't verification</b></a>
+    <a class="next" href="code-owns-the-clock.html"><span>Next</span><b>The model owns judgment, code owns the clock</b></a>
+  </nav>
+
+  <footer class="site-foot">
+    <p>Part of a series on <a href="intentional-agentic-work.html">runtime alignment</a>. If you're working through something similar, <a href="mailto:jwiesebron@pm.me">I'd like to hear about it</a>.</p>
+    <p><a href="../#writing">All writing</a> · <a href="https://github.com/jwbron">GitHub</a> · <a href="https://www.linkedin.com/in/james-wiesebron/">LinkedIn</a> · <a href="../feed.xml">RSS</a></p>
+  </footer>
+
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../essay.js?v=7502a7b5" defer></script>
 </body>
 </html>
